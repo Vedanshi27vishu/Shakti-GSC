@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             text: "Need a Shakti account? ",
                             style:
                                 TextStyle(color: Scolor.light.withOpacity(1)),
-                            children: [
+                            children: const [
                               TextSpan(
                                 text: "Create an account",
                                 style: TextStyle(
@@ -113,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           children: [
                             // Email Field
-                            
+
                             SizedBox(height: screenHeight * 0.005),
                             InputField(
                               controller: emailController,
@@ -124,9 +124,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             // Password Field
                             Align(
-                              alignment: Alignment.centerLeft,
-                              child: buildSubSection("Password")
-                            ),
+                                alignment: Alignment.centerLeft,
+                                child: buildSubSection("Password")),
                             //SizedBox(height: screenHeight * 0.005),
                             TextField(
                               controller: passwordController,
@@ -188,6 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Text(
                                   "Forgot username?",
                                   style: TextStyle(
+                                    fontSize: screenWidth * 0.01,
                                     color: Scolor.secondry,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
 
-                      //      SizedBox(height: screenHeight * 0.1),
+                            //      SizedBox(height: screenHeight * 0.1),
                           ],
                         ),
                       ),

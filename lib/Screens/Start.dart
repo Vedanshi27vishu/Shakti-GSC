@@ -12,14 +12,13 @@ class StartScreen extends StatelessWidget {
     double screenHeight = THelperFunctions.screenHeight();
 
     return Scaffold(
-      backgroundColor:
-          Scolor.primary, // Assuming Scolor.primary is the background color
+      backgroundColor: Scolor.primary,
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-           SizedBox(height: screenHeight * 0.25),
-        
+            SizedBox(height: screenHeight * 0.25),
+
             // Logo
             CircleAvatar(
               radius: screenWidth * 0.20, // Responsive size
@@ -27,32 +26,32 @@ class StartScreen extends StatelessWidget {
               backgroundImage: const AssetImage(
                   'assets/logo.png'), // Update with your logo path
             ),
-        
+
             SizedBox(height: screenHeight * 0.02), // Responsive spacing
-        
+
             // App Name
             Text(
-              "Shakti",
+              "ShaktiNxt",
               style: TextStyle(
                 color: Scolor.light,
                 fontSize: screenWidth * 0.07, // Responsive font size
                 fontWeight: FontWeight.bold,
               ),
             ),
-        
+
             SizedBox(height: screenHeight * 0.01),
-        
+
             // Tagline
             Text(
               "Your AI-Powered Business Guide",
               style: TextStyle(
-                color: Scolor.secondry.withOpacity(0.7),
-                fontSize: screenWidth * 0.04,
+                color: Scolor.secondry.withOpacity(0.8),
+                fontSize: screenWidth * 0.05,
               ),
             ),
-        
+
             SizedBox(height: screenHeight * 0.05),
-        
+
             // Buttons
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
@@ -61,7 +60,9 @@ class StartScreen extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
-                          context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginScreen()));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Scolor.secondry,
@@ -96,8 +97,8 @@ class StartScreen extends StatelessWidget {
                 ],
               ),
             ),
-        
-             SizedBox(height: screenHeight * 0.1),
+
+            SizedBox(height: screenHeight * 0.1),
           ],
         ),
       ),

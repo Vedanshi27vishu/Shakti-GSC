@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/FinancialDetails.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/Continue.dart';
@@ -19,16 +21,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController languageController = TextEditingController();
   final TextEditingController experienceController = TextEditingController();
   final TextEditingController qualificationController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = THelperFunctions.screenWidth();
     double screenHeight = THelperFunctions.screenHeight();
 
     return Scaffold(
-      backgroundColor:Scolor.primary, // Dark theme background
+      backgroundColor: Scolor.primary, // Dark theme background
       appBar: AppBar(
-        backgroundColor:Scolor.primary,
+        backgroundColor: Scolor.primary,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Scolor.secondry),
@@ -60,21 +61,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // Section: Personal Information
               buildSectionHeader("Personal Information"),
-              InputField( label: "Full Name", controller: nameController),
-              InputField(label:"Preferred Language",controller: languageController),
+              InputField(label: "Full Name", controller: nameController),
+              InputField(
+                  label: "Preferred Language", controller: languageController),
 
               SizedBox(height: screenHeight * 0.02),
 
               // Section: Professional Details
-               buildSectionHeader("Professional Details"),
-              InputField(label:"Business Experience",controller: experienceController),
+              buildSectionHeader("Professional Details"),
               InputField(
-                  label:"Educational Qualifications",controller: qualificationController),
+                  label: "Business Experience",
+                  controller: experienceController),
+              InputField(
+                  label: "Educational Qualifications",
+                  controller: qualificationController),
 
               SizedBox(height: screenHeight * 0.04),
 
               // Continue Button
-             ContinueButton(screenHeight: screenHeight, screenWidth: screenWidth, text: "Continue", Screen: FinancialDetails()),
+              ContinueButton(
+                  screenHeight: screenHeight,
+                  screenWidth: screenWidth,
+                  text: "Continue",
+                  Screen: FinancialDetails()),
 
               SizedBox(height: screenHeight * 0.05),
             ],
@@ -84,4 +93,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-

@@ -8,7 +8,7 @@ class InputField extends StatelessWidget {
   const InputField({
     super.key,
     required this.label,
-    required this.controller,
+    required this.controller, 
   });
 
   @override

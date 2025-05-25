@@ -7,13 +7,13 @@ class ContinueButton extends StatelessWidget {
     required this.screenHeight,
     required this.screenWidth,
     required this.text,
-    required this.Screen,
+    required this.onPressed,
   });
 
   final double screenHeight;
   final double screenWidth;
   final dynamic text;
-  final dynamic Screen;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +21,7 @@ class ContinueButton extends StatelessWidget {
       width: double.infinity,
       height: screenHeight * 0.06,
       child: ElevatedButton(
-        onPressed: () {
-          // Handle Login Logic
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Screen));
-        },
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Scolor.secondry,
           foregroundColor: Scolor.primary,

@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Screens/Success.dart';
 import 'package:shakti/Widgets/AppWidgets/Continue.dart';
 import 'package:shakti/Widgets/AppWidgets/InputField.dart';
@@ -31,6 +34,80 @@ class _BusinessDetailsState extends State<BusinessDetails> {
   bool lifeInsurance = false;
   bool healthInsurance = false;
   bool cropInsurance = false;
+
+   bool isLoading = false;
+
+   // API call to submit business details
+Future<void> submitBusinessDetails() async {
+  try {
+    setState(() {
+      isLoading = true;
+    });
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final sessionId = prefs.getString('sessionId');
+
+    if (sessionId == null) {
+      throw Exception("Session ID not found. Please restart the signup process.");
+    }
+
+    final url = Uri.parse(
+      "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup3"
+    );
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "sessionId": sessionId,
+        "ideaDetails": {
+          "Business_Name": lenderNameController.text,
+          "Business_Sector": selectedLoanType,
+          "Business_Location": "Dummy Location",
+          "Buisness_City": "Dummy City",
+          "Idea_Description": "This is a placeholder description.",
+          "Target_Market": "Rural India",
+          "Unique_Selling_Proposition": "Affordable service"
+        },
+        "financialPlan": {
+          "Estimated_Startup_Cost": loanAmountController.text,
+          "Funding_Required": "100000",
+          "Expected_Revenue_First_Year": "500000"
+        },
+        "operationalPlan": {
+          "Team_Size": "3",
+          "Resources_Required": "Basic machinery",
+          "Timeline_To_Launch": "3 months"
+        }
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 201 && data['token'] != null) {
+      await prefs.setString('token', data['token']);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const SuccessScreen()),
+      );
+    } else {
+      throw Exception(data['message'] ?? "Signup failed.");
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Error: ${e.toString()}"),
+      backgroundColor: Colors.red,
+    ));
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
+  }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +223,7 @@ class _BusinessDetailsState extends State<BusinessDetails> {
               SizedBox(height: screenHeight * 0.03),
 
               // Continue Button
-              ContinueButton(screenHeight: screenHeight, screenWidth: screenWidth, text: "Continue", Screen: SuccessScreen() ),
+              ContinueButton(screenHeight: screenHeight, screenWidth: screenWidth, text: "Continue", onPressed: submitBusinessDetails ),
 
               SizedBox(height: screenHeight * 0.1),
             ],

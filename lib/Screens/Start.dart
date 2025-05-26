@@ -31,7 +31,7 @@ class StartScreen extends StatelessWidget {
 
             // App Name
             Text(
-              "ShaktiNxt",
+              "Shakti-Nxt",
               style: TextStyle(
                 color: Scolor.light,
                 fontSize: screenWidth * 0.07, // Responsive font size
@@ -45,6 +45,7 @@ class StartScreen extends StatelessWidget {
             Text(
               "Your AI-Powered Business Guide",
               style: TextStyle(
+                fontWeight: FontWeight.w600,
                 color: Scolor.secondry.withOpacity(0.8),
                 fontSize: screenWidth * 0.05,
               ),
@@ -74,7 +75,7 @@ class StartScreen extends StatelessWidget {
                       "Start Your Journey",
                       style: TextStyle(
                         fontSize: screenWidth * 0.045,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),

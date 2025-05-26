@@ -60,7 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString("token", responseData['token']);
 
-        // Navigate to BottomNavBarExample
         if (context.mounted) {
           Navigator.pushReplacement(
             context,
@@ -115,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: screenHeight * 0.02),
               Text(
-                "Shakti",
+                "Shakti-Nxt",
                 style: TextStyle(
                   color: Scolor.light,
                   fontSize: screenWidth * 0.07,
@@ -146,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Text.rich(
                     TextSpan(
-                      text: "Need a Shakti account? ",
+                      text: "Need a Shakti-Nxt account? ",
                       style: TextStyle(color: Scolor.light),
                       children: [
                         TextSpan(
@@ -173,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(height: screenHeight * 0.005),
                     InputField(
                       controller: emailController,
-                      label: "Username or Email-Id",
+                      label: "Email-Id",
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Align(
@@ -194,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide:
-                              const BorderSide(color: Scolor.white, width: 3.5),
+                              const BorderSide(color: Scolor.white, width: 2.5),
                         ),
                         hintText: "Enter Password",
                         hintStyle:

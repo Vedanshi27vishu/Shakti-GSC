@@ -12,7 +12,7 @@ class Finance extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading : false,
+        automaticallyImplyLeading: false,
         backgroundColor: Scolor.primary,
         actions: [
           Padding(

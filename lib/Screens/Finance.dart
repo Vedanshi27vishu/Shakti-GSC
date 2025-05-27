@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shakti/Screens/BusinessTracker.dart';
 import 'package:shakti/Screens/taskcreate.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Utils/constants/sizes.dart';
@@ -303,12 +304,20 @@ class _FinanceState extends State<Finance> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Learning Progress",
-                        style: TextStyle(
-                            fontSize: ESizes.fontSizeSm,
-                            color: Scolor.white,
-                            fontWeight: FontWeight.w500),
+                      GestureDetector(
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) =>
+                            ComparativeTrackerApp()));
+                        },
+                        child: Text(
+                          "Learning Progress",
+                          style: TextStyle(
+                              fontSize: ESizes.fontSizeSm,
+                              color: Scolor.white,
+                              fontWeight: FontWeight.w500),
+                        ),
                       ),
                       SizedBox(height: height * 0.01),
                       Row(

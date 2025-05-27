@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shakti/Screens/InvestScreen.dart';
 import 'package:shakti/Screens/InvestmentGroup.dart';
+import 'package:shakti/Screens/tracker.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/helpers/helper_functions.dart';
 
@@ -117,13 +118,22 @@ class Invest extends StatelessWidget {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => InvestmentGroupsScreen ()));
+                                builder: (context) =>
+                                    InvestmentGroupsScreen()));
                       },
                       child: BottomContainer(
                           height: height, width: width, heading: "GROUPS"),
                     ),
-                    BottomContainer(
-                        height: height, width: width, heading: "TRACKER")
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => TrackerApp()));
+                      },
+                      child: BottomContainer(
+                          height: height, width: width, heading: "TRACKER"),
+                    )
                   ],
                 )
               ],

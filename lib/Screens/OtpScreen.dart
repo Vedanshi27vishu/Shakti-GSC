@@ -115,7 +115,7 @@ class _OTPScreenState extends State<OTPScreen> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'You have registered successfully.',
+                'Your email is registered successfully. Fill further details to complete the registration',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),

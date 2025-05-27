@@ -1,9 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:shakti/Screens/taskcreate.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Utils/constants/sizes.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class Finance extends StatelessWidget {
+import 'package:shared_preferences/shared_preferences.dart';
+
+class Finance extends StatefulWidget {
   const Finance({super.key});
+
+  @override
+  State<Finance> createState() => _FinanceState();
+}
+
+class _FinanceState extends State<Finance> {
+  List<dynamic> tasks = [];
+  DateTime selectedDate = DateTime.now();
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTasks(selectedDate);
+  }
+
+  Future<void> fetchTasks(DateTime date) async {
+    setState(() => isLoading = true);
+    final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+    final url = Uri.parse(
+        'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/tasks/filter?date=$formattedDate');
+
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('token');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          tasks = data['tasks'];
+        });
+      } else {
+        print('Error fetching tasks: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void _pickDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+      fetchTasks(picked);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +80,7 @@ class Finance extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading : false,
+        automaticallyImplyLeading: false,
         backgroundColor: Scolor.primary,
         actions: [
           Padding(
@@ -143,33 +211,79 @@ class Finance extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Today's Priority Tasks",
-                        style: TextStyle(
-                          color: Scolor.white,
-                          fontSize: height * 0.022,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      /// Title and Date Picker
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Today's Priority Tasks",
+                            style: TextStyle(
+                              color: Scolor.white,
+                              fontSize: height * 0.022,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  Icons.calendar_today,
+                                  size: height * 0.026,
+                                  color: Scolor.secondry,
+                                ),
+                                onPressed: () => _pickDate(context),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            TaskCreateScreen()),
+                                  );
+                                },
+                                child: Icon(
+                                  Icons.add,
+                                  color: Colors.yellow.shade700,
+                                  size: height * 0.030,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                       SizedBox(height: height * 0.015),
 
-                      /// *Task 1*
-                      TaskRow(
-                        icon: "assets/images/mdi_circle-double.png",
-                        title: "Complete Business Plan",
-                        subtitle: "Due Today",
-                        height: height,
-                      ),
-
-                      SizedBox(height: height * 0.015),
-
-                      /// *Task 2*
-                      TaskRow(
-                        icon: "assets/images/mdi_circle-double.png",
-                        title: "Review Monthly Goals",
-                        subtitle: "2 Items Pending",
-                        height: height,
-                      ),
+                      /// Task List from API
+                      isLoading
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: Scolor.secondry,
+                              ),
+                            )
+                          : tasks.isEmpty
+                              ? Text(
+                                  "No tasks for this date.",
+                                  style: TextStyle(
+                                      color: Scolor.secondry,
+                                      fontSize: height * 0.018),
+                                )
+                              : Column(
+                                  children: tasks
+                                      .map((task) => Padding(
+                                            padding: EdgeInsets.only(
+                                                bottom: height * 0.015),
+                                            child: TaskRow(
+                                              icon:
+                                                  "assets/images/mdi_circle-double.png",
+                                              title: task['title'] ?? 'Untitled',
+                                              subtitle: task['description'] ??
+                                                  'No description',
+                                              height: height,
+                                            ),
+                                          ))
+                                      .toList(),
+                                ),
                     ],
                   ),
                 ),

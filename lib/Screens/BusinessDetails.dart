@@ -18,12 +18,29 @@ class BusinessDetails extends StatefulWidget {
 }
 
 class _BusinessDetailsState extends State<BusinessDetails> {
-  final TextEditingController monthlyPaymentController =
+  // controller for ideaDetails
+  final TextEditingController BusinessNameController = TextEditingController();
+  final TextEditingController BusinessSectorController =
       TextEditingController();
-  final TextEditingController lenderNameController = TextEditingController();
-  final TextEditingController loanAmountController = TextEditingController();
-  final TextEditingController monthlySavingsController =
+  final TextEditingController BusinessLocationController =
       TextEditingController();
+  final TextEditingController BusinessCityController = TextEditingController();
+  final TextEditingController IdeaDescriptionController =
+      TextEditingController();
+  final TextEditingController TargetMarketController = TextEditingController();
+  final TextEditingController UniqueSellingController = TextEditingController();
+
+  // controller for financialPlan
+  final TextEditingController EstimatedCostController = TextEditingController();
+  final TextEditingController FundingController = TextEditingController();
+  final TextEditingController ExpectedRevenueController =
+      TextEditingController();
+
+  // controller for operational plan
+  final TextEditingController TeamSizeController = TextEditingController();
+  final TextEditingController ResourceRequiredController =
+      TextEditingController();
+  final TextEditingController TimelineController = TextEditingController();
   String? selectedLoanType;
   final List<String> loanTypes = [
     'Personal Loan',
@@ -35,79 +52,79 @@ class _BusinessDetailsState extends State<BusinessDetails> {
   bool healthInsurance = false;
   bool cropInsurance = false;
 
-   bool isLoading = false;
+  bool isLoading = false;
 
-   // API call to submit business details
-Future<void> submitBusinessDetails() async {
-  try {
-    setState(() {
-      isLoading = true;
-    });
+  // API call to submit business details
+  Future<void> submitBusinessDetails() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final sessionId = prefs.getString('sessionId');
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final sessionId = prefs.getString('sessionId');
 
-    if (sessionId == null) {
-      throw Exception("Session ID not found. Please restart the signup process.");
-    }
+      if (sessionId == null) {
+        throw Exception(
+            "Session ID not found. Please restart the signup process.");
+      }
 
-    final url = Uri.parse(
-      "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup3"
-    );
+      final url = Uri.parse(
+          "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup3");
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        "sessionId": sessionId,
-        "ideaDetails": {
-          "Business_Name": lenderNameController.text,
-          "Business_Sector": selectedLoanType,
-          "Business_Location": "Dummy Location",
-          "Buisness_City": "Dummy City",
-          "Idea_Description": "This is a placeholder description.",
-          "Target_Market": "Rural India",
-          "Unique_Selling_Proposition": "Affordable service"
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
         },
-        "financialPlan": {
-          "Estimated_Startup_Cost": loanAmountController.text,
-          "Funding_Required": "100000",
-          "Expected_Revenue_First_Year": "500000"
-        },
-        "operationalPlan": {
-          "Team_Size": "3",
-          "Resources_Required": "Basic machinery",
-          "Timeline_To_Launch": "3 months"
-        }
-      }),
-    );
+        body: jsonEncode({
+          "sessionId": sessionId,
+          "ideaDetails": {
+  "Business_Name": BusinessNameController.text,
+  "Business_Sector": BusinessSectorController.text,
+  "Business_City": BusinessCityController.text,
+  "Buisness_Location": BusinessLocationController.text, // typo kept to match backend
+  "Idea_Description": IdeaDescriptionController.text,
+  "Target_Market": TargetMarketController.text,
+  "Unique_Selling_Proposition": UniqueSellingController.text
+},
 
-    final data = jsonDecode(response.body);
-
-    if (response.statusCode == 201 && data['token'] != null) {
-      await prefs.setString('token', data['token']);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const SuccessScreen()),
-      );
-    } else {
-      throw Exception(data['message'] ?? "Signup failed.");
-    }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("Error: ${e.toString()}"),
-      backgroundColor: Colors.red,
-    ));
-  } finally {
-    setState(() {
-      isLoading = false;
-    });
-  }
+         "financialPlan": {
+  "Estimated_Startup_Cost": int.tryParse(EstimatedCostController.text.trim()) ?? 0,
+  "Funding_Required": int.tryParse(FundingController.text.trim()) ?? 0,
+  "Expected_Revenue_First_Year": int.tryParse(ExpectedRevenueController.text.trim()) ?? 0,
+},
+"operationalPlan": {
+  "Team_Size": int.tryParse(TeamSizeController.text.trim()) ?? 0,
+  "Resources_Required": ResourceRequiredController.text.trim(),
+  "Timeline_To_Launch": TimelineController.text.trim()
 }
 
+        }),
+      );
 
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 && data['token'] != null) {
+        await prefs.setString('token', data['token']);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const SuccessScreen()),
+        );
+      } else {
+        throw Exception(data['message'] ?? "Signup failed.");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Error: ${e.toString()}"),
+        backgroundColor: Colors.red,
+      ));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,85 +162,121 @@ Future<void> submitBusinessDetails() async {
               ),
               SizedBox(height: screenHeight * 0.02),
 
-              buildSectionHeader("Loan Details"),
+              buildSectionHeader("Idea Details"),
               InputField(
-                  label: "Monthly Payment",
-                  controller: monthlyPaymentController),
+                  label: "Business Name", controller: BusinessNameController),
               InputField(
-                  label: "Lender Name", controller: lenderNameController),
+                  label: "Business Sector",
+                  controller: BusinessSectorController),
+              InputField(
+                  label: "Business Location", controller: BusinessLocationController),
+              InputField(
+                  label: "Business City",
+                  controller: BusinessCityController),
+              InputField(
+                  label: "Idea Description", controller: IdeaDescriptionController),
+              InputField(
+                  label: "Target Market",
+                  controller: TargetMarketController),
+              InputField(
+                  label: "Unique Selling Proposition", controller: UniqueSellingController),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  value: selectedLoanType,
-                  hint: const Text("Select Payment Type"),
-                  items: loanTypes.map((type) {
-                    return DropdownMenuItem(
-                      value: type,
-                      child: Text(type),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedLoanType = value;
-                    });
-                  },
-                ),
-              ),
-              InputField(
-                  label: "Loan Amount", controller: loanAmountController),
 
-              SizedBox(height: screenHeight * 0.02),
-              buildSectionHeader("Savings & Insurance"),
+          buildSectionHeader("Financial Plan"),
               InputField(
-                  label: "Monthly Savings",
-                  controller: monthlySavingsController),
+                  label: "Estimated Startup Cost", controller: EstimatedCostController),
+              InputField(
+                  label: "Funding Required",
+                  controller: FundingController),
+              InputField(
+                  label: "Expected Revenue In 1st Year", controller: ExpectedRevenueController),
 
-              Column(
-                children: [
-                  CheckboxListTile(
-                    title: const Text("Life Insurance",
-                        style: TextStyle(color: Colors.white)),
-                    value: lifeInsurance,
-                    onChanged: (val) {
-                      setState(() {
-                        lifeInsurance = val!;
-                      });
-                    },
-                  ),
-                  CheckboxListTile(
-                    title: const Text("Health Insurance",
-                        style: TextStyle(color: Colors.white)),
-                    value: healthInsurance,
-                    onChanged: (val) {
-                      setState(() {
-                        healthInsurance = val!;
-                      });
-                    },
-                  ),
-                  CheckboxListTile(
-                    title: const Text("Other Insurance",
-                        style: TextStyle(color: Colors.white)),
-                    value: cropInsurance,
-                    onChanged: (val) {
-                      setState(() {
-                        cropInsurance = val!;
-                      });
-                    },
-                  ),
-                ],
-              ),
+
+          buildSectionHeader("Operational Plan"),
+              InputField(
+                  label: "Team Size", controller: TeamSizeController),
+              InputField(
+                  label: "Resources Required",
+                  controller: ResourceRequiredController),
+              InputField(
+                  label: "Timeline To Launch", controller: TimelineController),
+
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(vertical: 8),
+              //   child: DropdownButtonFormField<String>(
+              //     decoration: InputDecoration(
+              //       filled: true,
+              //       fillColor: Colors.white,
+              //       border: OutlineInputBorder(
+              //           borderRadius: BorderRadius.circular(12)),
+              //     ),
+              //     value: selectedLoanType,
+              //     hint: const Text("Select Payment Type"),
+              //     items: loanTypes.map((type) {
+              //       return DropdownMenuItem(
+              //         value: type,
+              //         child: Text(type),
+              //       );
+              //     }).toList(),
+              //     onChanged: (value) {
+              //       setState(() {
+              //         selectedLoanType = value;
+              //       });
+              //     },
+              //   ),
+              // ),
+              // InputField(
+              //     label: "Loan Amount", controller: loanAmountController),
+
+              // SizedBox(height: screenHeight * 0.02),
+              // buildSectionHeader("Savings & Insurance"),
+              // InputField(
+              //     label: "Monthly Savings",
+              //     controller: monthlySavingsController),
+
+              // Column(
+              //   children: [
+              //     CheckboxListTile(
+              //       title: const Text("Life Insurance",
+              //           style: TextStyle(color: Colors.white)),
+              //       value: lifeInsurance,
+              //       onChanged: (val) {
+              //         setState(() {
+              //           lifeInsurance = val!;
+              //         });
+              //       },
+              //     ),
+              //     CheckboxListTile(
+              //       title: const Text("Health Insurance",
+              //           style: TextStyle(color: Colors.white)),
+              //       value: healthInsurance,
+              //       onChanged: (val) {
+              //         setState(() {
+              //           healthInsurance = val!;
+              //         });
+              //       },
+              //     ),
+              //     CheckboxListTile(
+              //       title: const Text("Other Insurance",
+              //           style: TextStyle(color: Colors.white)),
+              //       value: cropInsurance,
+              //       onChanged: (val) {
+              //         setState(() {
+              //           cropInsurance = val!;
+              //         });
+              //       },
+              //     ),
+              //   ],
+              // ),
 
               SizedBox(height: screenHeight * 0.03),
 
               // Continue Button
-              ContinueButton(screenHeight: screenHeight, screenWidth: screenWidth, text: "Continue", onPressed: submitBusinessDetails ),
+              ContinueButton(
+                  screenHeight: screenHeight,
+                  screenWidth: screenWidth,
+                  text: "Continue",
+                  onPressed: submitBusinessDetails),
 
               SizedBox(height: screenHeight * 0.1),
             ],

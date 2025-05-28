@@ -9,6 +9,7 @@ import 'package:shakti/Widgets/AppWidgets/Continue.dart';
 import 'package:shakti/Widgets/AppWidgets/InputField.dart';
 import 'package:shakti/Widgets/AppWidgets/Subheading.dart';
 import 'package:shakti/helpers/helper_functions.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +23,78 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool obscurePassword = true;
   bool isLoading = false;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+  scopes: ['email', 'profile'],
+  serverClientId: '701319090890-5ptlmu3ogiej1lneklmsh72n4d4im2uu.apps.googleusercontent.com', 
+);
+
+bool isGoogleLoading = false;
+
+Future<void> _handleGoogleSignIn() async {
+  setState(() {
+    isGoogleLoading = true;
+  });
+
+  try {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+    if (googleUser == null) {
+      // User canceled the sign-in
+      setState(() {
+        isGoogleLoading = false;
+      });
+      return;
+    }
+
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    // googleAuth.idToken is what you send to backend
+    final String? idToken = googleAuth.idToken;
+
+    if (idToken == null) {
+      setState(() {
+        isGoogleLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to get Google ID token')),
+      );
+      return;
+    }
+
+    // Send idToken to your backend API for verification
+    final response = await http.post(
+      Uri.parse("http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/auth/google"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"idToken": idToken}),
+    );
+
+    final responseData = jsonDecode(response.body);
+
+    if (response.statusCode == 200 && responseData['token'] != null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString("token", responseData['token']);
+
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => BottomNavBarExample()),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(responseData['message'] ?? 'Google Sign-In failed')),
+      );
+    }
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $error')),
+    );
+  } finally {
+    setState(() {
+      isGoogleLoading = false;
+    });
+  }
+}
 
   final String loginUrl =
       "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/auth/login";
@@ -246,6 +319,38 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
+              SizedBox(height: screenHeight * 0.03),
+             SizedBox(
+  width: screenWidth*0.9,
+  child: ElevatedButton.icon(
+    onPressed: isGoogleLoading ? null : _handleGoogleSignIn,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Scolor.primary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Scolor.secondry),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      elevation: 2,
+    ),
+    icon: Image.asset(
+      'assets/images/Google.png',
+      height: 20,
+      width: 20,
+    ),
+    label: isGoogleLoading
+        ? const CircularProgressIndicator(color: Colors.white)
+        : Text(
+            'SignUp with Google',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Scolor.light,
+            ),
+          ),
+  ),
+),
+
             ],
           ),
         ),

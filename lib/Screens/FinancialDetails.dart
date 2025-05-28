@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shakti/Widgets/AppWidgets/UnderlineHeading.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Screens/BusinessDetails.dart';
 import 'package:shakti/Utils/constants/colors.dart';
+import 'package:shakti/Widgets/AppWidgets/UnderlineHeading.dart';
 import 'package:shakti/Widgets/AppWidgets/Continue.dart';
 import 'package:shakti/Widgets/AppWidgets/InputField.dart';
 import 'package:shakti/Widgets/AppWidgets/Subheading.dart';
@@ -19,18 +19,24 @@ class FinancialDetails extends StatefulWidget {
 }
 
 class _FinancialDetailsState extends State<FinancialDetails> {
-  // Controllers for input fields
   final TextEditingController primaryIncomeController = TextEditingController();
-  final TextEditingController additionalIncomeController =
-      TextEditingController();
+  final TextEditingController additionalIncomeController = TextEditingController();
   final TextEditingController goldAmountController = TextEditingController();
   final TextEditingController goldValueController = TextEditingController();
   final TextEditingController landAreaController = TextEditingController();
   final TextEditingController landValueController = TextEditingController();
-  final TextEditingController monthlyloanPaymentController = TextEditingController();
-  final TextEditingController totalloanPaymentController= TextEditingController();
-   double screenWidth = 0;
+
+  double screenWidth = 0;
   double screenHeight = 0;
+
+  List<Map<String, TextEditingController>> loanControllers = [
+    {
+      "Monthly_Payment": TextEditingController(),
+      "Lender_Name": TextEditingController(),
+      "Loan_Type": TextEditingController(),
+      "Total_Loan_Amount": TextEditingController(),
+    }
+  ];
 
 Future<void> submitFinancialDetails() async {
   final prefs = await SharedPreferences.getInstance();
@@ -43,7 +49,17 @@ Future<void> submitFinancialDetails() async {
     return;
   }
 
-  final url = Uri.parse("http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup2");
+  final url = Uri.parse(
+    "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup2");
+
+  final loanList = loanControllers.map((loan) {
+    return {
+      "Monthly_Payment": int.tryParse(loan["Monthly_Payment"]!.text.trim()) ?? 0,
+      "Lender_Name": loan["Lender_Name"]!.text.trim(),
+      "Loan_Type": loan["Loan_Type"]!.text.trim(),
+      "Total_Loan_Amount": int.tryParse(loan["Total_Loan_Amount"]!.text.trim()) ?? 0,
+    };
+  }).toList();
 
   final response = await http.post(
     url,
@@ -51,21 +67,18 @@ Future<void> submitFinancialDetails() async {
       "Content-Type": "application/json",
     },
     body: jsonEncode({
-      "sessionId": sessionId, // ✅ Moved to body
+      "sessionId": sessionId,
       "incomeDetails": {
-        "Primary_Monthly_Income": primaryIncomeController.text.trim(),
-        "Additional_Monthly_Income": additionalIncomeController.text.trim(),
+        "Primary_Monthly_Income": int.tryParse(primaryIncomeController.text.trim()) ?? 0,
+        "Additional_Monthly_Income": int.tryParse(additionalIncomeController.text.trim()) ?? 0,
       },
       "assetDetails": {
-        "Gold_Asset_amount": goldAmountController.text.trim(),
-        "Gold_Asset_App_Value": goldValueController.text.trim(),
-        "Land_Asset_Area": landAreaController.text.trim(),
-        "Land_Asset_App_Value": landValueController.text.trim(),
+        "Gold_Asset_amount": int.tryParse(goldAmountController.text.trim()) ?? 0,
+        "Gold_Asset_App_Value": int.tryParse(goldValueController.text.trim()) ?? 0,
+        "Land_Asset_Area": int.tryParse(landAreaController.text.trim()) ?? 0,
+        "Land_Asset_App_Value": int.tryParse(landValueController.text.trim()) ?? 0,
       },
-      "existingloanDetails": {
-        "Monthly_Payment": monthlyloanPaymentController.text.trim(),
-        "Total_Loan_Amount": totalloanPaymentController.text.trim(),
-      }
+      "existingloanDetails": loanList,
     }),
   );
 
@@ -84,11 +97,11 @@ Future<void> submitFinancialDetails() async {
 
   @override
   Widget build(BuildContext context) {
-     screenWidth = THelperFunctions.screenWidth();
-     screenHeight = THelperFunctions.screenHeight();
+    screenWidth = THelperFunctions.screenWidth();
+    screenHeight = THelperFunctions.screenHeight();
 
     return Scaffold(
-      backgroundColor:Scolor.primary, // Dark background color
+      backgroundColor: Scolor.primary,
       appBar: AppBar(
         backgroundColor: Scolor.primary,
         elevation: 0,
@@ -103,12 +116,8 @@ Future<void> submitFinancialDetails() async {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Progress Indicator
               ThreeCircle(screenWidth: screenWidth),
-
               SizedBox(height: screenHeight * 0.03),
-
-              // Financial Details Title
               const Text(
                 "Financial Details",
                 style: TextStyle(
@@ -117,52 +126,64 @@ Future<void> submitFinancialDetails() async {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               SizedBox(height: screenHeight * 0.02),
-
-              // Section: Income Details
               buildSectionHeader("Income Details"),
-              InputField(
-                  label: "Primary Monthly Income",
-                  controller: primaryIncomeController),
-              InputField(
-                  label: "Additional Monthly Income",
-                  controller: additionalIncomeController),
-
+              InputField(label: "Primary Monthly Income", controller: primaryIncomeController),
+              InputField(label: "Additional Monthly Income", controller: additionalIncomeController),
               SizedBox(height: screenHeight * 0.02),
-
-              // Section: Assets Details
               buildSectionHeader("Assets Details"),
               buildSubSection("Gold Assets"),
-              InputField(
-                  label: "Amount (in grams)", controller: goldAmountController),
-              InputField(
-                  label: "Approximate Value (₹)",
-                  controller: goldValueController),
-
+              InputField(label: "Amount (in grams)", controller: goldAmountController),
+              InputField(label: "Approximate Value (₹)", controller: goldValueController),
               SizedBox(height: screenHeight * 0.02),
-
               buildSubSection("Land Assets"),
-              InputField(
-                  label: "Area (in acres)", controller: landAreaController),
-              InputField(
-                  label: "Approximate Value (₹)",
-                  controller: landValueController),
-
+              InputField(label: "Area (in acres)", controller: landAreaController),
+              InputField(label: "Approximate Value (₹)", controller: landValueController),
               SizedBox(height: screenHeight * 0.02),
-
-              // Section: Existing Loans
               buildSectionHeader("Existing Loans"),
-              InputField(
-                  label: "Monthly Payment", controller: monthlyloanPaymentController),
-              InputField(
-                  label: "Total_Loan_Amount", controller: totalloanPaymentController),
-
-                SizedBox(height: screenHeight * 0.04),
-
-              // Continue Button
-             ContinueButton(screenHeight: screenHeight, screenWidth: screenWidth, text: "Continue", onPressed:submitFinancialDetails, ),
-
+              Column(
+                children: List.generate(loanControllers.length, (index) {
+                  final loan = loanControllers[index];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Loan ${index + 1}",
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      InputField(label: "Monthly Payment", controller: loan["Monthly_Payment"]!),
+                      InputField(label: "Lender Name", controller: loan["Lender_Name"]!),
+                      InputField(label: "Loan Type", controller: loan["Loan_Type"]!),
+                      InputField(label: "Total Loan Amount", controller: loan["Total_Loan_Amount"]!),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      loanControllers.add({
+                        "Monthly_Payment": TextEditingController(),
+                        "Lender_Name": TextEditingController(),
+                        "Loan_Type": TextEditingController(),
+                        "Total_Loan_Amount": TextEditingController(),
+                      });
+                    });
+                  },
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  label: const Text("Add Another Loan", style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.04),
+              ContinueButton(
+                screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                text: "Continue",
+                onPressed: submitFinancialDetails,
+              ),
               SizedBox(height: screenHeight * 0.05),
             ],
           ),

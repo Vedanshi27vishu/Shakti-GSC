@@ -38,62 +38,62 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     }
   ];
 
-  Future<void> submitFinancialDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-    final sessionId = prefs.getString('sessionId');
+Future<void> submitFinancialDetails() async {
+  final prefs = await SharedPreferences.getInstance();
+  final sessionId = prefs.getString('sessionId');
 
-    if (sessionId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Session ID not found. Please restart the form.")),
-      );
-      return;
-    }
-
-    final url = Uri.parse(
-        "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup2");
-
-    final loanList = loanControllers.map((loan) {
-      return {
-        "Monthly_Payment": loan["Monthly_Payment"]!.text.trim(),
-        "Lender_Name": loan["Lender_Name"]!.text.trim(),
-        "Loan_Type": loan["Loan_Type"]!.text.trim(),
-        "Total_Loan_Amount": loan["Total_Loan_Amount"]!.text.trim(),
-      };
-    }).toList();
-
-    final response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "sessionId": sessionId,
-        "incomeDetails": {
-          "Primary_Monthly_Income": primaryIncomeController.text.trim(),
-          "Additional_Monthly_Income": additionalIncomeController.text.trim(),
-        },
-        "assetDetails": {
-          "Gold_Asset_amount": goldAmountController.text.trim(),
-          "Gold_Asset_App_Value": goldValueController.text.trim(),
-          "Land_Asset_Area": landAreaController.text.trim(),
-          "Land_Asset_App_Value": landValueController.text.trim(),
-        },
-        "existingloanDetails": loanList,
-      }),
+  if (sessionId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Session ID not found. Please restart the form.")),
     );
-
-    if (response.statusCode == 200) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const BusinessDetails()),
-      );
-    } else {
-      debugPrint("Error: ${response.body}");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to submit financial details.")),
-      );
-    }
+    return;
   }
+
+  final url = Uri.parse(
+    "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup2");
+
+  final loanList = loanControllers.map((loan) {
+    return {
+      "Monthly_Payment": int.tryParse(loan["Monthly_Payment"]!.text.trim()) ?? 0,
+      "Lender_Name": loan["Lender_Name"]!.text.trim(),
+      "Loan_Type": loan["Loan_Type"]!.text.trim(),
+      "Total_Loan_Amount": int.tryParse(loan["Total_Loan_Amount"]!.text.trim()) ?? 0,
+    };
+  }).toList();
+
+  final response = await http.post(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: jsonEncode({
+      "sessionId": sessionId,
+      "incomeDetails": {
+        "Primary_Monthly_Income": int.tryParse(primaryIncomeController.text.trim()) ?? 0,
+        "Additional_Monthly_Income": int.tryParse(additionalIncomeController.text.trim()) ?? 0,
+      },
+      "assetDetails": {
+        "Gold_Asset_amount": int.tryParse(goldAmountController.text.trim()) ?? 0,
+        "Gold_Asset_App_Value": int.tryParse(goldValueController.text.trim()) ?? 0,
+        "Land_Asset_Area": int.tryParse(landAreaController.text.trim()) ?? 0,
+        "Land_Asset_App_Value": int.tryParse(landValueController.text.trim()) ?? 0,
+      },
+      "existingloanDetails": loanList,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const BusinessDetails()),
+    );
+  } else {
+    debugPrint("Error: ${response.body}");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Failed to submit financial details.")),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {

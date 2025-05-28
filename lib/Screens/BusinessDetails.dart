@@ -80,24 +80,26 @@ class _BusinessDetailsState extends State<BusinessDetails> {
         body: jsonEncode({
           "sessionId": sessionId,
           "ideaDetails": {
-            "Business_Name": BusinessNameController.text,
-            "Business_Sector": BusinessSectorController.text,
-            "Business_Location": BusinessLocationController.text,
-            "Buisness_City": BusinessCityController.text,
-            "Idea_Description": IdeaDescriptionController.text,
-            "Target_Market": TargetMarketController.text,
-            "Unique_Selling_Proposition": UniqueSellingController.text
-          },
-          "financialPlan": {
-            "Estimated_Startup_Cost": EstimatedCostController.text,
-            "Funding_Required": FundingController.text,
-            "Expected_Revenue_First_Year": ExpectedRevenueController.text,
-          },
-          "operationalPlan": {
-            "Team_Size": TeamSizeController.text,
-            "Resources_Required": ResourceRequiredController.text,
-            "Timeline_To_Launch": TimelineController.text
-          }
+  "Business_Name": BusinessNameController.text,
+  "Business_Sector": BusinessSectorController.text,
+  "Business_City": BusinessCityController.text,
+  "Buisness_Location": BusinessLocationController.text, // typo kept to match backend
+  "Idea_Description": IdeaDescriptionController.text,
+  "Target_Market": TargetMarketController.text,
+  "Unique_Selling_Proposition": UniqueSellingController.text
+},
+
+         "financialPlan": {
+  "Estimated_Startup_Cost": int.tryParse(EstimatedCostController.text.trim()) ?? 0,
+  "Funding_Required": int.tryParse(FundingController.text.trim()) ?? 0,
+  "Expected_Revenue_First_Year": int.tryParse(ExpectedRevenueController.text.trim()) ?? 0,
+},
+"operationalPlan": {
+  "Team_Size": int.tryParse(TeamSizeController.text.trim()) ?? 0,
+  "Resources_Required": ResourceRequiredController.text.trim(),
+  "Timeline_To_Launch": TimelineController.text.trim()
+}
+
         }),
       );
 

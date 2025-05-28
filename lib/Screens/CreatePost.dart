@@ -1,46 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:shakti/Screens/BottomNavBar.dart';
-import 'package:shakti/Screens/CommunityHome.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/CommunityPostAppBar.dart';
 import 'package:shakti/Widgets/AppWidgets/ScreenHeadings.dart';
 import 'package:shakti/Widgets/AppWidgets/YellowLine.dart';
 import 'package:shakti/helpers/helper_functions.dart';
 
-
 class CreatePostScreen extends StatelessWidget {
   const CreatePostScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-       double screenWidth = THelperFunctions.screenWidth();
+    double screenWidth = THelperFunctions.screenWidth();
     double screenHeight = THelperFunctions.screenHeight();
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: Scolor.primary,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Scolor.secondry),
-          onPressed: () {
-             Navigator.push(
+            icon: const Icon(Icons.arrow_back, color: Scolor.secondry),
+            onPressed: () {
+              Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => BottomNavBarExample()));
-          }
-        ),
+            }),
       ),
-     body: Padding(
+      body: Padding(
         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //Container(color: Colors.red,height: 10,width: 10,),
-               CustomTopBar3(),
-                  SizedBox(height: screenHeight * 0.015),
-              Center(
-                child: ScreenHeadings(text: "Create New Post")
-              ),
+              CustomTopBar3(),
+              SizedBox(height: screenHeight * 0.015),
+              Center(child: ScreenHeadings(text: "Create New Post")),
               SizedBox(height: screenHeight * 0.005),
               const Text(
                 "Add the main post details here. They'll be connected to the layout and take on the layout design.",
@@ -52,27 +47,32 @@ class CreatePostScreen extends StatelessWidget {
                 "Post Title",
                 style: TextStyle(color: Colors.white, fontSize: 14),
               ),
-             TextField(
-  maxLength: 200,
-  style: const TextStyle(color: Colors.white),
-  decoration: InputDecoration(
-    filled: true,
-    fillColor: Colors.white10,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: Scolor.secondry, width: 2), // Default border
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: Scolor.secondry, width: 2), // Yellow border when not focused
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: Colors.amber, width: 3), // Thicker yellow border when focused
-    ),
-    counterStyle: const TextStyle(color: Colors.white70),
-  ),
-),
+              TextField(
+                maxLength: 200,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white10,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                        color: Scolor.secondry, width: 2), // Default border
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                        color: Scolor.secondry,
+                        width: 2), // Yellow border when not focused
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                        color: Colors.amber,
+                        width: 3), // Thicker yellow border when focused
+                  ),
+                  counterStyle: const TextStyle(color: Colors.white70),
+                ),
+              ),
               SizedBox(height: screenHeight * 0.01),
               const Text(
                 "Post author",
@@ -87,14 +87,18 @@ class CreatePostScreen extends StatelessWidget {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                   enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: Scolor.secondry, width: 2), // Yellow border when not focused
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: Colors.amber, width: 3), // Thicker yellow border when focused
-    ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                        color: Scolor.secondry,
+                        width: 2), // Yellow border when not focused
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                        color: Colors.amber,
+                        width: 3), // Thicker yellow border when focused
+                  ),
                 ),
               ),
               SizedBox(height: screenHeight * 0.02),
@@ -121,8 +125,7 @@ class CreatePostScreen extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:Scolor.secondry
-                      ,
+                      backgroundColor: Scolor.secondry,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -154,7 +157,9 @@ class CreatePostScreen extends StatelessWidget {
               const Text(
                 "Previous Posts",
                 style: TextStyle(
-                    color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
               ),
               SizedBox(height: screenHeight * 0.015),
               Container(
@@ -219,4 +224,3 @@ class CreatePostScreen extends StatelessWidget {
     );
   }
 }
-

@@ -51,7 +51,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         "Preferred_Languages": languageController.text.trim(),
       },
       "professionalDetails": {
-        "Business_Experience": int.tryParse(experienceController.text.trim()) ?? 0,
+        "Business_Experience":
+            int.tryParse(experienceController.text.trim()) ?? 0,
         "Educational_Qualifications": qualificationController.text.trim(),
       },
       "passwordDetails": {
@@ -62,7 +63,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup1'),
+        Uri.parse(
+            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup1'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
@@ -131,7 +133,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SizedBox(height: screenHeight * 0.03),
               const Text(
                 "Create Your Profile",
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
               ),
               SizedBox(height: screenHeight * 0.02),
 
@@ -139,7 +144,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               buildSectionHeader("Personal Information"),
               InputField(label: "Full Name", controller: nameController),
               InputField(label: "Email", controller: emailController),
-              InputField(label: "Preferred Language", controller: languageController),
+              InputField(
+                  label: "Preferred Language", controller: languageController),
 
               buildSectionHeader("Password"),
               TextField(
@@ -151,11 +157,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fillColor: Scolor.primary,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Scolor.secondry, width: 1),
+                    borderSide:
+                        const BorderSide(color: Scolor.secondry, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Scolor.white, width: 3.5),
+                    borderSide:
+                        const BorderSide(color: Scolor.white, width: 3.5),
                   ),
                   hintText: "Enter Password",
                   hintStyle: TextStyle(color: Scolor.white.withOpacity(0.5)),
@@ -177,8 +185,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // Professional Information
               buildSectionHeader("Professional Details"),
-              InputField(label: "Business Experience", controller: experienceController),
-              InputField(label: "Educational Qualifications", controller: qualificationController),
+              InputField(
+                  label: "Business Experience",
+                  controller: experienceController),
+              InputField(
+                  label: "Educational Qualifications",
+                  controller: qualificationController),
 
               SizedBox(height: screenHeight * 0.04),
 
@@ -201,7 +213,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.only(top: 20.0, bottom: 10),
       child: Text(
         title,
-        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+            color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }

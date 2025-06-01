@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:shakti/Screens/CreatePost.dart';
+import 'package:shakti/Screens/CommunityHome.dart';
 import 'package:shakti/Screens/Mentors.dart';
 import 'package:shakti/Screens/followers.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/helpers/helper_functions.dart';
 
-class CustomTopBar1 extends StatelessWidget {
-  const CustomTopBar1({super.key});
+class MeesageBar extends StatelessWidget {
+  const MeesageBar({super.key});
 
   @override
   Widget build(BuildContext context) {
     double screenHeight = THelperFunctions.screenHeight();
     return Column(
       children: [
-        SizedBox(
-          height: screenHeight * 0.05,
-        ),
         Container(
           color: Scolor.primary,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
+              IconButton(
+                icon: const Icon(Icons.home, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CommunityHomeScreen()));
+                },
+              ),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Scolor.secondry,
@@ -29,33 +35,17 @@ class CustomTopBar1 extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CreatePostScreen()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MentorsScreen()));
                 },
-                icon: const Icon(Icons.home, color: Colors.black),
+                icon: const Icon(Icons.group, color: Colors.black),
                 label: const Text(
-                  "Home",
+                  "Meesages",
                   style: TextStyle(color: Colors.black),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.group, color: Colors.white),
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MentorsScreen()));
-                },
-              ),
-              IconButton(
                 icon: const Icon(Icons.add, color: Colors.white),
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MentorsScreen()));
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.message, color: Colors.white),
                 onPressed: () {
                   Navigator.push(
                       context,

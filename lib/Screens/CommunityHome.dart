@@ -70,20 +70,20 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
     }
   }
 
-  Future<void> _onLikePost(String postId, int postIndex) async {
-    try {
-      print('Attempting to like post: $postId');
-      await PostService.likePost(postId);
-      print('Post liked successfully');
-      // Refresh the specific post or the entire list
-      await _loadPosts();
-    } catch (e) {
-      print('Error liking post: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to like post: $e')),
-      );
-    }
-  }
+  // Future<void> _onLikePost(String postId, int postIndex) async {
+  //   try {
+  //     print('Attempting to like post: $postId');
+  //     await PostService.likePost(postId);
+  //     print('Post liked successfully');
+  //     // Refresh the specific post or the entire list
+  //     await _loadPosts();
+  //   } catch (e) {
+  //     print('Error liking post: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Failed to like post: $e')),
+  //     );
+  //   }
+  // }
 
   bool isCommenting = false;
 
@@ -127,14 +127,14 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
     });
   }
 
-  void _onPostUpdated(PostModel updatedPost) {
-    setState(() {
-      final index = posts.indexWhere((post) => post.id == updatedPost.id);
-      if (index != -1) {
-        posts[index] = updatedPost;
-      }
-    });
-  }
+  // void _onPostUpdated(PostModel updatedPost) {
+  //   setState(() {
+  //     final index = posts.indexWhere((post) => post.id == updatedPost.id);
+  //     if (index != -1) {
+  //       posts[index] = updatedPost;
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -145,10 +145,10 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
       backgroundColor: Scolor.primary,
       body: Column(
         children: [
-          /// **Custom Top Bar**
+          /// *Custom Top Bar*
           CustomTopBar1(),
 
-          /// **Debug Toggle Button**
+          /// *Debug Toggle Button*
           Padding(
             padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
             child: Row(
@@ -170,7 +170,7 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
             ),
           ),
 
-          /// **Debug Info Section**
+          /// *Debug Info Section*
           if (showDebugInfo)
             Container(
               margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
@@ -199,7 +199,7 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
               ),
             ),
 
-          /// **Posts List**
+          /// *Posts List*
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
-import 'package:path/path.dart' as path;
+//import 'package:path/path.dart' as path;
 import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Screens/BottomNavBar.dart';
@@ -28,41 +28,40 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   bool isUploading = false;
 
   Future<String?> uploadImageToCloudinary(File imageFile) async {
-  const cloudName = 'dbiwykg29';
-  const uploadPreset = 'Images'; 
+    const cloudName = 'dbiwykg29';
+    const uploadPreset = 'Images';
 
-  final mimeTypeData = lookupMimeType(imageFile.path)?.split('/');
-  if (mimeTypeData == null) return null;
+    final mimeTypeData = lookupMimeType(imageFile.path)?.split('/');
+    if (mimeTypeData == null) return null;
 
-  final imageUploadRequest = http.MultipartRequest(
-    'POST',
-    Uri.parse("https://api.cloudinary.com/v1_1/$cloudName/image/upload"),
-  );
+    final imageUploadRequest = http.MultipartRequest(
+      'POST',
+      Uri.parse("https://api.cloudinary.com/v1_1/$cloudName/image/upload"),
+    );
 
-  final file = await http.MultipartFile.fromPath(
-    'file',
-    imageFile.path,
-    contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
-  );
+    final file = await http.MultipartFile.fromPath(
+      'file',
+      imageFile.path,
+      contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
+    );
 
-  imageUploadRequest.files.add(file);
-  imageUploadRequest.fields['upload_preset'] = uploadPreset;
+    imageUploadRequest.files.add(file);
+    imageUploadRequest.fields['upload_preset'] = uploadPreset;
 
-  // Remove the Authorization header (no need for unsigned upload)
-  // imageUploadRequest.headers['Authorization'] = auth;
+    // Remove the Authorization header (no need for unsigned upload)
+    // imageUploadRequest.headers['Authorization'] = auth;
 
-  final streamedResponse = await imageUploadRequest.send();
-  final response = await http.Response.fromStream(streamedResponse);
+    final streamedResponse = await imageUploadRequest.send();
+    final response = await http.Response.fromStream(streamedResponse);
 
-  if (response.statusCode == 200) {
-    final responseData = jsonDecode(response.body);
-    return responseData['secure_url'];
-  } else {
-    print("Upload failed: ${response.body}");
-    return null;
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      return responseData['secure_url'];
+    } else {
+      print("Upload failed: ${response.body}");
+      return null;
+    }
   }
-}
-
 
   Future<void> createPost() async {
     final content = contentController.text.trim();
@@ -101,7 +100,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
 
     final response = await http.post(
-      Uri.parse("http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/post/create"),
+      Uri.parse(
+          "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/post/create"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -130,7 +130,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() => selectedImage = File(pickedFile.path));
     }
@@ -170,7 +171,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: screenHeight * 0.02),
-              const Text("Post Content", style: TextStyle(color: Colors.white, fontSize: 14)),
+              const Text("Post Content",
+                  style: TextStyle(color: Colors.white, fontSize: 14)),
               TextField(
                 controller: contentController,
                 maxLength: 300,
@@ -181,11 +183,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   fillColor: Colors.white10,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Scolor.secondry, width: 2),
+                    borderSide:
+                        const BorderSide(color: Scolor.secondry, width: 2),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Scolor.secondry, width: 2),
+                    borderSide:
+                        const BorderSide(color: Scolor.secondry, width: 2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -194,7 +198,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   counterStyle: const TextStyle(color: Colors.white70),
                 ),
               ),
-              const Text("Interest Tags (comma-separated)", style: TextStyle(color: Colors.white, fontSize: 14)),
+              const Text("Interest Tags (comma-separated)",
+                  style: TextStyle(color: Colors.white, fontSize: 14)),
               TextField(
                 controller: tagsController,
                 style: const TextStyle(color: Colors.white),
@@ -206,7 +211,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Scolor.secondry, width: 2),
+                    borderSide:
+                        const BorderSide(color: Scolor.secondry, width: 2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -226,10 +232,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: selectedImage == null
-                        ? const Icon(Icons.add_a_photo, color: Colors.white, size: 40)
+                        ? const Icon(Icons.add_a_photo,
+                            color: Colors.white, size: 40)
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.file(selectedImage!, fit: BoxFit.cover),
+                            child:
+                                Image.file(selectedImage!, fit: BoxFit.cover),
                           ),
                   ),
                 ),
@@ -246,13 +254,18 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   onPressed: isUploading ? null : createPost,
                   child: isUploading
                       ? const CircularProgressIndicator(color: Colors.black)
-                      : const Text("Submit Post", style: TextStyle(color: Colors.black)),
+                      : const Text("Submit Post",
+                          style: TextStyle(color: Colors.black)),
                 ),
               ),
               SizedBox(height: screenHeight * 0.02),
               Yellowline(screenWidth: screenWidth),
               SizedBox(height: screenHeight * 0.02),
-              const Text("Previous Posts", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text("Previous Posts",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
             ],
           ),
         ),

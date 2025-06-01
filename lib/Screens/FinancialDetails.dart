@@ -25,6 +25,8 @@ class _FinancialDetailsState extends State<FinancialDetails> {
   final TextEditingController goldValueController = TextEditingController();
   final TextEditingController landAreaController = TextEditingController();
   final TextEditingController landValueController = TextEditingController();
+  final TextEditingController cashAmountController = TextEditingController();
+  final TextEditingController cashValueController = TextEditingController();
 
   double screenWidth = 0;
   double screenHeight = 0;
@@ -35,6 +37,8 @@ class _FinancialDetailsState extends State<FinancialDetails> {
       "Lender_Name": TextEditingController(),
       "Loan_Type": TextEditingController(),
       "Total_Loan_Amount": TextEditingController(),
+      "Loan_Years": TextEditingController(),
+      "Interest_Rate": TextEditingController(),
     }
   ];
 
@@ -58,6 +62,8 @@ Future<void> submitFinancialDetails() async {
       "Lender_Name": loan["Lender_Name"]!.text.trim(),
       "Loan_Type": loan["Loan_Type"]!.text.trim(),
       "Total_Loan_Amount": int.tryParse(loan["Total_Loan_Amount"]!.text.trim()) ?? 0,
+      "Loan_Years": int.tryParse(loan["Loan_Years"]!.text.trim()) ?? 0,
+      "Interest_Rate": int.tryParse(loan["Interest_Rate"]!.text.trim()) ?? 0,
     };
   }).toList();
 
@@ -155,6 +161,8 @@ Future<void> submitFinancialDetails() async {
                       InputField(label: "Lender Name", controller: loan["Lender_Name"]!),
                       InputField(label: "Loan Type", controller: loan["Loan_Type"]!),
                       InputField(label: "Total Loan Amount", controller: loan["Total_Loan_Amount"]!),
+                      InputField(label: "Loan Years", controller: loan["Loan_Years"]!),
+                      InputField(label: "Interest Rate (%)", controller: loan["Interest_Rate"]!),
                       const SizedBox(height: 16),
                     ],
                   );
@@ -170,6 +178,8 @@ Future<void> submitFinancialDetails() async {
                         "Lender_Name": TextEditingController(),
                         "Loan_Type": TextEditingController(),
                         "Total_Loan_Amount": TextEditingController(),
+                        "Loan_Years": TextEditingController(),
+                        "Interest_Rate": TextEditingController(),
                       });
                     });
                   },

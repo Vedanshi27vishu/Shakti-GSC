@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shakti/Widgets/AppWidgets/communitywidget/authhelper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Screens/BottomNavBar.dart';
 import 'package:shakti/Screens/Profile.dart';
@@ -132,7 +133,7 @@ Future<void> _handleGoogleSignIn() async {
         // Save token locally using SharedPreferences (optional)
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString("token", responseData['token']);
-
+        await AuthHelper.saveLoginData(responseData);
         if (context.mounted) {
           Navigator.pushReplacement(
             context,

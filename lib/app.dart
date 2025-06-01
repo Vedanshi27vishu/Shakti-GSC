@@ -8,9 +8,6 @@ import 'package:shakti/Screens/Financialflowchart.dart';
 import 'package:shakti/Screens/InvestScreen.dart';
 import 'package:shakti/Screens/InvestmentGroup.dart';
 import 'package:shakti/Screens/Start.dart';
-import 'package:shakti/Screens/YourProgress.dart';
-import 'package:shakti/Screens/taskcreate.dart';
-import 'package:shakti/Screens/tracker.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 
 class MyApp extends StatelessWidget {
@@ -21,7 +18,6 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
         theme: ThemeData(scaffoldBackgroundColor: Scolor.primary),
         debugShowCheckedModeBanner: false,
-        home: 
-    StartScreen());
+        home: StartScreen());
   }
 }

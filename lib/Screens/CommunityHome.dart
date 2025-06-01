@@ -54,7 +54,7 @@ class CommunityHomeScreen extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: screenWidth * 0.04,
-                  vertical: screenHeight*0), // Less padding
+                  vertical: screenHeight * 0), // Less padding
               child: ListView.builder(
                 itemCount: posts.length,
                 itemBuilder: (context, index) {

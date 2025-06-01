@@ -7,17 +7,18 @@ class ComparativeTrackerScreen extends StatefulWidget {
   const ComparativeTrackerScreen({Key? key}) : super(key: key);
 
   @override
-  State<ComparativeTrackerScreen> createState() => _ComparativeTrackerScreenState();
+  State<ComparativeTrackerScreen> createState() =>
+      _ComparativeTrackerScreenState();
 }
 
 class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
   // DATABASE INTEGRATION POINTS - Replace with your database calls
-  
+
   // Comparative data for current vs next month
   List<double> currentMonthData = [2000, 1500, 1200, 800, 1800, 1000];
   List<double> nextMonthData = [2200, 1600, 1300, 900, 1900, 1200];
   List<String> monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-  
+
   // Business metrics
   String currentMonthValue = '727500';
   String currentMonthGrowth = '6.2%';
@@ -49,11 +50,12 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor:Scolor.primary,
+      backgroundColor: Scolor.primary,
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Scolor.secondry, size: 24),
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context)=> Finance())),
+        onPressed: () => Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Finance())),
       ),
       actions: [
         IconButton(
@@ -112,13 +114,16 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
                 ),
                 titlesData: FlTitlesData(
                   show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 32,
-                      getTitlesWidget: (value, meta) => _buildBottomTitle(value.toInt()),
+                      getTitlesWidget: (value, meta) =>
+                          _buildBottomTitle(value.toInt()),
                     ),
                   ),
                   leftTitles: AxisTitles(
@@ -298,7 +303,8 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
         const SizedBox(height: 12),
         _buildFeatureItem(Icons.trending_up, 'Regular customer base growing'),
         const SizedBox(height: 12),
-        _buildFeatureItem(Icons.school_outlined, 'Staff training costs expected'),
+        _buildFeatureItem(
+            Icons.school_outlined, 'Staff training costs expected'),
       ],
     );
   }

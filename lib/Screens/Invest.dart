@@ -17,14 +17,46 @@ class Invest extends StatefulWidget {
 class _InvestState extends State<Invest> {
   List<dynamic> recommendedLoans = [];
   List<dynamic> privateSchemes = [];
+  List<dynamic> userLoans = [];
+  double totalRemainingLoanAmount = 0;
+  double investmentAmount = 0;
+  double totalInstallment = 0;
   bool isLoading = false;
   String? error;
 
   @override
   void initState() {
     super.initState();
-    fetchRecommendedLoans();
-    fetchPrivateSchemes();
+    _loadData();
+  }
+
+  // Combined method to load all data
+  Future<void> _loadData() async {
+    await Future.wait([
+      fetchRecommendedLoans(),
+      fetchPrivateSchemes(),
+      fetchUserLoans(),
+    ]);
+  }
+
+  // Helper method to format currency with comma separation
+  String _formatCurrency(double amount) {
+    String amountStr = amount.toInt().toString();
+
+    if (amountStr.length > 3) {
+      String result = '';
+      int count = 0;
+
+      for (int i = amountStr.length - 1; i >= 0; i--) {
+        if (count == 3 || (count > 3 && (count - 3) % 2 == 0)) {
+          result = ',$result';
+        }
+        result = '${amountStr[i]}$result';
+        count++;
+      }
+      return result;
+    }
+    return amountStr;
   }
 
   Future<void> fetchRecommendedLoans() async {
@@ -33,17 +65,22 @@ class _InvestState extends State<Invest> {
       error = null;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
-
-    final url = Uri.parse(
-        'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/filter-loans');
-
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('token');
+
+      if (token == null) {
+        throw Exception('No authentication token found');
+      }
+
+      final url = Uri.parse(
+          'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/filter-loans');
+
       final response = await http.post(
         url,
         headers: {
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
         },
       );
 
@@ -53,13 +90,11 @@ class _InvestState extends State<Invest> {
           recommendedLoans = data['recommendedLoans'] ?? [];
         });
       } else {
-        setState(() {
-          error = 'Error fetching loans: ${response.statusCode}';
-        });
+        throw Exception('Failed to fetch loans: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
-        error = 'Error: $e';
+        error = 'Error fetching recommended loans: $e';
       });
     } finally {
       setState(() => isLoading = false);
@@ -67,22 +102,22 @@ class _InvestState extends State<Invest> {
   }
 
   Future<void> fetchPrivateSchemes() async {
-    setState(() {
-      isLoading = true;
-      error = null;
-    });
-
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
-
-    final url = Uri.parse(
-        'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/private-schemes');
-
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('token');
+
+      if (token == null) {
+        throw Exception('No authentication token found');
+      }
+
+      final url = Uri.parse(
+          'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/private-schemes');
+
       final response = await http.post(
         url,
         headers: {
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
         },
       );
 
@@ -92,16 +127,52 @@ class _InvestState extends State<Invest> {
           privateSchemes = data['recommendedLoans'] ?? [];
         });
       } else {
-        setState(() {
-          error = 'Error fetching private schemes: ${response.statusCode}';
-        });
+        throw Exception(
+            'Failed to fetch private schemes: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
-        error = 'Error: $e';
+        error = 'Error fetching private schemes: $e';
       });
-    } finally {
-      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> fetchUserLoans() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('token');
+
+      if (token == null) {
+        throw Exception('No authentication token found');
+      }
+
+      final url = Uri.parse(
+          'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/financial/loans');
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          userLoans = data['loans'] ?? [];
+          totalRemainingLoanAmount =
+              (data['totalRemainingLoanAmount'] ?? 0).toDouble();
+          investmentAmount = (data['investmentAmount'] ?? 0).toDouble();
+          totalInstallment = (data['totalinstallment'] ?? 0).toDouble();
+        });
+      } else {
+        throw Exception('Failed to fetch user loans: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        error = 'Error fetching user loans: $e';
+      });
     }
   }
 
@@ -135,28 +206,34 @@ class _InvestState extends State<Invest> {
                 Row(
                   children: [
                     Expanded(
-                        child: _infoCard(
-                            "Total Outstanding Loans",
-                            "₹25,000",
-                            "Across 2 active loans",
-                            height,
-                            "assets/images/rupeesyellow.png")),
+                      child: _infoCard(
+                        "Total Outstanding Loans",
+                        "₹${_formatCurrency(totalRemainingLoanAmount)}",
+                        "Across ${userLoans.length} active loans",
+                        height,
+                        "assets/images/rupeesyellow.png",
+                      ),
+                    ),
                     SizedBox(width: width * 0.02),
                     Expanded(
-                        child: _infoCard(
-                            "Monthly Revenue",
-                            "₹7,500",
-                            "Due Every Month",
-                            height,
-                            "assets/images/Vector-1.png")),
+                      child: _infoCard(
+                        "Monthly Payment",
+                        "₹${_formatCurrency(totalInstallment)}",
+                        "Due Every Month",
+                        height,
+                        "assets/images/Vector-1.png",
+                      ),
+                    ),
                     SizedBox(width: width * 0.02),
                     Expanded(
-                        child: _infoCard(
-                            "Available Credit",
-                            "₹25,000",
-                            "Additional Capacity",
-                            height,
-                            "assets/images/arrow (1).png")),
+                      child: _infoCard(
+                        "Investment Amount",
+                        "₹${_formatCurrency(investmentAmount)}",
+                        "Available Funds",
+                        height,
+                        "assets/images/arrow (1).png",
+                      ),
+                    ),
                   ],
                 ),
 
@@ -171,7 +248,7 @@ class _InvestState extends State<Invest> {
                     color: Scolor.white,
                   ),
                 ),
-                SizedBox(height: height * 0.05),
+                SizedBox(height: height * 0.02),
                 _loanTable(),
 
                 SizedBox(height: height * 0.05),
@@ -180,7 +257,6 @@ class _InvestState extends State<Invest> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       GestureDetector(
                         onTap: () {
@@ -198,7 +274,7 @@ class _InvestState extends State<Invest> {
                           width,
                           "Government Schemes",
                           "assets/images/raphael_piechart.png",
-                          true, // isGovernment = true
+                          true,
                         ),
                       ),
                       SizedBox(width: width * 0.02),
@@ -218,49 +294,66 @@ class _InvestState extends State<Invest> {
                           width,
                           "Private Schemes",
                           "assets/images/famicons_person-outline.png",
-                          false, // isGovernment = false
+                          false,
                         ),
                       ),
                     ],
                   ),
                 ),
+
                 SizedBox(height: height * 0.05),
+
+                // Bottom Navigation Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => InvestmentScreen()));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => InvestmentScreen(),
+                          ),
+                        );
                       },
                       child: BottomContainer(
-                          height: height, width: width, heading: "INVEST"),
+                        height: height,
+                        width: width,
+                        heading: "INVEST",
+                      ),
                     ),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    InvestmentGroupsScreen()));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => InvestmentGroupsScreen(),
+                          ),
+                        );
                       },
                       child: BottomContainer(
-                          height: height, width: width, heading: "GROUPS"),
+                        height: height,
+                        width: width,
+                        heading: "GROUPS",
+                      ),
                     ),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TrackerApp()));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TrackerApp(),
+                          ),
+                        );
                       },
                       child: BottomContainer(
-                          height: height, width: width, heading: "TRACKER"),
-                    )
+                        height: height,
+                        width: width,
+                        heading: "TRACKER",
+                      ),
+                    ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -269,12 +362,11 @@ class _InvestState extends State<Invest> {
     );
   }
 
-  /// *Info Card Widget (Ensures Equal Height & Responsive)*
   Widget _infoCard(String title, String amount, String subtitle, double height,
       String image) {
     return Container(
       height: height * 0.22,
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         border: Border.all(color: Scolor.secondry),
         borderRadius: BorderRadius.circular(8),
@@ -283,7 +375,7 @@ class _InvestState extends State<Invest> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          SizedBox(
             height: height * 0.03,
             width: height * 0.03,
             child: Image.asset(image),
@@ -308,81 +400,148 @@ class _InvestState extends State<Invest> {
               color: Scolor.white,
             ),
             maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: height * 0.005),
           Text(
             subtitle,
             style: TextStyle(
               fontSize: height * 0.016,
-              color: Color(0xFF41836B),
+              color: const Color(0xFF41836B),
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
 
-  /// *Active Loans Table*
   Widget _loanTable() {
-    return Column(children: [
-      Container(
-        color: Scolor.secondry,
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _tableHeader("Lender"),
-            _tableHeader("Amount"),
-            _tableHeader("Remaining"),
-          ],
+    return Column(
+      children: [
+        Container(
+          color: Scolor.secondry,
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+          child: Row(
+            children: [
+              _tableHeader("Lender"),
+              _tableHeader("Type"),
+              _tableHeader("Remaining"),
+              _tableHeader("Monthly"),
+            ],
+          ),
         ),
-      ),
-      _loanRow("State Bank of India", "₹50,000", "₹35,000"),
-      _loanRow("Central Bank of India", "₹25,000", "₹20,000"),
-    ]);
+        if (isLoading)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Scolor.secondry,
+              ),
+            ),
+          )
+        else if (error != null)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              error!,
+              style: const TextStyle(
+                color: Colors.red,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+        else if (userLoans.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              "No active loans found",
+              style: TextStyle(
+                color: Scolor.white,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          ...userLoans.map((loan) => _loanRow(
+                loan['Lender_Name']?.toString() ?? 'Unknown Lender',
+                loan['Loan_Type']?.toString() ?? 'Unknown Type',
+                "₹${_formatCurrency((loan['Remaining_Loan_Amount'] ?? 0).toDouble())}",
+                "₹${_formatCurrency((loan['Monthly_Payment'] ?? 0).toDouble())}",
+              )),
+      ],
+    );
   }
 
-  /// *Table Header*
   Widget _tableHeader(String text) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 14,
-        color: Scolor.primary,
+    return Expanded(
+      child: Text(
+        text,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+          color: Scolor.primary,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
 
-  /// *Loan Row*
-  Widget _loanRow(String lender, String amount, String remaining) {
+  Widget _loanRow(
+      String lender, String loanType, String remaining, String monthly) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            flex: 2,
             child: Text(
               lender,
-              style: TextStyle(fontSize: 12, color: Scolor.white),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Scolor.white,
+              ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.left,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              loanType,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Scolor.white,
+              ),
+              textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
             ),
           ),
           Expanded(
-            flex: 3,
             child: Text(
-              amount,
-              style: TextStyle(fontSize: 12, color: Scolor.white),
+              remaining,
+              style: TextStyle(
+                fontSize: 12,
+                color: Scolor.white,
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           Expanded(
-            flex: 2,
             child: Text(
-              remaining,
-              style: TextStyle(fontSize: 12, color: Scolor.white),
+              monthly,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Scolor.white,
+              ),
               textAlign: TextAlign.right,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -390,13 +549,14 @@ class _InvestState extends State<Invest> {
     );
   }
 
-  /// *Scheme Card Widget - Updated to show API data for both government and private*
   Widget _schemeCard(double height, double width, String heading, String image,
       bool isGovernment) {
+    final schemes = isGovernment ? recommendedLoans : privateSchemes;
+
     return Container(
       height: height * 0.22,
       width: width * 0.55,
-      padding: EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border.all(color: Scolor.secondry),
         borderRadius: BorderRadius.circular(8),
@@ -407,116 +567,111 @@ class _InvestState extends State<Invest> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Container(
-                  height: height * 0.03,
-                  width: height * 0.03,
-                  color: Colors.transparent,
-                  child: Image.asset(image)),
-              Text(
-                heading,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Scolor.secondry,
+              SizedBox(
+                height: height * 0.03,
+                width: height * 0.03,
+                child: Image.asset(image),
+              ),
+              Flexible(
+                child: Text(
+                  heading,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Scolor.secondry,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
           SizedBox(height: height * 0.01),
-          // Show loading, error, or loan data based on scheme type
-          if (isGovernment) ...[
-            if (isLoading)
-              Center(
-                child: CircularProgressIndicator(
-                  color: Scolor.secondry,
-                  strokeWidth: 2,
-                ),
-              )
-            else if (error != null)
-              Text(
-                "Error loading loans",
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.red,
-                  fontWeight: FontWeight.w700,
-                ),
-              )
-            else if (recommendedLoans.isEmpty)
-              Text(
-                "No loans available",
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Scolor.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              )
-            else
-              // Show top 3 government loans
-              ...recommendedLoans
-                  .take(4)
-                  .map((loan) => Padding(
-                        padding: EdgeInsets.symmetric(vertical: 2),
-                        child: Text(
-                          "• ${loan['name'] ?? 'Unknown Loan'}",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Scolor.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ))
-                  .toList(),
-          ] else ...[
-            // Private schemes section - exactly like government schemes
-            if (isLoading)
-              Center(
-                child: CircularProgressIndicator(
-                  color: Scolor.secondry,
-                  strokeWidth: 2,
-                ),
-              )
-            else if (error != null)
-              Text(
-                "Error loading schemes",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.red,
-                  fontWeight: FontWeight.w700,
-                ),
-              )
-            else if (privateSchemes.isEmpty)
-              Text(
-                "No schemes available",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Scolor.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              )
-            else
-              // Show top 3 private schemes
-              ...privateSchemes
-                  .take(5)
-                  .map((scheme) => Padding(
-                        padding: EdgeInsets.symmetric(vertical: 2),
-                        child: Text(
-                          "• ${scheme['name'] ?? 'Unknown Loan'}",
-                          style: TextStyle(
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isLoading)
+                    Center(
+                      child: CircularProgressIndicator(
+                        color: Scolor.secondry,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  else if (error != null)
+                    Text(
+                      "Error loading ${isGovernment ? 'loans' : 'schemes'}",
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )
+                  else if (schemes.isEmpty)
+                    Text(
+                      "No ${isGovernment ? 'loans' : 'schemes'} available",
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Scolor.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )
+                  else
+                    ...schemes.take(4).map((scheme) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Text(
+                            "• ${scheme['name']?.toString() ?? 'Unknown ${isGovernment ? 'Loan' : 'Scheme'}'}",
+                            style: TextStyle(
                               fontSize: 12,
                               color: Scolor.white,
-                              fontWeight: FontWeight.w700),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ))
-                  .toList(),
-          ],
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
+}
 
-  /// *Scheme Row (kept for reference, not used anymore)*
+// Assuming BottomContainer is defined elsewhere, here's a basic implementation
+class BottomContainer extends StatelessWidget {
+  final double height;
+  final double width;
+  final String heading;
+
+  const BottomContainer({
+    Key? key,
+    required this.height,
+    required this.width,
+    required this.heading,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height * 0.06,
+      width: width * 0.25,
+      decoration: BoxDecoration(
+        border: Border.all(color: Scolor.secondry),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Center(
+        child: Text(
+          heading,
+          style: TextStyle(
+            color: Scolor.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
 }

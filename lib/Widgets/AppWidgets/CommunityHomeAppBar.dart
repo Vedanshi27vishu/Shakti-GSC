@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shakti/Screens/CommunityHome.dart';
 import 'package:shakti/Screens/CreatePost.dart';
 import 'package:shakti/Screens/Mentors.dart';
+import 'package:shakti/Screens/followers.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/helpers/helper_functions.dart';
 
@@ -20,36 +22,54 @@ class CustomTopBar1 extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Scolor.secondry,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                IconButton(
+                icon: const Icon(Icons.home, color: Colors.white),
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CreatePostScreen()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => CommunityHomeScreen()));
                 },
-                icon: const Icon(Icons.home, color: Colors.black),
-                label: const Text(
-                  "Home",
-                  style: TextStyle(color: Colors.black),
-                ),
               ),
-               IconButton(
+              // ElevatedButton(
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Scolor.secondry,
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //   ),
+              //   onPressed: () {
+              //     Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //             builder: (context) => CommunityHomeScreen()));
+              //   },
+              //   icon: const Icon(Icons.home, color: Colors.black),
+              //   label: null,
+              //   //const Text(
+              //   //   "Home",
+              //   //   style: TextStyle(color: Colors.black),
+              //   // ),
+              // ),
+              IconButton(
                 icon: const Icon(Icons.group, color: Colors.white),
                 onPressed: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MentorsScreen()));
+                      MaterialPageRoute(builder: (context) => FollowUsersScreen()));
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.add, color: Colors.white),
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>MentorsScreen()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => CreatePostScreen()));
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.message, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UsersListScreen()));
                 },
               ),
             ],

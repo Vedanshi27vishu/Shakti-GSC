@@ -1,16 +1,51 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/ScreenHeadings.dart';
 import 'package:shakti/Widgets/AppWidgets/YellowLine.dart';
 import 'package:shakti/helpers/helper_functions.dart';
 
-class FinancialRecordsScreen extends StatelessWidget {
+class FinancialRecordsScreen extends StatefulWidget {
   const FinancialRecordsScreen({super.key});
 
   @override
+  State<FinancialRecordsScreen> createState() => _FinancialRecordsScreenState();
+}
+
+class _FinancialRecordsScreenState extends State<FinancialRecordsScreen> {
+  late Future<List<PdfInsight>> _insightsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _insightsFuture = fetchLinks();
+  }
+
+  Future<List<PdfInsight>> fetchLinks() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    final response = await http.get(
+      Uri.parse(
+          'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/pdfsearch'),
+      headers: {'Authorization': 'Bearer ${token ?? ''}'},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = json.decode(response.body);
+      return jsonList.map((item) => PdfInsight.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load insights');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-     double screenWidth = THelperFunctions.screenWidth();
+    double screenWidth = THelperFunctions.screenWidth();
     double screenHeight = THelperFunctions.screenHeight();
+
     return Scaffold(
       backgroundColor: Scolor.primary,
       appBar: AppBar(
@@ -26,45 +61,82 @@ class FinancialRecordsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ScreenHeadings(text:  "Financial Records -"),
-            SizedBox(height: screenHeight*0.01),
+            ScreenHeadings(text: "Financial Documents -"),
+            SizedBox(height: screenHeight * 0.01),
             Yellowline(screenWidth: screenWidth),
-             SizedBox(height: screenHeight*0.02),
-            const Text(
-              "Documents:",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: screenHeight*0.02),
+            SizedBox(height: screenHeight * 0.02),
             Expanded(
-              child: ListView.builder(
-                itemCount: financialDocuments.length,
-                itemBuilder: (context, index) {
-                  final doc = financialDocuments[index];
-                  return Card(
-                    color: Scolor.primary,
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(color: Colors.amber, width: 1.5),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: ListTile(
-                      leading: const Icon(Icons.insert_drive_file, color: Colors.amber, size: 30),
-                      title: Text(
-                        doc['title']!,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              child: FutureBuilder<List<PdfInsight>>(
+                future: _insightsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                        child:
+                            CircularProgressIndicator(color: Scolor.secondry));
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
                       ),
-                      subtitle: Text(
-                        doc['description']!,
-                        style: const TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.more_vert, color: Colors.white),
-                        onPressed: () {},
-                      ),
-                    ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text('No records found',
+                          style: TextStyle(color: Colors.white)),
+                    );
+                  }
+
+                  final insights = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: insights.length,
+                    itemBuilder: (context, index) {
+                      final doc = insights[index];
+                      return Card(
+                        color: Scolor.primary,
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(
+                              color: Scolor.secondry, width: 1.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                          leading: const Icon(Icons.insert_drive_file,
+                              color: Scolor.secondry, size: 30),
+                          title: Text(
+                            doc.title,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(
+                                doc.snippet,
+                                style: const TextStyle(
+                                    color: Colors.grey, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.open_in_new,
+                                color: Colors.white),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Link: ${doc.link}'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              // You can open the link using url_launcher if needed
+                              // launchUrl(Uri.parse(doc.link));
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
@@ -76,26 +148,22 @@ class FinancialRecordsScreen extends StatelessWidget {
   }
 }
 
-// ✅ Sample Data
-final List<Map<String, String>> financialDocuments = [
-  {
-    'title': 'Monthly Planner.docs',
-    'description': 'A detailed template to track income, expenses, and savings goals.',
-  },
-  {
-    'title': 'Saving Goal Sheet.docs',
-    'description': 'A document to plan and monitor short- and long-term savings goals.',
-  },
-  {
-    'title': 'Balance Sheet.docs',
-    'description': 'A snapshot of a company’s assets, liabilities, and equity at a specific point in time.',
-  },
-  {
-    'title': 'Risk Assessment.docs',
-    'description': 'A form to evaluate financial risk tolerance and align investments accordingly.',
-  },
-  {
-    'title': 'Income Tax Filing.docs',
-    'description': 'A detailed form to organize income, deductions, and tax liabilities before filing.',
-  },
-];
+class PdfInsight {
+  final String title;
+  final String link;
+  final String snippet;
+
+  PdfInsight({
+    required this.title,
+    required this.link,
+    required this.snippet,
+  });
+
+  factory PdfInsight.fromJson(Map<String, dynamic> json) {
+    return PdfInsight(
+      title: json['title'] ?? '',
+      snippet: json['snippet'] ?? '',
+      link: json['link'] ?? '',
+    );
+  }
+}

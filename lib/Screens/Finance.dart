@@ -21,10 +21,15 @@ class _FinanceState extends State<Finance> {
   DateTime selectedDate = DateTime.now();
   bool isLoading = false;
 
+  Map<String, dynamic>? profitData;
+  bool isProfitLoading = false;
+  String? profitError;
+
   @override
   void initState() {
     super.initState();
     fetchTasks(selectedDate);
+    fetchProfitPrediction(); // Add this line to fetch profit data on init
   }
 
   Future<void> fetchTasks(DateTime date) async {
@@ -59,6 +64,46 @@ class _FinanceState extends State<Finance> {
     }
   }
 
+  Future<void> fetchProfitPrediction() async {
+    setState(() {
+      isProfitLoading = true;
+      profitError = null;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('token');
+
+    final url = Uri.parse(
+        'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/predict-profit');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          profitData = data;
+        });
+      } else {
+        setState(() {
+          profitError =
+              'Error fetching profit prediction: ${response.statusCode}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        profitError = 'Error: $e';
+      });
+    } finally {
+      setState(() => isProfitLoading = false);
+    }
+  }
+
   void _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -72,6 +117,26 @@ class _FinanceState extends State<Finance> {
       });
       fetchTasks(picked);
     }
+  }
+
+  // Helper method to format the predicted profit amount
+  String getFormattedAmount() {
+    if (profitData != null && profitData!['curr'] != null) {
+      int amount = profitData!['curr'];
+      return '₹ ${NumberFormat('#,##,###').format(amount)}';
+    }
+    return '₹ 1,50,000'; // Default fallback
+  }
+
+  // Helper method to get percentage change with sign
+  String getPercentageChange() {
+    if (profitData != null && profitData!['curr'] != null) {
+      String percentage = profitData!['percentageChange'].toString();
+      // Remove the negative sign and add appropriate prefix
+      percentage = percentage.replaceAll('-', '');
+      return '$percentage% vs Last Month';
+    }
+    return '0% vs Last Month'; // Default fallback
   }
 
   @override
@@ -89,7 +154,16 @@ class _FinanceState extends State<Finance> {
             child: SizedBox(
               height: height * 0.04,
               width: height * 0.04,
-              child: Image.asset("assets/images/newwallet.png"),
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ComparativeTrackerScreen(),
+                      ),
+                    );
+                  },
+                  child: Image.asset("assets/images/newwallet.png")),
             ),
           )
         ],
@@ -169,7 +243,7 @@ class _FinanceState extends State<Finance> {
 
               SizedBox(height: height * 0.03),
 
-              /// *Suggestions Row*
+              /// *Suggestions Row* - Updated to use API data
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -177,8 +251,8 @@ class _FinanceState extends State<Finance> {
                     child: SuggestionContainer(
                       image: "assets/images/rupees.png",
                       heading: "Monthly Revenue",
-                      suggestion1: "₹25,000",
-                      suggestion2: "12% vs Last Month",
+                      suggestion1: getFormattedAmount(), // Using API data
+                      suggestion2: getPercentageChange(), // Using API data
                       height: height,
                       width: width,
                     ),
@@ -277,7 +351,8 @@ class _FinanceState extends State<Finance> {
                                             child: TaskRow(
                                               icon:
                                                   "assets/images/mdi_circle-double.png",
-                                              title: task['title'] ?? 'Untitled',
+                                              title:
+                                                  task['title'] ?? 'Untitled',
                                               subtitle: task['description'] ??
                                                   'No description',
                                               height: height,
@@ -305,11 +380,12 @@ class _FinanceState extends State<Finance> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>
-                            ComparativeTrackerApp()));
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      ComparativeTrackerScreen()));
                         },
                         child: Text(
                           "Learning Progress",

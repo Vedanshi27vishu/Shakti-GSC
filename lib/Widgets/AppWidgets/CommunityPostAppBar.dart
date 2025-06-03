@@ -31,7 +31,7 @@ class CustomTopBar3 extends StatelessWidget {
                 icon: const Icon(Icons.group, color: Colors.white),
                 onPressed: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MentorsScreen()));
+                      MaterialPageRoute(builder: (context) => FollowUsersScreen()));
                 },
               ),
               ElevatedButton.icon(

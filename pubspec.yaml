@@ -39,9 +39,13 @@ dependencies:
   cupertino_icons: ^1.0.8
   get: ^4.7.2
   intl: ^0.20.2
-  google_sign_in: ^6.3.0
+  webview_flutter: ^4.13.0
+  url_launcher: ^6.3.1
   flutter_otp_text_field: ^1.5.1+1
   fl_chart: ^1.0.0
+  google_sign_in: ^6.3.0
+  socket_io_client: ^3.1.2
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shakti/Screens/ExpertsInsights.dart';
 import 'package:shakti/Screens/FinancialRecords.dart';
-import 'package:shakti/Screens/Financialflowchart.dart';
 import 'package:shakti/Screens/YourBudget.dart';
 import 'package:shakti/Screens/YourFeedback.dart';
 import 'package:shakti/Screens/YourProgress.dart';
+import 'package:shakti/Screens/links.dart';
+import 'package:shakti/Screens/usershaktidetails.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Utils/constants/sizes.dart';
 import 'package:shakti/helpers/helper_functions.dart';
@@ -20,12 +21,30 @@ class AvatarScreen extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Scolor.primary,
-        title: Text(
-          'Hi, Entrepreneur!',
-          style: TextStyle(
-              color: Scolor.white,
-              fontSize: height * 0.04,
-              fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Hi, Entrepreneur!',
+              style: TextStyle(
+                color: Scolor.white,
+                fontSize: height * 0.04,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            CircleAvatar(
+              radius: height * 0.025, // Adjust size as needed
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ShaktiProfileScreen()));
+                  },
+                  child: Icon(Icons.person, color: Scolor.primary)),
+              backgroundColor: Colors.white, // fallback color
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
@@ -53,35 +72,44 @@ class AvatarScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: height * 0.05),
-                       SizedBox(
+                      SizedBox(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             CircularContainer(
-                                image: "assets/images/video.png",
-                                label: "Video", screen: () { Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          FinancialInsightsScreen())); },),
+                              image: "assets/images/video.png",
+                              label: "Video",
+                              screen: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            FinancialInsightsScreen()));
+                              },
+                            ),
                             CircularContainer(
-                                image: "assets/images/doc.png",
-                                label: "Document", screen: () { 
-                                  Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          FinancialRecordsScreen()));
-                                 },),
+                              image: "assets/images/doc.png",
+                              label: "Document",
+                              screen: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            FinancialRecordsScreen()));
+                              },
+                            ),
                             CircularContainer(
-                                image: "assets/images/flowchart.png",
-                                label: "Process", screen: () { 
-                                  Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          FinancialFlowChartScreen()));
-                                 },),
+                              image: "assets/images/flowchart.png",
+                              label: "Process",
+                              screen: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            FinancialLinkInsights()));
+                                //   ComparativeTrackerScreen()));
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -129,11 +157,14 @@ class AvatarScreen extends StatelessWidget {
                             suggestion1: "Save 20% income",
                             suggestion2: "Invest wisely",
                             suggestion3: "Monitor expenses",
-                            width: width, screen: () {  Navigator.push(
+                            width: width,
+                            screen: () {
+                              Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          YourBudgetScreen())); },
+                                          YourBudgetScreen()));
+                            },
                           ),
                           SuggestionContainer(
                             height: height,
@@ -142,7 +173,8 @@ class AvatarScreen extends StatelessWidget {
                             suggestion1: "Ask for reviews",
                             suggestion2: "Improve quality",
                             suggestion3: "Engage with clients",
-                            width: width, screen: () {  
+                            width: width,
+                            screen: () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -261,7 +293,7 @@ class SuggestionContainer extends StatelessWidget {
 class CircularContainer extends StatelessWidget {
   final String image;
   final String label;
-  
+
   final VoidCallback screen;
 
   const CircularContainer({

@@ -80,26 +80,28 @@ class _BusinessDetailsState extends State<BusinessDetails> {
         body: jsonEncode({
           "sessionId": sessionId,
           "ideaDetails": {
-  "Business_Name": BusinessNameController.text,
-  "Business_Sector": BusinessSectorController.text,
-  "Business_City": BusinessCityController.text,
-  "Buisness_Location": BusinessLocationController.text, // typo kept to match backend
-  "Idea_Description": IdeaDescriptionController.text,
-  "Target_Market": TargetMarketController.text,
-  "Unique_Selling_Proposition": UniqueSellingController.text
-},
-
-         "financialPlan": {
-  "Estimated_Startup_Cost": int.tryParse(EstimatedCostController.text.trim()) ?? 0,
-  "Funding_Required": int.tryParse(FundingController.text.trim()) ?? 0,
-  "Expected_Revenue_First_Year": int.tryParse(ExpectedRevenueController.text.trim()) ?? 0,
-},
-"operationalPlan": {
-  "Team_Size": int.tryParse(TeamSizeController.text.trim()) ?? 0,
-  "Resources_Required": ResourceRequiredController.text.trim(),
-  "Timeline_To_Launch": TimelineController.text.trim()
-}
-
+            "Business_Name": BusinessNameController.text,
+            "Business_Sector": BusinessSectorController.text,
+            "Business_City": BusinessCityController.text,
+            "Buisness_Location":
+                BusinessLocationController.text, // typo kept to match backend
+            "Idea_Description": IdeaDescriptionController.text,
+            "Target_Market": TargetMarketController.text,
+            "Unique_Selling_Proposition": UniqueSellingController.text
+          },
+          "financialPlan": {
+            "Estimated_Startup_Cost":
+                int.tryParse(EstimatedCostController.text.trim()) ?? 0,
+            "Funding_Required":
+                int.tryParse(FundingController.text.trim()) ?? 0,
+            "Expected_Revenue_First_Year":
+                int.tryParse(ExpectedRevenueController.text.trim()) ?? 0,
+          },
+          "operationalPlan": {
+            "Team_Size": int.tryParse(TeamSizeController.text.trim()) ?? 0,
+            "Resources_Required": ResourceRequiredController.text.trim(),
+            "Timeline_To_Launch": TimelineController.text.trim()
+          }
         }),
       );
 
@@ -169,32 +171,31 @@ class _BusinessDetailsState extends State<BusinessDetails> {
                   label: "Business Sector",
                   controller: BusinessSectorController),
               InputField(
-                  label: "Business Location", controller: BusinessLocationController),
+                  label: "Business Location",
+                  controller: BusinessLocationController),
               InputField(
-                  label: "Business City",
-                  controller: BusinessCityController),
+                  label: "Business City", controller: BusinessCityController),
               InputField(
-                  label: "Idea Description", controller: IdeaDescriptionController),
+                  label: "Idea Description",
+                  controller: IdeaDescriptionController),
               InputField(
-                  label: "Target Market",
-                  controller: TargetMarketController),
+                  label: "Target Market", controller: TargetMarketController),
               InputField(
-                  label: "Unique Selling Proposition", controller: UniqueSellingController),
+                  label: "Unique Selling Proposition",
+                  controller: UniqueSellingController),
 
+              buildSectionHeader("Financial Plan"),
+              InputField(
+                  label: "Estimated Startup Cost",
+                  controller: EstimatedCostController),
+              InputField(
+                  label: "Funding Required", controller: FundingController),
+              InputField(
+                  label: "Expected Revenue In 1st Year",
+                  controller: ExpectedRevenueController),
 
-          buildSectionHeader("Financial Plan"),
-              InputField(
-                  label: "Estimated Startup Cost", controller: EstimatedCostController),
-              InputField(
-                  label: "Funding Required",
-                  controller: FundingController),
-              InputField(
-                  label: "Expected Revenue In 1st Year", controller: ExpectedRevenueController),
-
-
-          buildSectionHeader("Operational Plan"),
-              InputField(
-                  label: "Team Size", controller: TeamSizeController),
+              buildSectionHeader("Operational Plan"),
+              InputField(label: "Team Size", controller: TeamSizeController),
               InputField(
                   label: "Resources Required",
                   controller: ResourceRequiredController),

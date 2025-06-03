@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shakti/Widgets/AppWidgets/communitywidget/authhelper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Screens/BottomNavBar.dart';
 import 'package:shakti/Screens/Profile.dart';
@@ -24,79 +25,85 @@ class _LoginScreenState extends State<LoginScreen> {
   bool obscurePassword = true;
   bool isLoading = false;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-  scopes: ['email', 'profile'],
-  serverClientId: '701319090890-5ptlmu3ogiej1lneklmsh72n4d4im2uu.apps.googleusercontent.com', 
-);
+    scopes: ['email', 'profile'],
+    serverClientId:
+        '701319090890-5ptlmu3ogiej1lneklmsh72n4d4im2uu.apps.googleusercontent.com',
+  );
 
-bool isGoogleLoading = false;
+  bool isGoogleLoading = false;
 
-Future<void> _handleGoogleSignIn() async {
-  setState(() {
-    isGoogleLoading = true;
-  });
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      isGoogleLoading = true;
+    });
 
-  try {
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
-    if (googleUser == null) {
-      // User canceled the sign-in
-      setState(() {
-        isGoogleLoading = false;
-      });
-      return;
-    }
+      if (googleUser == null) {
+        // User canceled the sign-in
+        setState(() {
+          isGoogleLoading = false;
+        });
+        return;
+      }
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-    // googleAuth.idToken is what you send to backend
-    final String? idToken = googleAuth.idToken;
+      // googleAuth.idToken is what you send to backend
+      final String? idToken = googleAuth.idToken;
 
-    if (idToken == null) {
-      setState(() {
-        isGoogleLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to get Google ID token')),
+      if (idToken == null) {
+        setState(() {
+          isGoogleLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to get Google ID token')),
+        );
+        return;
+      }
+
+      // Send idToken to your backend API for verification
+      final response = await http.post(
+        Uri.parse(
+            "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/auth/google"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"idToken": idToken}),
       );
-      return;
-    }
 
-    // Send idToken to your backend API for verification
-    final response = await http.post(
-      Uri.parse("http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/auth/google"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"idToken": idToken}),
-    );
+      final responseData = jsonDecode(response.body);
 
-    final responseData = jsonDecode(response.body);
+      if (response.statusCode == 200 && responseData['token'] != null) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("token", responseData['token']);
 
-    if (response.statusCode == 200 && responseData['token'] != null) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString("token", responseData['token']);
-
-      if (context.mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => BottomNavBarExample()),
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => BottomNavBarExample()),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text(responseData['message'] ?? 'Google Sign-In failed')),
         );
       }
-    } else {
+    } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseData['message'] ?? 'Google Sign-In failed')),
+        SnackBar(content: Text('Error: $error')),
       );
+    } finally {
+      setState(() {
+        isGoogleLoading = false;
+      });
     }
-  } catch (error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $error')),
-    );
-  } finally {
-    setState(() {
-      isGoogleLoading = false;
-    });
   }
-}
 
-  final String loginUrl = "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/auth/login";
+  final String loginUrl =
+      "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/auth/login";
 
   Future<void> loginUser() async {
     final email = emailController.text.trim();
@@ -131,8 +138,7 @@ Future<void> _handleGoogleSignIn() async {
         // Save token locally using SharedPreferences (optional)
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString("token", responseData['token']);
-
-        // Navigate to BottomNavBarExample
+        await AuthHelper.saveLoginData(responseData);
         if (context.mounted) {
           Navigator.pushReplacement(
             context,
@@ -187,7 +193,7 @@ Future<void> _handleGoogleSignIn() async {
               ),
               SizedBox(height: screenHeight * 0.02),
               Text(
-                "Shakti",
+                "Shakti-Nxt",
                 style: TextStyle(
                   color: Scolor.light,
                   fontSize: screenWidth * 0.07,
@@ -218,7 +224,7 @@ Future<void> _handleGoogleSignIn() async {
                   },
                   child: Text.rich(
                     TextSpan(
-                      text: "Need a Shakti account? ",
+                      text: "Need a Shakti-Nxt account? ",
                       style: TextStyle(color: Scolor.light),
                       children: [
                         TextSpan(
@@ -245,7 +251,7 @@ Future<void> _handleGoogleSignIn() async {
                     SizedBox(height: screenHeight * 0.005),
                     InputField(
                       controller: emailController,
-                      label: "Username or Email-Id",
+                      label: "Email-Id",
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Align(
@@ -266,7 +272,7 @@ Future<void> _handleGoogleSignIn() async {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide:
-                              const BorderSide(color: Scolor.white, width: 3.5),
+                              const BorderSide(color: Scolor.white, width: 2.5),
                         ),
                         hintText: "Enter Password",
                         hintStyle:
@@ -288,7 +294,8 @@ Future<void> _handleGoogleSignIn() async {
                     ),
                     SizedBox(height: screenHeight * 0.03),
                     isLoading
-                        ? const CircularProgressIndicator(color: Scolor.secondry)
+                        ? const CircularProgressIndicator(
+                            color: Scolor.secondry)
                         : ContinueButton(
                             screenHeight: screenHeight,
                             screenWidth: screenWidth,
@@ -319,37 +326,36 @@ Future<void> _handleGoogleSignIn() async {
                 ),
               ),
               SizedBox(height: screenHeight * 0.03),
-             SizedBox(
-  width: screenWidth*0.9,
-  child: ElevatedButton.icon(
-    onPressed: isGoogleLoading ? null : _handleGoogleSignIn,
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Scolor.primary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Scolor.secondry),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      elevation: 2,
-    ),
-    icon: Image.asset(
-      'assets/images/Google.png',
-      height: 20,
-      width: 20,
-    ),
-    label: isGoogleLoading
-        ? const CircularProgressIndicator(color: Colors.white)
-        : Text(
-            'SignUp with Google',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Scolor.light,
-            ),
-          ),
-  ),
-),
-
+              SizedBox(
+                width: screenWidth * 0.9,
+                child: ElevatedButton.icon(
+                  onPressed: isGoogleLoading ? null : _handleGoogleSignIn,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Scolor.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Scolor.secondry),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    elevation: 2,
+                  ),
+                  icon: Image.asset(
+                    'assets/images/Google.png',
+                    height: 20,
+                    width: 20,
+                  ),
+                  label: isGoogleLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          'SignUp with Google',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Scolor.light,
+                          ),
+                        ),
+                ),
+              ),
             ],
           ),
         ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shakti/Screens/CommunityHome.dart';
 import 'package:shakti/Screens/Finance.dart';
 import 'package:shakti/Screens/Invest.dart';
-import 'package:shakti/Screens/Mentors.dart';
 import 'package:shakti/Screens/avatar.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 
@@ -85,5 +84,4 @@ class _BottomNavBarExampleState extends State<BottomNavBarExample> {
   }
 }
 
-class Community {
-}
+class Community {}

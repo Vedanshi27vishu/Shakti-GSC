@@ -136,6 +136,58 @@ static Future<PostModel?> commentOnPost(String postId, String commentText) async
     throw Exception('Error commenting: $e');
   }
 }
+// Update a comment
+static Future<PostModel?> updateComment(String postId, String commentId, String updatedText) async {
+  try {
+    final headers = await _getHeaders();
+    final response = await http.put(
+      Uri.parse('$baseUrl/post/$postId/comments/$commentId'),
+      headers: headers,
+      body: json.encode({'text': updatedText}),
+    );
+    
+    print('Update Comment Response: Status ${response.statusCode}');
+    print('Response Body: ${response.body}');
+    
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      if (responseData['post'] != null) {
+        return PostModel.fromJson(responseData['post']);
+      }
+    }
+    
+    throw Exception('Failed to update comment: ${response.statusCode} - ${response.body}');
+  } catch (e) {
+    print('Error updating comment: $e');
+    throw Exception('Error updating comment: $e');
+  }
+}
+
+// Delete a comment
+static Future<PostModel?> deleteComment(String postId, String commentId) async {
+  try {
+    final headers = await _getHeaders();
+    final response = await http.delete(
+      Uri.parse('$baseUrl/post/$postId/comments/$commentId'),
+      headers: headers,
+    );
+    
+    print('Delete Comment Response: Status ${response.statusCode}');
+    print('Response Body: ${response.body}');
+    
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      // For delete, we might not get the full post back, so fetch it
+      return await getPostsByInterest().then((posts) => 
+        posts.firstWhere((p) => p.id == postId, orElse: () => throw Exception('Post not found')));
+    }
+    
+    throw Exception('Failed to delete comment: ${response.statusCode} - ${response.body}');
+  } catch (e) {
+    print('Error deleting comment: $e');
+    throw Exception('Error deleting comment: $e');
+  }
+}
   // Create a new post
   static Future<bool> createPost(String content, {String? mediaUrl}) async {
     try {

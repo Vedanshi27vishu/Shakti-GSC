@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shakti/Screens/userprofile.dart';
 import 'package:shakti/Widgets/AppWidgets/CommunityHomeAppBar.dart';
 import 'package:shakti/Widgets/AppWidgets/ScreenHeadings.dart';
 import 'package:shakti/Widgets/AppWidgets/communitywidget/authhelper.dart';
@@ -157,15 +158,28 @@ class _CommunityHomeScreenState extends State<CommunityHomeScreen> {
                 ScreenHeadings(text: "Posts"),
                 TextButton(
                   onPressed: () {
-                    setState(() {
-                      showDebugInfo = !showDebugInfo;
-                    });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UserProfileScreen()),
+                    );
                   },
                   child: Text(
-                    showDebugInfo ? 'Hide Debug' : 'Show Debug',
+                    "Profile",
                     style: TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
+                // TextButton(
+                //   onPressed: () {
+                //     setState(() {
+                //       showDebugInfo = !showDebugInfo;
+                //     });
+                //   },
+                //   child: Text(
+                //     showDebugInfo ? 'Hide Debug' : 'Show Debug',
+                //     style: TextStyle(color: Colors.white, fontSize: 12),
+                //   ),
+                // ),
               ],
             ),
           ),

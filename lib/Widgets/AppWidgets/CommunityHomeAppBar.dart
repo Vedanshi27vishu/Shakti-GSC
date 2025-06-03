@@ -44,14 +44,14 @@ class CustomTopBar1 extends StatelessWidget {
                 icon: const Icon(Icons.group, color: Colors.white),
                 onPressed: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MentorsScreen()));
+                      MaterialPageRoute(builder: (context) => FollowUsersScreen()));
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.add, color: Colors.white),
                 onPressed: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MentorsScreen()));
+                      MaterialPageRoute(builder: (context) => CreatePostScreen()));
                 },
               ),
               IconButton(

@@ -36,7 +36,7 @@ class MeesageBar extends StatelessWidget {
                 ),
                 onPressed: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MentorsScreen()));
+                      MaterialPageRoute(builder: (context) => FollowUsersScreen()));
                 },
                 icon: const Icon(Icons.group, color: Colors.black),
                 label: const Text(

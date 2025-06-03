@@ -30,7 +30,6 @@ class _ProfileScreenState extends State<UserProfileScreen>
   static const Color darkBlue = Color(0xFF1A1B3A);
   static const Color lightBlue = Color(0xFF2A2D5A);
   static const Color yellow = Color(0xFFFFD700);
-  static const Color lightYellow = Color(0xFFFFF3A0);
 
   @override
   void initState() {
@@ -233,13 +232,13 @@ class _ProfileScreenState extends State<UserProfileScreen>
                         },
                         child: _buildStatColumn('Followers', followersCount)),
                     GestureDetector(
-                      onTap: (){
-                         Navigator.push(
+                        onTap: () {
+                          Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => FollowingPage()));
-                      },
-                      child: _buildStatColumn('Following', followingCount)),
+                        },
+                        child: _buildStatColumn('Following', followingCount)),
                   ],
                 ),
               ),

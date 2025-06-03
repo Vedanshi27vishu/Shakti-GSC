@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shakti/Screens/BusinessTracker.dart';
 import 'package:shakti/Screens/ExpertsInsights.dart';
 import 'package:shakti/Screens/FinancialRecords.dart';
-import 'package:shakti/Screens/Financialflowchart.dart';
 import 'package:shakti/Screens/YourBudget.dart';
 import 'package:shakti/Screens/YourFeedback.dart';
 import 'package:shakti/Screens/YourProgress.dart';
-import 'package:shakti/Screens/chat.dart';
 import 'package:shakti/Screens/links.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Utils/constants/sizes.dart';
@@ -91,7 +88,7 @@ class AvatarScreen extends StatelessWidget {
                                     MaterialPageRoute(
                                         builder: (context) =>
                                             FinancialLinkInsights()));
-                                // ComparativeTrackerScreen()));
+                                //   ComparativeTrackerScreen()));
                               },
                             ),
                           ],

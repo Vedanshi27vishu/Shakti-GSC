@@ -3,7 +3,6 @@ import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:shakti/Screens/Finance.dart';
 import 'package:shakti/Screens/FinancialDetails.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/helpers/helper_functions.dart';
@@ -45,7 +44,8 @@ class _OTPScreenState extends State<OTPScreen> {
       if (response.statusCode == 200) {
         _showSuccessDialog();
       } else {
-        _showErrorSnackBar(responseData['message'] ?? 'OTP verification failed');
+        _showErrorSnackBar(
+            responseData['message'] ?? 'OTP verification failed');
       }
     } catch (e) {
       _showErrorSnackBar('Network error. Please try again.');
@@ -130,17 +130,16 @@ class _OTPScreenState extends State<OTPScreen> {
                   foregroundColor: Colors.black,
                 ),
                 child: TextButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FinancialDetails(),
-      ),
-    );
-  },
-  child: const Text('OK'),
-),
-
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FinancialDetails(),
+                      ),
+                    );
+                  },
+                  child: const Text('OK'),
+                ),
               ),
             ],
           ),
@@ -167,7 +166,8 @@ class _OTPScreenState extends State<OTPScreen> {
                 backgroundColor: Colors.transparent,
                 child: Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFFFFC107), width: 2),
+                    border:
+                        Border.all(color: const Color(0xFFFFC107), width: 2),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -184,7 +184,10 @@ class _OTPScreenState extends State<OTPScreen> {
               const SizedBox(height: 16),
               const Text(
                 'Shakti',
-                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 30),
               // OTP Section
@@ -199,7 +202,8 @@ class _OTPScreenState extends State<OTPScreen> {
                   children: [
                     const Text(
                       'Enter OTP',
-                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     const Text(
@@ -210,10 +214,10 @@ class _OTPScreenState extends State<OTPScreen> {
                     const SizedBox(height: 32),
                     OtpTextField(
                       alignment: Alignment.center,
-                      fieldHeight: screenHeight*0.09 ,
-                      fieldWidth: screenWidth*0.09,
+                      fieldHeight: screenHeight * 0.09,
+                      fieldWidth: screenWidth * 0.09,
                       numberOfFields: 6,
-                      enabledBorderColor: Scolor.textsecondary ,
+                      enabledBorderColor: Scolor.textsecondary,
                       focusedBorderColor: Scolor.secondry,
                       disabledBorderColor: Scolor.secondry,
                       showFieldAsBox: true,
@@ -228,11 +232,14 @@ class _OTPScreenState extends State<OTPScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: (_enteredOtp.length == 6 && !_isLoading) ? _verifyOtp : null,
+                        onPressed: (_enteredOtp.length == 6 && !_isLoading)
+                            ? _verifyOtp
+                            : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: (_enteredOtp.length == 6 && !_isLoading)
-                              ? const Color(0xFFFFC107)
-                              : Colors.grey.shade400,
+                          backgroundColor:
+                              (_enteredOtp.length == 6 && !_isLoading)
+                                  ? const Color(0xFFFFC107)
+                                  : Colors.grey.shade400,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -245,12 +252,14 @@ class _OTPScreenState extends State<OTPScreen> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.black),
                                 ),
                               )
                             : const Text(
                                 'Verify OTP',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.w600),
                               ),
                       ),
                     ),
@@ -258,7 +267,8 @@ class _OTPScreenState extends State<OTPScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text("Didn't receive code? ", style: TextStyle(color: Colors.grey)),
+                        const Text("Didn't receive code? ",
+                            style: TextStyle(color: Colors.grey)),
                         GestureDetector(
                           onTap: _isResending ? null : _resendOtp,
                           child: _isResending
@@ -267,7 +277,8 @@ class _OTPScreenState extends State<OTPScreen> {
                                   width: 14,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFC107)),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Color(0xFFFFC107)),
                                   ),
                                 )
                               : const Text(

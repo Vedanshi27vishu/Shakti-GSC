@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shakti/Screens/BottomNavBar.dart';
-import 'package:shakti/Screens/CommunityHome.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/CommunityMentorAppBar.dart';
 import 'package:shakti/Widgets/AppWidgets/ScreenHeadings.dart';

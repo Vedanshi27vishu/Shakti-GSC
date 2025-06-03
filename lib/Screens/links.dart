@@ -103,7 +103,6 @@ class _FinancialInsightsScreenState extends State<FinancialLinkInsights> {
             }
 
             final insights = snapshot.data!;
-            final firstSector = insights.first.businessSector;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,

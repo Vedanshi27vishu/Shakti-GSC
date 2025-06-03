@@ -150,33 +150,3 @@ class GovernmentLoansScreen extends StatelessWidget {
     );
   }
 }
-
-class BottomContainer extends StatelessWidget {
-  String heading;
-  BottomContainer(
-      {super.key,
-      required this.height,
-      required this.width,
-      required this.heading});
-
-  final double height;
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: height * 0.03,
-      width: width * 0.25,
-      decoration: BoxDecoration(
-        color: Scolor.secondry.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Center(
-        child: Text(
-          heading,
-          style: TextStyle(color: Scolor.secondry, fontSize: 10),
-        ),
-      ),
-    );
-  }
-}

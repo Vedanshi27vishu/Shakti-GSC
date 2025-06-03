@@ -342,7 +342,7 @@ class _InvestState extends State<Invest> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TrackerApp(),
+                            builder: (context) => TrackerScreen(),
                           ),
                         );
                       },
@@ -420,128 +420,193 @@ class _InvestState extends State<Invest> {
   Widget _loanTable() {
     return Column(
       children: [
-        Container(
-          color: Scolor.secondry,
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-          child: Row(
-            children: [
-              _tableHeader("Lender"),
-              _tableHeader("Type"),
-              _tableHeader("Remaining"),
-              _tableHeader("Monthly"),
-            ],
+        // Make the entire table horizontally scrollable
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Container(
+            width: MediaQuery.of(context).size.width *
+                1.2, // Make it wider than screen
+            child: Column(
+              children: [
+                // Header row
+                Container(
+                  color: Scolor.secondry,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  child: Row(
+                    children: [
+                      _tableHeader("Lender"),
+                      _tableHeader("Type"),
+                      _tableHeader("Total Amount"), // New column
+                      _tableHeader("Remaining"),
+                      _tableHeader("Monthly"),
+                    ],
+                  ),
+                ),
+
+                // Loading, error, or data rows
+                if (isLoading)
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Scolor.secondry,
+                      ),
+                    ),
+                  )
+                else if (error != null)
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      error!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                else if (userLoans.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      "No active loans found",
+                      style: TextStyle(
+                        color: Scolor.white,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                else
+                  // Data rows with scrollable content
+                  ...userLoans.map((loan) => _loanRow(
+                        loan['Lender_Name']?.toString() ?? 'Unknown Lender',
+                        loan['Loan_Type']?.toString() ?? 'Unknown Type',
+                        "₹${_formatCurrency((loan['Total_Loan_Amount'] ?? 0).toDouble())}", // New total amount
+                        "₹${_formatCurrency((loan['Remaining_Loan_Amount'] ?? 0).toDouble())}",
+                        "₹${_formatCurrency((loan['Monthly_Payment'] ?? 0).toDouble())}",
+                      )),
+              ],
+            ),
           ),
         ),
-        if (isLoading)
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Center(
-              child: CircularProgressIndicator(
-                color: Scolor.secondry,
-              ),
-            ),
-          )
-        else if (error != null)
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              error!,
-              style: const TextStyle(
-                color: Colors.red,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          )
-        else if (userLoans.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              "No active loans found",
-              style: TextStyle(
-                color: Scolor.white,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          )
-        else
-          ...userLoans.map((loan) => _loanRow(
-                loan['Lender_Name']?.toString() ?? 'Unknown Lender',
-                loan['Loan_Type']?.toString() ?? 'Unknown Type',
-                "₹${_formatCurrency((loan['Remaining_Loan_Amount'] ?? 0).toDouble())}",
-                "₹${_formatCurrency((loan['Monthly_Payment'] ?? 0).toDouble())}",
-              )),
       ],
     );
   }
 
   Widget _tableHeader(String text) {
     return Expanded(
-      child: Text(
-        text,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-          color: Scolor.primary,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            color: Scolor.primary,
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
-        textAlign: TextAlign.center,
       ),
     );
   }
 
-  Widget _loanRow(
-      String lender, String loanType, String remaining, String monthly) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+  Widget _loanRow(String lender, String loanType, String totalAmount,
+      String remaining, String monthly) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Scolor.secondry.withOpacity(0.3),
+            width: 0.5,
+          ),
+        ),
+      ),
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              lender,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Scolor.white,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                lender,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: Scolor.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.left,
+                maxLines: 2,
               ),
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.left,
             ),
           ),
           Expanded(
-            child: Text(
-              loanType,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Scolor.white,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                loanType,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: Scolor.white,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
               ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           Expanded(
-            child: Text(
-              remaining,
-              style: TextStyle(
-                fontSize: 12,
-                color: Scolor.white,
-                fontWeight: FontWeight.bold,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                totalAmount, // New total amount column
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Scolor
+                      .secondry, // Different color to distinguish from remaining
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           Expanded(
-            child: Text(
-              monthly,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Scolor.white,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                remaining,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Scolor.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
-              textAlign: TextAlign.right,
-              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                monthly,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: Scolor.white,
+                ),
+                textAlign: TextAlign.right,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
           ),
         ],

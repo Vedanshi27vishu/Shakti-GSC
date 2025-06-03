@@ -134,7 +134,6 @@ class _FinanceState extends State<Finance> {
       String percentage = profitData!['percentageChange'].toString();
       // Remove the negative sign and add appropriate prefix
       percentage = percentage.replaceAll('-', '');
-      String changeType = profitData!['changeType'] ?? 'increase';
       return '$percentage% vs Last Month';
     }
     return '0% vs Last Month'; // Default fallback
@@ -155,7 +154,16 @@ class _FinanceState extends State<Finance> {
             child: SizedBox(
               height: height * 0.04,
               width: height * 0.04,
-              child: Image.asset("assets/images/newwallet.png"),
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ComparativeTrackerScreen(),
+                      ),
+                    );
+                  },
+                  child: Image.asset("assets/images/newwallet.png")),
             ),
           )
         ],

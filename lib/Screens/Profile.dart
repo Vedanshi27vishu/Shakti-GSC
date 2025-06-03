@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/OtpScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shakti/Screens/FinancialDetails.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/Continue.dart';
 import 'package:shakti/Widgets/AppWidgets/InputField.dart';
@@ -83,7 +82,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>  OTPScreen(sessionId: sessionId,)),
+            MaterialPageRoute(
+                builder: (context) => OTPScreen(
+                      sessionId: sessionId,
+                    )),
           );
         } else {
           showError("Session ID not found in response.");

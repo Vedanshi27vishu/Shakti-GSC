@@ -8,6 +8,7 @@ import 'package:shakti/Screens/YourFeedback.dart';
 import 'package:shakti/Screens/YourProgress.dart';
 import 'package:shakti/Screens/chat.dart';
 import 'package:shakti/Screens/links.dart';
+import 'package:shakti/Screens/usershaktidetails.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Utils/constants/sizes.dart';
 import 'package:shakti/helpers/helper_functions.dart';
@@ -23,12 +24,30 @@ class AvatarScreen extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Scolor.primary,
-        title: Text(
-          'Hi, Entrepreneur!',
-          style: TextStyle(
-              color: Scolor.white,
-              fontSize: height * 0.04,
-              fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Hi, Entrepreneur!',
+              style: TextStyle(
+                color: Scolor.white,
+                fontSize: height * 0.04,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            CircleAvatar(
+              radius: height * 0.025, // Adjust size as needed
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ShaktiProfileScreen()));
+                  },
+                  child: Icon(Icons.person, color: Scolor.primary)),
+              backgroundColor: Colors.white, // fallback color
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(

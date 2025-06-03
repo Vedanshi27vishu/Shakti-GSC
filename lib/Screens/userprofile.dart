@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shakti/Screens/userfollowers.dart';
+import 'package:shakti/Screens/userfollowing.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,10 +12,14 @@ class UserProfileScreen extends StatefulWidget {
   State<UserProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<UserProfileScreen> with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends State<UserProfileScreen>
+    with SingleTickerProviderStateMixin {
   bool isLoading = true;
   String userName = "Loading...";
   String userEmail = "";
+  String businessName = "";
+  String businessSector = "";
+  String businessLocation = "";
   int followersCount = 0;
   int followingCount = 0;
   int postsCount = 0;
@@ -31,7 +37,6 @@ class _ProfileScreenState extends State<UserProfileScreen> with SingleTickerProv
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     fetchUserProfile();
-    fetchUserPosts();
   }
 
   @override
@@ -52,88 +57,67 @@ class _ProfileScreenState extends State<UserProfileScreen> with SingleTickerProv
         throw Exception('No auth token found');
       }
 
-      // Fetch user basic info (you might need to adjust this API endpoint)
-      final userResponse = await http.get(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/user/profile'),
+      // Fetch user profile data
+      final response = await http.get(
+        Uri.parse(
+            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/profile/details'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
         },
       );
 
-      // Fetch followers/following data
-      final followResponse = await http.get(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/followers_following'),
-        headers: {
-          'Authorization': 'Bearer $authToken',
-          'Content-Type': 'application/json',
-        },
-      );
+      if (response.statusCode == 200) {
+        final profileData = json.decode(response.body);
 
-      if (followResponse.statusCode == 200) {
-        final followData = json.decode(followResponse.body);
         setState(() {
-          followersCount = (followData['followers'] as List).length;
-          followingCount = (followData['following'] as List).length;
+          userName = profileData['name'] ?? 'Unknown User';
+          userEmail = profileData['email'] ?? '';
+          businessName = profileData['businessName'] ?? '';
+          businessSector = profileData['businessSector'] ?? '';
+          businessLocation = profileData['businessLocation'] ?? '';
+          followersCount = profileData['followersCount'] ?? 0;
+          followingCount = profileData['followingCount'] ?? 0;
+          postsCount = profileData['postCount'] ?? 0;
+          userPosts = profileData['posts'] ?? [];
+          isLoading = false;
         });
+      } else {
+        throw Exception('Failed to load profile: ${response.statusCode}');
       }
-
-      // If you have user profile endpoint, uncomment this:
-      // if (userResponse.statusCode == 200) {
-      //   final userData = json.decode(userResponse.body);
-      //   setState(() {
-      //     userName = userData['fullName'] ?? 'User Name';
-      //     userEmail = userData['email'] ?? '';
-      //   });
-      // }
-
-      // Temporary user data (replace with actual API response)
-      setState(() {
-        userName = "John Doe";
-        userEmail = "john.doe@example.com";
-        isLoading = false;
-      });
-
     } catch (e) {
       print('Error fetching profile: $e');
       setState(() {
         isLoading = false;
         userName = "Error loading profile";
       });
-    }
-  }
 
-  Future<void> fetchUserPosts() async {
-    try {
-      final authToken = await _getAuthToken();
-      if (authToken == null) {
-        throw Exception('No auth token found');
+      // Show error dialog
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: darkBlue,
+            title: Text(
+              'Error',
+              style: TextStyle(color: yellow),
+            ),
+            content: Text(
+              'Failed to load profile data. Please check your connection and try again.',
+              style: TextStyle(color: Colors.white),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  fetchUserProfile(); // Retry
+                },
+                child: Text('Retry', style: TextStyle(color: yellow)),
+              ),
+            ],
+          ),
+        );
       }
-
-      // TODO: Replace with actual posts API endpoint
-      // final response = await http.get(
-      //   Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/posts/user-posts'),
-      //   headers: {
-      //     'Authorization': 'Bearer $authToken',
-      //     'Content-Type': 'application/json',
-      //   },
-      // );
-
-      // Temporary mock data for posts
-      await Future.delayed(Duration(seconds: 1));
-      setState(() {
-        userPosts = [
-          {'id': 1, 'image': 'https://picsum.photos/300/300?random=1', 'caption': 'Beautiful sunset'},
-          {'id': 2, 'image': 'https://picsum.photos/300/300?random=2', 'caption': 'Morning coffee'},
-          {'id': 3, 'image': 'https://picsum.photos/300/300?random=3', 'caption': 'Nature walk'},
-          {'id': 4, 'image': 'https://picsum.photos/300/300?random=4', 'caption': 'City lights'},
-          {'id': 5, 'image': 'https://picsum.photos/300/300?random=5', 'caption': 'Weekend vibes'},
-          {'id': 6, 'image': 'https://picsum.photos/300/300?random=6', 'caption': 'Food love'},
-        ];
-        postsCount = userPosts.length;
-      });
-    } catch (e) {
-      print('Error fetching posts: $e');
     }
   }
 
@@ -173,7 +157,6 @@ class _ProfileScreenState extends State<UserProfileScreen> with SingleTickerProv
           : RefreshIndicator(
               onRefresh: () async {
                 await fetchUserProfile();
-                await fetchUserPosts();
               },
               child: CustomScrollView(
                 slivers: [
@@ -232,25 +215,39 @@ class _ProfileScreenState extends State<UserProfileScreen> with SingleTickerProv
                   ),
                 ),
               ),
-              
+
               SizedBox(width: 20),
-              
+
               // Stats
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildStatColumn('Posts', postsCount),
-                    _buildStatColumn('Followers', followersCount),
-                    _buildStatColumn('Following', followingCount),
+                    GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => FollowersPage()));
+                        },
+                        child: _buildStatColumn('Followers', followersCount)),
+                    GestureDetector(
+                      onTap: (){
+                         Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => FollowingPage()));
+                      },
+                      child: _buildStatColumn('Following', followingCount)),
                   ],
                 ),
               ),
             ],
           ),
-          
+
           SizedBox(height: 20),
-          
+
           // Name and Bio
           Align(
             alignment: Alignment.centerLeft,
@@ -273,21 +270,68 @@ class _ProfileScreenState extends State<UserProfileScreen> with SingleTickerProv
                     fontSize: 14,
                   ),
                 ),
-                SizedBox(height: 10),
-                Text(
-                  "✨ Living life to the fullest\n🌟 Dream big, work hard\n📍 New York, NY",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    height: 1.3,
+                if (businessName.isNotEmpty) ...[
+                  SizedBox(height: 10),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: lightBlue,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: yellow.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      businessName,
+                      style: TextStyle(
+                        color: yellow,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                ],
+                if (businessSector.isNotEmpty ||
+                    businessLocation.isNotEmpty) ...[
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      if (businessSector.isNotEmpty) ...[
+                        Icon(Icons.business, color: Colors.grey[400], size: 16),
+                        SizedBox(width: 5),
+                        Text(
+                          businessSector,
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                      if (businessSector.isNotEmpty &&
+                          businessLocation.isNotEmpty)
+                        Text(
+                          ' • ',
+                          style: TextStyle(color: Colors.grey[400]),
+                        ),
+                      if (businessLocation.isNotEmpty) ...[
+                        Icon(Icons.location_on,
+                            color: Colors.grey[400], size: 16),
+                        SizedBox(width: 5),
+                        Text(
+                          businessLocation,
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
-          
+
           SizedBox(height: 20),
-          
+
           // Action Buttons
           Row(
             children: [
@@ -340,7 +384,8 @@ class _ProfileScreenState extends State<UserProfileScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildActionButton(String text, IconData icon, VoidCallback onPressed) {
+  Widget _buildActionButton(
+      String text, IconData icon, VoidCallback onPressed) {
     return Container(
       height: 35,
       child: ElevatedButton.icon(
@@ -445,26 +490,119 @@ class _ProfileScreenState extends State<UserProfileScreen> with SingleTickerProv
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Mock image placeholder
-                Container(
-                  color: lightBlue,
-                  child: Icon(
-                    Icons.image,
-                    color: yellow.withOpacity(0.7),
-                    size: 40,
-                  ),
-                ),
-                // Overlay for interaction
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.1),
-                      ],
+                // Display post image if available
+                if (post['mediaUrl'] != null &&
+                    post['mediaUrl'].toString().isNotEmpty)
+                  ClipRRect(
+                    child: Image.network(
+                      post['mediaUrl'],
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: lightBlue,
+                          child: Icon(
+                            Icons.broken_image,
+                            color: yellow.withOpacity(0.7),
+                            size: 40,
+                          ),
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: lightBlue,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(yellow),
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
                     ),
+                  )
+                else
+                  // Placeholder for posts without images
+                  Container(
+                    color: lightBlue,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.text_fields,
+                            color: yellow.withOpacity(0.7),
+                            size: 30,
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            'Text Post',
+                            style: TextStyle(
+                              color: yellow.withOpacity(0.7),
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // Overlay for interaction indicators
+                Positioned(
+                  bottom: 5,
+                  right: 5,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (post['likes'] != null &&
+                          (post['likes'] as List).isNotEmpty)
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.favorite, color: Colors.red, size: 12),
+                              SizedBox(width: 2),
+                              Text(
+                                '${(post['likes'] as List).length}',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        ),
+                      SizedBox(width: 3),
+                      if (post['comments'] != null &&
+                          (post['comments'] as List).isNotEmpty)
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.comment, color: Colors.blue, size: 12),
+                              SizedBox(width: 2),
+                              Text(
+                                '${(post['comments'] as List).length}',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
@@ -518,48 +656,151 @@ class _ProfileScreenState extends State<UserProfileScreen> with SingleTickerProv
           ),
           child: Container(
             padding: EdgeInsets.all(20),
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: lightBlue,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.image,
-                    color: yellow,
-                    size: 60,
-                  ),
+                // Post Header
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: lightBlue,
+                      child: Text(
+                        userName.isNotEmpty ? userName[0].toUpperCase() : '?',
+                        style: TextStyle(
+                            color: yellow, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            userName,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (post['interestTags'] != null &&
+                              (post['interestTags'] as List).isNotEmpty)
+                            Text(
+                              (post['interestTags'] as List).join(', '),
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 12,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 15),
-                Text(
-                  post['caption'] ?? 'No caption',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
+
+                // Post Image or Content
+                if (post['mediaUrl'] != null &&
+                    post['mediaUrl'].toString().isNotEmpty)
+                  Container(
+                    height: 200,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        post['mediaUrl'],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: lightBlue,
+                            child: Icon(
+                              Icons.broken_image,
+                              color: yellow,
+                              size: 60,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    height: 100,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: lightBlue,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.text_fields,
+                        color: yellow,
+                        size: 40,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
+
+                SizedBox(height: 15),
+
+                // Post Content
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    post['content'] ?? 'No content',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
-                SizedBox(height: 20),
+
+                SizedBox(height: 15),
+
+                // Post Stats
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.favorite_border, color: yellow),
+                    Row(
+                      children: [
+                        Icon(Icons.favorite, color: Colors.red, size: 20),
+                        SizedBox(width: 5),
+                        Text(
+                          '${post['likes'] != null ? (post['likes'] as List).length : 0}',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.comment_outlined, color: yellow),
+                    Row(
+                      children: [
+                        Icon(Icons.comment, color: yellow, size: 20),
+                        SizedBox(width: 5),
+                        Text(
+                          '${post['comments'] != null ? (post['comments'] as List).length : 0}',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
                     ),
                     IconButton(
                       onPressed: () {},
                       icon: Icon(Icons.share_outlined, color: yellow),
                     ),
                   ],
+                ),
+
+                SizedBox(height: 10),
+
+                // Close button
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    'Close',
+                    style: TextStyle(color: yellow),
+                  ),
                 ),
               ],
             ),

@@ -241,6 +241,100 @@ Future<void> _handleComment(String commentText) async {
       ],
     );
   }
+  void _showEditCommentDialog(CommentModel comment) {
+  final TextEditingController editController = TextEditingController(text: comment.text);
+  
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Edit Comment'),
+      content: TextField(
+        controller: editController,
+        decoration: const InputDecoration(
+          hintText: 'Edit your comment...',
+          border: OutlineInputBorder(),
+        ),
+        maxLines: 3,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final updatedText = editController.text.trim();
+            if (updatedText.isNotEmpty && comment.id != null) {
+              Navigator.pop(context);
+              await _updateComment(comment.id!, updatedText);
+            }
+          },
+          child: const Text('Update'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showDeleteCommentDialog(CommentModel comment) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Delete Comment'),
+      content: const Text('Are you sure you want to delete this comment?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            if (comment.id != null) {
+              Navigator.pop(context);
+              await _deleteComment(comment.id!);
+            }
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          child: const Text('Delete', style: TextStyle(color: Colors.white)),
+        ),
+      ],
+    ),
+  );
+}
+
+Future<void> _updateComment(String commentId, String updatedText) async {
+  try {
+    final updatedPost = await PostService.updateComment(_currentPost.id, commentId, updatedText);
+    
+    if (updatedPost != null && mounted) {
+      setState(() {
+        _currentPost = updatedPost.copyWith(
+          userFullName: _currentPost.userFullName,
+        );
+      });
+      widget.onPostUpdated?.call(_currentPost);
+    }
+  } catch (e) {
+    _showErrorSnackBar('Failed to update comment: $e');
+  }
+}
+
+Future<void> _deleteComment(String commentId) async {
+  try {
+    final updatedPost = await PostService.deleteComment(_currentPost.id, commentId);
+    
+    if (updatedPost != null && mounted) {
+      setState(() {
+        _currentPost = updatedPost.copyWith(
+          userFullName: _currentPost.userFullName,
+        );
+      });
+      widget.onPostUpdated?.call(_currentPost);
+    }
+  } catch (e) {
+    _showErrorSnackBar('Failed to delete comment: $e');
+  }
+}
 
   Widget _buildPostContent() {
     return Text(
@@ -482,6 +576,8 @@ Future<void> _handleComment(String commentText) async {
         ),
         const SizedBox(height: 8),
         ..._currentPost.comments.take(3).map((comment) {
+          final bool isCurrentUserComment = comment.postedBy == currentUserId;
+          
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Container(
@@ -494,16 +590,59 @@ Future<void> _handleComment(String commentText) async {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    comment.text,
-                    style: const TextStyle(fontSize: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          comment.text,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                      if (isCurrentUserComment)
+                        PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              _showEditCommentDialog(comment);
+                            } else if (value == 'delete') {
+                              _showDeleteCommentDialog(comment);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, size: 16),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete, size: 16, color: Colors.red),
+                                  SizedBox(width: 8),
+                                  Text('Delete', style: TextStyle(color: Colors.red)),
+                                ],
+                              ),
+                            ),
+                          ],
+                          child: Icon(
+                            Icons.more_vert,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        comment.postedBy == currentUserId ? 'You' : 'User',
+                        isCurrentUserComment ? 'You' : 'User',
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey[600],
@@ -527,7 +666,6 @@ Future<void> _handleComment(String commentText) async {
         if (_currentPost.comments.length > 3)
           GestureDetector(
             onTap: () {
-              // UPDATED: Navigate to CommentsScreen instead of debug print
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -611,3 +749,4 @@ Future<void> _handleComment(String commentText) async {
     super.dispose();
   }
 }
+

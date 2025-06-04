@@ -118,6 +118,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
       MaterialPageRoute(
         builder: (context) => ChatScreen(
           recipientUserId: userId,
+          recipientName: fullName,
+          // recipientAvatar: null, // Optional - can be added later
         ),
       ),
     );
@@ -135,7 +137,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Users'),
-        backgroundColor: Colors.blue[600],
+        backgroundColor: const Color(0xFF1E3A8A), // Dark blue
         foregroundColor: Colors.white,
         elevation: 2,
       ),
@@ -189,7 +191,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
                           },
                           child: Text('Retry'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[600],
+                            backgroundColor:
+                                const Color(0xFF1E3A8A), // Dark blue
                             foregroundColor: Colors.white,
                           ),
                         ),
@@ -235,13 +238,15 @@ class _UsersListScreenState extends State<UsersListScreen> {
                                       horizontal: 20, vertical: 8),
                                   leading: CircleAvatar(
                                     radius: 25,
-                                    backgroundColor: Colors.blue[100],
+                                    backgroundColor:
+                                        const Color(0xFFFBBF24), // Yellow
                                     child: Text(
                                       user.fullName.isNotEmpty
                                           ? user.fullName[0].toUpperCase()
                                           : 'U',
                                       style: TextStyle(
-                                        color: Colors.blue[800],
+                                        color: const Color(
+                                            0xFF1E3A8A), // Dark blue
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
                                       ),
@@ -264,7 +269,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
                                   ),
                                   trailing: Icon(
                                     Icons.chat_bubble_outline,
-                                    color: Colors.blue[600],
+                                    color: const Color(0xFF1E3A8A), // Dark blue
                                     size: 20,
                                   ),
                                   onTap: () => navigateToChat(

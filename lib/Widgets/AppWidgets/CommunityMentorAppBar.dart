@@ -3,14 +3,12 @@ import 'package:shakti/Screens/CommunityHome.dart';
 import 'package:shakti/Screens/CreatePost.dart';
 import 'package:shakti/Screens/Mentors.dart';
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/helpers/helper_functions.dart';
 
 class CustomTopBar2 extends StatelessWidget {
   const CustomTopBar2({super.key});
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = THelperFunctions.screenHeight(context);
     return Column(
       children: [
         Container(

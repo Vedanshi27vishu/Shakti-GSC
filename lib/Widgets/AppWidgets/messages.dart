@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shakti/Screens/CommunityHome.dart';
 import 'package:shakti/Screens/Mentors.dart';
 import 'package:shakti/Screens/followers.dart';
-import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/helpers/helper_functions.dart';
 
 class MessageBar extends StatelessWidget {
   final int selectedIndex;
@@ -19,7 +17,6 @@ class MessageBar extends StatelessWidget {
   Widget build(BuildContext context) {
     // Your color palette
     final Color primaryColor = const Color(0xFF1E3A8A); // Dark blue
-    final Color secondaryColor = const Color(0xFFFBBF24); // Yellow
 
     return Container(
       decoration: BoxDecoration(
@@ -47,7 +44,8 @@ class MessageBar extends StatelessWidget {
                   onItemSelected(0);
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => CommunityHomeScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => CommunityHomeScreen()),
                   );
                 },
               ),
@@ -60,7 +58,8 @@ class MessageBar extends StatelessWidget {
                   onItemSelected(1);
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => FollowUsersScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => FollowUsersScreen()),
                   );
                 },
               ),

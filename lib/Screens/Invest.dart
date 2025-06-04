@@ -37,6 +37,11 @@ class _InvestState extends State<Invest> {
       fetchPrivateSchemes(),
       fetchUserLoans(),
     ]);
+    if (mounted) {
+      setState(() {
+        // trigger a general update if needed
+      });
+    }
   }
 
   // Helper method to format currency with comma separation
@@ -178,8 +183,8 @@ class _InvestState extends State<Invest> {
 
   @override
   Widget build(BuildContext context) {
-    double height = THelperFunctions.screenHeight();
-    double width = THelperFunctions.screenWidth();
+    double height = THelperFunctions.screenHeight(context);
+    double width = THelperFunctions.screenWidth(context);
 
     return Scaffold(
       body: Padding(

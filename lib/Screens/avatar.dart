@@ -15,8 +15,8 @@ class AvatarScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double height = THelperFunctions.screenHeight();
-    double width = THelperFunctions.screenWidth();
+    double height = THelperFunctions.screenHeight(context);
+    double width = THelperFunctions.screenWidth(context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -305,8 +305,8 @@ class CircularContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double height = THelperFunctions.screenHeight();
-    double width = THelperFunctions.screenWidth();
+    double height = THelperFunctions.screenHeight(context);
+    double width = THelperFunctions.screenWidth(context);
     return Column(
       children: [
         GestureDetector(

@@ -11,7 +11,7 @@ class CustomTopBar1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = THelperFunctions.screenHeight();
+    double screenHeight = THelperFunctions.screenHeight(context);
     return Column(
       children: [
         SizedBox(
@@ -22,11 +22,13 @@ class CustomTopBar1 extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-                IconButton(
+              IconButton(
                 icon: const Icon(Icons.home, color: Colors.white),
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => CommunityHomeScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CommunityHomeScreen()));
                 },
               ),
               // ElevatedButton(
@@ -52,15 +54,19 @@ class CustomTopBar1 extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.group, color: Colors.white),
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => FollowUsersScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FollowUsersScreen()));
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.add, color: Colors.white),
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => CreatePostScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CreatePostScreen()));
                 },
               ),
               IconButton(

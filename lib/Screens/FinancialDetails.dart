@@ -110,8 +110,8 @@ class _FinancialDetailsState extends State<FinancialDetails> {
 
   @override
   Widget build(BuildContext context) {
-    screenWidth = THelperFunctions.screenWidth();
-    screenHeight = THelperFunctions.screenHeight();
+    screenWidth = THelperFunctions.screenWidth(context);
+    screenHeight = THelperFunctions.screenHeight(context);
 
     return Scaffold(
       backgroundColor: Scolor.primary,

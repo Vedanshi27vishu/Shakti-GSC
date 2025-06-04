@@ -12,8 +12,8 @@ class GovernmentLoansScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double height = THelperFunctions.screenHeight();
-    double width = THelperFunctions.screenWidth();
+    double height = THelperFunctions.screenHeight(context);
+    double width = THelperFunctions.screenWidth(context);
 
     return Scaffold(
       backgroundColor: Scolor.primary,

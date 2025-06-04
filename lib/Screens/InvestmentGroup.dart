@@ -9,29 +9,31 @@ class InvestmentGroupsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth();
-    double screenHeight = THelperFunctions.screenHeight();
+    double screenWidth = THelperFunctions.screenWidth(context);
+    double screenHeight = THelperFunctions.screenHeight(context);
     double padding = screenWidth * 0.04;
     double fontSizeSubtitle = screenWidth * 0.045;
     double fontSizeContent = screenWidth * 0.04;
     double buttonHeight = screenHeight * 0.05;
-    
+
     return Scaffold(
       backgroundColor: Scolor.primary,
       appBar: AppBar(
         backgroundColor: Scolor.primary,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Scolor.secondry, size: screenWidth * 0.06),
+          icon: Icon(Icons.arrow_back,
+              color: Scolor.secondry, size: screenWidth * 0.06),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: padding, vertical: padding / 2),
+        padding:
+            EdgeInsets.symmetric(horizontal: padding, vertical: padding / 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-           ScreenHeadings(text: "Groups-"),
+            ScreenHeadings(text: "Groups-"),
             SizedBox(height: screenHeight * 0.005),
             Yellowline(screenWidth: screenWidth),
             SizedBox(height: screenHeight * 0.015),
@@ -53,7 +55,8 @@ class InvestmentGroupsScreen extends StatelessWidget {
                     margin: EdgeInsets.only(bottom: screenHeight * 0.015),
                     padding: EdgeInsets.all(screenWidth * 0.03),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.amber, width: screenWidth * 0.004),
+                      border: Border.all(
+                          color: Colors.amber, width: screenWidth * 0.004),
                       borderRadius: BorderRadius.circular(screenWidth * 0.025),
                     ),
                     child: Column(
@@ -84,9 +87,11 @@ class InvestmentGroupsScreen extends StatelessWidget {
                                 backgroundColor: Colors.amber,
                                 foregroundColor: Colors.black,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(screenWidth * 0.015),
+                                  borderRadius: BorderRadius.circular(
+                                      screenWidth * 0.015),
                                 ),
-                                minimumSize: Size(screenWidth * 0.35, buttonHeight),
+                                minimumSize:
+                                    Size(screenWidth * 0.35, buttonHeight),
                               ),
                               onPressed: () {},
                               child: const Text("Preview"),
@@ -96,9 +101,11 @@ class InvestmentGroupsScreen extends StatelessWidget {
                                 backgroundColor: Colors.amber,
                                 foregroundColor: Colors.black,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(screenWidth * 0.015),
+                                  borderRadius: BorderRadius.circular(
+                                      screenWidth * 0.015),
                                 ),
-                                minimumSize: Size(screenWidth * 0.35, buttonHeight),
+                                minimumSize:
+                                    Size(screenWidth * 0.35, buttonHeight),
                               ),
                               onPressed: () {},
                               child: const Text("Join"),

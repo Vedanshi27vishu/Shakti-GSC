@@ -10,7 +10,7 @@ class YourBudgetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth();
+    double screenWidth = THelperFunctions.screenWidth(context);
 
     return Scaffold(
       backgroundColor: Scolor.primary, // Dark background
@@ -74,6 +74,3 @@ class YourBudgetScreen extends StatelessWidget {
     );
   }
 }
-
-
-

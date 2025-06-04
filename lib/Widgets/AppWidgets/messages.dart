@@ -3,14 +3,12 @@ import 'package:shakti/Screens/CommunityHome.dart';
 import 'package:shakti/Screens/Mentors.dart';
 import 'package:shakti/Screens/followers.dart';
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/helpers/helper_functions.dart';
 
 class MeesageBar extends StatelessWidget {
   const MeesageBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = THelperFunctions.screenHeight();
     return Column(
       children: [
         Container(
@@ -35,8 +33,10 @@ class MeesageBar extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => FollowUsersScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FollowUsersScreen()));
                 },
                 icon: const Icon(Icons.group, color: Colors.black),
                 label: const Text(

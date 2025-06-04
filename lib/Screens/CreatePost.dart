@@ -139,8 +139,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth();
-    double screenHeight = THelperFunctions.screenHeight();
+    double screenWidth = THelperFunctions.screenWidth(context);
+    double screenHeight = THelperFunctions.screenHeight(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Scolor.primary,

@@ -20,18 +20,31 @@ class _UsersListScreenState extends State<UsersListScreen> {
     fetchUsers();
   }
 
+  @override
+  void dispose() {
+    // Cancel any ongoing operations here if needed
+    super.dispose();
+  }
+
   Future<void> fetchUsers() async {
     try {
+      // Check if widget is still mounted before starting
+      if (!mounted) return;
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString("token");
 
       if (token == null) {
+        if (!mounted) return;
         setState(() {
           errorMessage = 'Authentication token not found. Please login again.';
           isLoading = false;
         });
         return;
       }
+
+      // Check mounted state before making network request
+      if (!mounted) return;
 
       final response = await http.get(
         Uri.parse(
@@ -41,6 +54,9 @@ class _UsersListScreenState extends State<UsersListScreen> {
           'Authorization': 'Bearer $token',
         },
       );
+
+      // Always check mounted state after async operations
+      if (!mounted) return;
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -62,22 +78,30 @@ class _UsersListScreenState extends State<UsersListScreen> {
           }
         }
 
+        // Final check before setState
+        if (!mounted) return;
+        
         setState(() {
           users = allUsers;
           isLoading = false;
+          errorMessage = ''; // Clear any previous errors
         });
       } else if (response.statusCode == 401) {
+        if (!mounted) return;
         setState(() {
           errorMessage = 'Authentication failed. Please login again.';
           isLoading = false;
         });
       } else {
+        if (!mounted) return;
         setState(() {
           errorMessage = 'Failed to load users (${response.statusCode})';
           isLoading = false;
         });
       }
     } catch (e) {
+      // Always check mounted state in catch block
+      if (!mounted) return;
       setState(() {
         errorMessage = 'Error: $e';
         isLoading = false;
@@ -86,6 +110,9 @@ class _UsersListScreenState extends State<UsersListScreen> {
   }
 
   void navigateToChat(String userId, String fullName) {
+    // Check if widget is still mounted before navigation
+    if (!mounted) return;
+    
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -94,6 +121,13 @@ class _UsersListScreenState extends State<UsersListScreen> {
         ),
       ),
     );
+  }
+
+  // Safe setState wrapper
+  void safeSetState(VoidCallback fn) {
+    if (mounted) {
+      setState(fn);
+    }
   }
 
   @override
@@ -146,7 +180,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
                         SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            setState(() {
+                            if (!mounted) return;
+                            safeSetState(() {
                               isLoading = true;
                               errorMessage = '';
                             });

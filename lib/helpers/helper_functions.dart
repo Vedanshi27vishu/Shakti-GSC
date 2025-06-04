@@ -68,27 +68,30 @@ class THelperFunctions {
 
   /// Truncate text if it exceeds a given length
   static String truncateText(String text, int maxLength) {
-    return text.length <= maxLength ? text : '${text.substring(0, maxLength)}...';
+    return text.length <= maxLength
+        ? text
+        : '${text.substring(0, maxLength)}...';
   }
 
   /// Check if the current theme mode is dark
   static bool isDarkMode() {
-    return Get.context != null && Theme.of(Get.context!).brightness == Brightness.dark;
+    return Get.context != null &&
+        Theme.of(Get.context!).brightness == Brightness.dark;
   }
 
-  /// Get screen size using GetX context
-  static Size screenSize() {
-    return Get.context != null ? MediaQuery.of(Get.context!).size : const Size(0, 0);
+  /// Get screen size using BuildContext
+  static Size screenSize(BuildContext context) {
+    return MediaQuery.of(context).size;
   }
 
-  /// Get screen width using GetX
-  static double screenWidth() {
-    return screenSize().width;
+  /// Get screen width using BuildContext
+  static double screenWidth(BuildContext context) {
+    return screenSize(context).width;
   }
 
-  /// Get screen height using GetX
-  static double screenHeight() {
-    return screenSize().height;
+  /// Get screen height using BuildContext
+  static double screenHeight(BuildContext context) {
+    return screenSize(context).height;
   }
 
   /// Remove duplicates from a list

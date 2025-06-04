@@ -3,14 +3,12 @@ import 'package:shakti/Screens/CommunityHome.dart';
 import 'package:shakti/Screens/CreatePost.dart';
 import 'package:shakti/Screens/Mentors.dart';
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/helpers/helper_functions.dart';
 
 class CustomTopBar3 extends StatelessWidget {
   const CustomTopBar3({super.key});
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = THelperFunctions.screenHeight();
     return Column(
       children: [
         Container(
@@ -30,8 +28,10 @@ class CustomTopBar3 extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.group, color: Colors.white),
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => FollowUsersScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FollowUsersScreen()));
                 },
               ),
               ElevatedButton.icon(

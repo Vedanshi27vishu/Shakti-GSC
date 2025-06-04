@@ -130,8 +130,8 @@ class _BusinessDetailsState extends State<BusinessDetails> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth();
-    double screenHeight = THelperFunctions.screenHeight();
+    double screenWidth = THelperFunctions.screenWidth(context);
+    double screenHeight = THelperFunctions.screenHeight(context);
 
     return Scaffold(
       backgroundColor: Scolor.primary,

@@ -10,7 +10,7 @@ class CustomTopBar2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = THelperFunctions.screenHeight();
+    double screenHeight = THelperFunctions.screenHeight(context);
     return Column(
       children: [
         Container(
@@ -35,8 +35,10 @@ class CustomTopBar2 extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => FollowUsersScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FollowUsersScreen()));
                 },
                 icon: const Icon(Icons.group, color: Colors.black),
                 label: const Text(

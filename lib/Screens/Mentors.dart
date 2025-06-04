@@ -45,7 +45,8 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
 
       // Updated to use localhost API for followers/following counts
       final response = await http.get(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/user/all-users'),
+        Uri.parse(
+            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/user/all-users'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -65,6 +66,8 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
         throw Exception('Failed to load users');
       }
     } catch (e) {
+      if (!mounted) return; // skip if widget is disposed
+
       setState(() {
         isLoading = false;
       });
@@ -79,9 +82,10 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       if (authToken == null) {
         throw Exception('No auth token found');
       }
-      
+
       final response = await http.get(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/followers-following'),
+        Uri.parse(
+            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/followers-following'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -108,9 +112,10 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       if (authToken == null) {
         throw Exception('No auth token found');
       }
-      
+
       final response = await http.put(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/F/$userId'),
+        Uri.parse(
+            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/F/$userId'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -127,9 +132,11 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
               followersCount: allUsers[userIndex].followersCount + 1,
             );
             // Update filtered users as well
-            final filteredIndex = filteredUsers.indexWhere((user) => user.id == userId);
+            final filteredIndex =
+                filteredUsers.indexWhere((user) => user.id == userId);
             if (filteredIndex != -1) {
-              filteredUsers[filteredIndex] = filteredUsers[filteredIndex].copyWith(
+              filteredUsers[filteredIndex] =
+                  filteredUsers[filteredIndex].copyWith(
                 followersCount: filteredUsers[filteredIndex].followersCount + 1,
               );
             }
@@ -151,9 +158,10 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       if (authToken == null) {
         throw Exception('No auth token found');
       }
-      
+
       final response = await http.put(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/U/$userId'),
+        Uri.parse(
+            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/U/$userId'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -170,9 +178,11 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
               followersCount: allUsers[userIndex].followersCount - 1,
             );
             // Update filtered users as well
-            final filteredIndex = filteredUsers.indexWhere((user) => user.id == userId);
+            final filteredIndex =
+                filteredUsers.indexWhere((user) => user.id == userId);
             if (filteredIndex != -1) {
-              filteredUsers[filteredIndex] = filteredUsers[filteredIndex].copyWith(
+              filteredUsers[filteredIndex] =
+                  filteredUsers[filteredIndex].copyWith(
                 followersCount: filteredUsers[filteredIndex].followersCount - 1,
               );
             }
@@ -195,7 +205,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       } else {
         filteredUsers = allUsers.where((user) {
           return user.email.toLowerCase().contains(query.toLowerCase()) ||
-                 user.fullName.toLowerCase().contains(query.toLowerCase());
+              user.fullName.toLowerCase().contains(query.toLowerCase());
         }).toList();
       }
     });
@@ -229,8 +239,8 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth();
-    double screenHeight = THelperFunctions.screenHeight();
+    double screenWidth = THelperFunctions.screenWidth(context);
+    double screenHeight = THelperFunctions.screenHeight(context);
 
     return Scaffold(
       backgroundColor: Scolor.primary,
@@ -259,7 +269,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
             SizedBox(height: screenHeight * 0.015),
             Center(child: ScreenHeadings(text: "Connect with Users")),
             SizedBox(height: screenHeight * 0.02),
-            
+
             // Search Bar
             Container(
               decoration: BoxDecoration(
@@ -292,9 +302,9 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
                 ),
               ),
             ),
-            
+
             SizedBox(height: screenHeight * 0.02),
-            
+
             // Users Count
             Padding(
               padding: EdgeInsets.only(bottom: screenHeight * 0.01),
@@ -306,13 +316,14 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
                 ),
               ),
             ),
-            
+
             // Users List
             Expanded(
               child: isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Scolor.secondry),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Scolor.secondry),
                       ),
                     )
                   : filteredUsers.isEmpty
@@ -327,7 +338,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
                               ),
                               SizedBox(height: screenHeight * 0.02),
                               Text(
-                                searchQuery.isEmpty 
+                                searchQuery.isEmpty
                                     ? 'No users available'
                                     : 'No users match your search',
                                 style: TextStyle(
@@ -347,8 +358,9 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
                             itemCount: filteredUsers.length,
                             itemBuilder: (context, index) {
                               final user = filteredUsers[index];
-                              final isFollowing = followingIds.contains(user.id);
-                              
+                              final isFollowing =
+                                  followingIds.contains(user.id);
+
                               return UserCard(
                                 user: user,
                                 isFollowing: isFollowing,
@@ -408,7 +420,9 @@ class UserCard extends StatelessWidget {
                 backgroundColor: Scolor.secondry,
                 radius: screenWidth * 0.06,
                 child: Text(
-                  user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?',
+                  user.fullName.isNotEmpty
+                      ? user.fullName[0].toUpperCase()
+                      : '?',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: screenWidth * 0.05,
@@ -464,7 +478,7 @@ class UserCard extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // Followers and Following Count Row
           SizedBox(height: screenHeight * 0.01),
           Row(
@@ -484,13 +498,14 @@ class UserCard extends StatelessWidget {
               ),
             ],
           ),
-          
+
           SizedBox(height: screenHeight * 0.015),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: isFollowing ? Colors.grey[700] : Scolor.secondry,
+                backgroundColor:
+                    isFollowing ? Colors.grey[700] : Scolor.secondry,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(screenWidth * 0.02),
                 ),

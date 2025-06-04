@@ -150,8 +150,8 @@ class _OTPScreenState extends State<OTPScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth();
-    double screenHeight = THelperFunctions.screenHeight();
+    double screenWidth = THelperFunctions.screenWidth(context);
+    double screenHeight = THelperFunctions.screenHeight(context);
     return Scaffold(
       backgroundColor: const Color(0xFF1E3A5F),
       body: SafeArea(

@@ -9,8 +9,8 @@ class InvestmentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth();
-    double screenHeight = THelperFunctions.screenHeight();
+    double screenWidth = THelperFunctions.screenWidth(context);
+    double screenHeight = THelperFunctions.screenHeight(context);
 
     return Scaffold(
       backgroundColor: Scolor.primary,
@@ -25,14 +25,14 @@ class InvestmentScreen extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.04,
-        //  vertical: screenHeight * 0.02,
+          //  vertical: screenHeight * 0.02,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          const ScreenHeadings(text: "Invest-"),
+            const ScreenHeadings(text: "Invest-"),
             SizedBox(height: screenHeight * 0.005),
-           Yellowline(screenWidth: screenWidth),
+            Yellowline(screenWidth: screenWidth),
             SizedBox(height: screenHeight * 0.02),
             Expanded(
               child: ListView.builder(

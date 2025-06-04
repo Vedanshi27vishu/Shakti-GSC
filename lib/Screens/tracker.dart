@@ -58,17 +58,16 @@ class _TrackerScreenState extends State<TrackerScreen> {
     loadData();
   }
 
-  // Method to load data from API
   Future<void> loadData() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
+
       final response = await http.get(
         Uri.parse(
             'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/profits/last-6-months'),
         headers: {
           'Content-Type': 'application/json',
-          // Add any additional headers if required by your API
           'Authorization': 'Bearer $token',
         },
       );
@@ -76,24 +75,23 @@ class _TrackerScreenState extends State<TrackerScreen> {
       if (response.statusCode == 200) {
         final apiResponse = ApiResponse.fromJson(json.decode(response.body));
         processApiData(apiResponse.last6MonthsProfits);
+      } else if (response.statusCode == 403) {
+        print('403 Forbidden: Falling back to zero data...');
+        useZeroFallbackData();
       } else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
     } catch (e) {
-      // Handle error - show error message and use fallback data
       print('Error loading data: $e');
-
-      // Show error snackbar
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load data: $e'),
+            content: const Text('Failed to load data. Showing fallback.'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
         );
       }
-
       useFallbackData();
     }
 
@@ -102,7 +100,6 @@ class _TrackerScreenState extends State<TrackerScreen> {
     });
   }
 
-  // Add refresh functionality
   Future<void> refreshData() async {
     setState(() {
       isLoading = true;
@@ -114,7 +111,6 @@ class _TrackerScreenState extends State<TrackerScreen> {
     chartData.clear();
     months.clear();
 
-    // Find the maximum profit value to set appropriate maxY
     double maxProfit = 0;
     for (var data in profitData) {
       if (data.profit > maxProfit) {
@@ -122,19 +118,15 @@ class _TrackerScreenState extends State<TrackerScreen> {
       }
     }
 
-    // Set maxY with some padding (20% more than max value)
     maxY = maxProfit * 1.2;
 
-    // Convert profit data to chart data
     for (int i = 0; i < profitData.length; i++) {
       chartData.add(FlSpot(i.toDouble(), profitData[i].profit));
-      // Extract month abbreviation (first 3 characters)
       months.add(profitData[i].monthName.substring(0, 3));
     }
   }
 
   void useFallbackData() {
-    // Fallback to original sample data
     chartData = [
       const FlSpot(0, 650),
       const FlSpot(1, 1300),
@@ -147,19 +139,28 @@ class _TrackerScreenState extends State<TrackerScreen> {
     maxY = 3000;
   }
 
+  void useZeroFallbackData() {
+    chartData = [
+      const FlSpot(0, 0),
+      const FlSpot(1, 0),
+      const FlSpot(2, 0),
+      const FlSpot(3, 0),
+      const FlSpot(4, 0),
+      const FlSpot(5, 0),
+    ];
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June'];
+    maxY = 100;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Scolor.primary, // Dark blue background
+      backgroundColor: Scolor.primary,
       appBar: AppBar(
         backgroundColor: Scolor.primary,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Scolor.secondry,
-            size: 24,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Scolor.secondry, size: 24),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -172,10 +173,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.refresh,
-              color: Scolor.white,
-            ),
+            icon: const Icon(Icons.refresh, color: Scolor.white),
             onPressed: refreshData,
           ),
         ],
@@ -183,7 +181,6 @@ class _TrackerScreenState extends State<TrackerScreen> {
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          // Title Section
           const Text(
             'Track Your Growth',
             style: TextStyle(
@@ -204,19 +201,18 @@ class _TrackerScreenState extends State<TrackerScreen> {
             ),
           ),
           const SizedBox(height: 40),
-
-          // Chart Section
           Expanded(
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                  color: const Color(0xFF34495E).withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFF34495E),
-                    width: 1,
-                  )),
+                color: const Color(0xFF34495E).withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFF34495E),
+                  width: 1,
+                ),
+              ),
               child: isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
@@ -225,138 +221,126 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     )
                   : LineChart(
                       LineChartData(
-                          backgroundColor: Colors.transparent,
-                          gridData: FlGridData(
-                            show: true,
-                            drawVerticalLine: true,
-                            drawHorizontalLine: true,
-                            horizontalInterval:
-                                maxY / 5, // Dynamic interval based on data
-                            verticalInterval: 1,
-                            getDrawingHorizontalLine: (value) {
-                              return const FlLine(
-                                color: Color(0xFF34495E),
-                                strokeWidth: 1,
-                              );
-                            },
-                            getDrawingVerticalLine: (value) {
-                              return const FlLine(
-                                color: Color(0xFF34495E),
-                                strokeWidth: 1,
-                              );
-                            },
+                        backgroundColor: Colors.transparent,
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: true,
+                          drawHorizontalLine: true,
+                          horizontalInterval: maxY / 5,
+                          verticalInterval: 1,
+                          getDrawingHorizontalLine: (_) => const FlLine(
+                            color: Color(0xFF34495E),
+                            strokeWidth: 1,
                           ),
-                          titlesData: FlTitlesData(
-                            show: true,
-                            rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                                interval: 1,
-                                getTitlesWidget:
-                                    (double value, TitleMeta meta) {
-                                  if (value.toInt() >= 0 &&
-                                      value.toInt() < months.length) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Text(
-                                        months[value.toInt()],
-                                        style: const TextStyle(
-                                          color: Scolor.white,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                          getDrawingVerticalLine: (_) => const FlLine(
+                            color: Color(0xFF34495E),
+                            strokeWidth: 1,
+                          ),
+                        ),
+                        titlesData: FlTitlesData(
+                          show: true,
+                          rightTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
+                          topTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 30,
+                              interval: 1,
+                              getTitlesWidget: (double value, TitleMeta meta) {
+                                if (value.toInt() >= 0 &&
+                                    value.toInt() < months.length) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text(
+                                      months[value.toInt()],
+                                      style: const TextStyle(
+                                        color: Scolor.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                    );
-                                  }
-                                  return const Text('');
-                                },
-                              ),
-                            ),
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                interval: maxY / 5, // Dynamic interval
-                                reservedSize:
-                                    80, // Increased to accommodate larger numbers
-                                getTitlesWidget:
-                                    (double value, TitleMeta meta) {
-                                  // Format large numbers (e.g., 1M, 1K)
-                                  String formattedValue;
-                                  if (value >= 1000000) {
-                                    formattedValue =
-                                        '${(value / 1000000).toStringAsFixed(1)}M';
-                                  } else if (value >= 1000) {
-                                    formattedValue =
-                                        '${(value / 1000).toStringAsFixed(0)}K';
-                                  } else {
-                                    formattedValue = value.toInt().toString();
-                                  }
-
-                                  return Text(
-                                    formattedValue,
-                                    style: const TextStyle(
-                                      color: Scolor.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
                                     ),
                                   );
-                                },
-                              ),
+                                }
+                                return const Text('');
+                              },
                             ),
                           ),
-                          borderData: FlBorderData(
-                            show: false,
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              interval: maxY / 5,
+                              reservedSize: 80,
+                              getTitlesWidget: (double value, TitleMeta meta) {
+                                String formattedValue;
+                                if (value >= 1000000) {
+                                  formattedValue =
+                                      '${(value / 1000000).toStringAsFixed(1)}M';
+                                } else if (value >= 1000) {
+                                  formattedValue =
+                                      '${(value / 1000).toStringAsFixed(0)}K';
+                                } else {
+                                  formattedValue = value.toInt().toString();
+                                }
+
+                                return Text(
+                                  formattedValue,
+                                  style: const TextStyle(
+                                    color: Scolor.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                          minX: 0,
-                          maxX: (chartData.length - 1).toDouble(),
-                          minY: 0,
-                          maxY: maxY,
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: chartData,
-                              isCurved: true,
-                              gradient: const LinearGradient(
+                        ),
+                        borderData: FlBorderData(show: false),
+                        minX: 0,
+                        maxX: (chartData.length - 1).toDouble(),
+                        minY: 0,
+                        maxY: maxY,
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: chartData,
+                            isCurved: true,
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color.fromARGB(255, 245, 194, 7),
+                                Scolor.secondry,
+                              ],
+                            ),
+                            barWidth: 3,
+                            isStrokeCapRound: true,
+                            dotData: FlDotData(
+                              show: true,
+                              getDotPainter: (spot, percent, barData, index) {
+                                return FlDotCirclePainter(
+                                  radius: 4,
+                                  color: Scolor.secondry,
+                                  strokeWidth: 2,
+                                  strokeColor: Scolor.white,
+                                );
+                              },
+                            ),
+                            belowBarData: BarAreaData(
+                              show: true,
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
                                 colors: [
-                                  Color.fromARGB(255, 245, 194, 7),
-                                  Scolor.secondry,
+                                  const Color.fromARGB(255, 245, 194, 7)
+                                      .withOpacity(0.3),
+                                  const Color.fromARGB(255, 245, 194, 7)
+                                      .withOpacity(0.1),
+                                  Colors.transparent,
                                 ],
                               ),
-                              barWidth: 3,
-                              isStrokeCapRound: true,
-                              dotData: FlDotData(
-                                show: true,
-                                getDotPainter: (spot, percent, barData, index) {
-                                  return FlDotCirclePainter(
-                                    radius: 4,
-                                    color: Scolor.secondry,
-                                    strokeWidth: 2,
-                                    strokeColor: Scolor.white,
-                                  );
-                                },
-                              ),
-                              belowBarData: BarAreaData(
-                                show: true,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    const Color.fromARGB(255, 245, 194, 7)
-                                        .withOpacity(0.3),
-                                    const Color.fromARGB(255, 245, 194, 7)
-                                        .withOpacity(0.1),
-                                    Colors.transparent,
-                                  ],
-                                ),
-                              ),
                             ),
-                          ]),
+                          ),
+                        ],
+                      ),
                     ),
             ),
           ),

@@ -10,8 +10,8 @@ class FinancialFlowChartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth();
-    double screenHeight = THelperFunctions.screenHeight();
+    double screenWidth = THelperFunctions.screenWidth(context);
+    double screenHeight = THelperFunctions.screenHeight(context);
     return Scaffold(
       backgroundColor: Scolor.primary,
       appBar: AppBar(
@@ -27,11 +27,11 @@ class FinancialFlowChartScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-             const ScreenHeadings(text: "Financial Process FlowChart-"),
+              const ScreenHeadings(text: "Financial Process FlowChart-"),
               SizedBox(height: screenHeight * 0.01),
               Yellowline(screenWidth: screenWidth),
               SizedBox(height: screenHeight * 0.01),
-          
+
               // FLOWCHART
               Column(
                 children: [
@@ -46,7 +46,8 @@ class FinancialFlowChartScreen extends StatelessWidget {
                   connector(),
                   flowChartNode("Create Emergency Fund"),
                   connector(),
-                  flowChartNode("Analyze Cash Flow\n(Track Spending, Save More)"),
+                  flowChartNode(
+                      "Analyze Cash Flow\n(Track Spending, Save More)"),
                   connector(),
                   flowChartNode(
                       "Develop Investment Strategy\n(Risk Tolerance, Diversification)"),

@@ -30,7 +30,6 @@ android {
 
     buildTypes {
         release {
-<<<<<<< HEAD
             // Change this when you add your keystore
             signingConfig signingConfigs.debug
 
@@ -38,14 +37,6 @@ android {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-=======
-            signingConfig = signingConfigs.debug // ⚠️ Change this if you use real signing
-            minifyEnabled false                 // ✅ Prevents code obfuscation issues
-            shrinkResources false               // ✅ Prevents resource removal
-            proguardFiles getDefaultProguardFile(
-                'proguard-android-optimize.txt'
-            ), 'proguard-rules.pro'
->>>>>>> origin/aikansh
         }
     }
 }

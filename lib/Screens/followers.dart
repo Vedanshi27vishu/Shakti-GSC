@@ -90,7 +90,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => ChatScreen(
-          recipientUserId: userId,
+           recipientUserId: userId,
           recipientName: fullName,
           // recipientAvatar: null, // Optional - can be added later
         ),

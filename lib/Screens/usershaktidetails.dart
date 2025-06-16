@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shakti/Screens/razorpay.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'dart:convert';
 
@@ -583,6 +584,7 @@ Widget _buildEditTextField(String label, TextEditingController controller, {bool
                     fontSize: 16,
                   ),
                 ),
+                
               ],
             ),
           ),
@@ -594,7 +596,22 @@ Widget _buildEditTextField(String label, TextEditingController controller, {bool
           //   },
           //   icon: Icon(Icons.edit, color: Color(0xFFFFC107)),
           // ),
+          IconButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => RazorpayPaymentScreen()),
+            );
+          },
+          icon: Icon(
+            Icons.workspace_premium, // or use Icons.currency_rupee
+            color: Color(0xFFFFC107),
+            size: 30,
+          ),
+          tooltip: "Upgrade / Pay Now",
+        ),
         ],
+        
       ),
     );
   }

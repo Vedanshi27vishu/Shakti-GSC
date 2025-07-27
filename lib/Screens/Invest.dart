@@ -30,28 +30,21 @@ class _InvestState extends State<Invest> {
     _loadData();
   }
 
-  // Combined method to load all data
   Future<void> _loadData() async {
     await Future.wait([
       fetchRecommendedLoans(),
       fetchPrivateSchemes(),
       fetchUserLoans(),
     ]);
-    if (mounted) {
-      setState(() {
-        // trigger a general update if needed
-      });
-    }
+    if (!mounted) return;
+    setState(() {}); // trigger general UI update if needed
   }
 
-  // Helper method to format currency with comma separation
   String _formatCurrency(double amount) {
     String amountStr = amount.toInt().toString();
-
     if (amountStr.length > 3) {
       String result = '';
       int count = 0;
-
       for (int i = amountStr.length - 1; i >= 0; i--) {
         if (count == 3 || (count > 3 && (count - 3) % 2 == 0)) {
           result = ',$result';
@@ -65,6 +58,7 @@ class _InvestState extends State<Invest> {
   }
 
   Future<void> fetchRecommendedLoans() async {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
       error = null;
@@ -73,13 +67,9 @@ class _InvestState extends State<Invest> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? token = prefs.getString('token');
+      if (token == null) throw Exception('No authentication token found');
 
-      if (token == null) {
-        throw Exception('No authentication token found');
-      }
-
-      final url = Uri.parse(
-          'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/filter-loans');
+      final url = Uri.parse('http://13.233.25.114:5000/filter-loans');
 
       final response = await http.post(
         url,
@@ -91,6 +81,7 @@ class _InvestState extends State<Invest> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        if (!mounted) return;
         setState(() {
           recommendedLoans = data['recommendedLoans'] ?? [];
         });
@@ -98,10 +89,12 @@ class _InvestState extends State<Invest> {
         throw Exception('Failed to fetch loans: ${response.statusCode}');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         error = 'Error fetching recommended loans: $e';
       });
     } finally {
+      if (!mounted) return;
       setState(() => isLoading = false);
     }
   }
@@ -110,13 +103,9 @@ class _InvestState extends State<Invest> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? token = prefs.getString('token');
+      if (token == null) throw Exception('No authentication token found');
 
-      if (token == null) {
-        throw Exception('No authentication token found');
-      }
-
-      final url = Uri.parse(
-          'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/private-schemes');
+      final url = Uri.parse('http://13.233.25.114:5000/private-schemes');
 
       final response = await http.post(
         url,
@@ -128,6 +117,7 @@ class _InvestState extends State<Invest> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        if (!mounted) return;
         setState(() {
           privateSchemes = data['recommendedLoans'] ?? [];
         });
@@ -136,6 +126,7 @@ class _InvestState extends State<Invest> {
             'Failed to fetch private schemes: ${response.statusCode}');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         error = 'Error fetching private schemes: $e';
       });
@@ -146,13 +137,9 @@ class _InvestState extends State<Invest> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? token = prefs.getString('token');
+      if (token == null) throw Exception('No authentication token found');
 
-      if (token == null) {
-        throw Exception('No authentication token found');
-      }
-
-      final url = Uri.parse(
-          'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/financial/loans');
+      final url = Uri.parse('http://13.233.25.114:5000/api/financial/loans');
 
       final response = await http.get(
         url,
@@ -164,6 +151,7 @@ class _InvestState extends State<Invest> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        if (!mounted) return;
         setState(() {
           userLoans = data['loans'] ?? [];
           totalRemainingLoanAmount =
@@ -175,6 +163,7 @@ class _InvestState extends State<Invest> {
         throw Exception('Failed to fetch user loans: ${response.statusCode}');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         error = 'Error fetching user loans: $e';
       });

@@ -52,58 +52,58 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     }
   }
 
+  void _createTask() async {
+    if (_formKey.currentState!.validate() &&
+        _startDate != null &&
+        _endDate != null) {
+      final url = Uri.parse('http://13.233.25.114:5000/tasks/create');
 
-void _createTask() async {
-  if (_formKey.currentState!.validate() && _startDate != null && _endDate != null) {
-    final url = Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/tasks/create');
+      // 🔐 Get the token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('token');
 
-    // 🔐 Get the token from SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("🔐 Token not found. Please login again.")),
+        );
+        return;
+      }
 
-    if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("🔐 Token not found. Please login again.")),
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'title': _titleController.text,
+          'description': _descriptionController.text,
+          'startDate': DateFormat('yyyy-MM-dd').format(_startDate!),
+          'endDate': DateFormat('yyyy-MM-dd').format(_endDate!),
+          'priority': _priority,
+        }),
       );
-      return;
-    }
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: json.encode({
-        'title': _titleController.text,
-        'description': _descriptionController.text,
-        'startDate': DateFormat('yyyy-MM-dd').format(_startDate!),
-        'endDate': DateFormat('yyyy-MM-dd').format(_endDate!),
-        'priority': _priority,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      // ✅ Task creation successful
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("✅ Task Created Successfully")),
-      );
-      Navigator.pop(context);
+      if (response.statusCode == 201) {
+        // ✅ Task creation successful
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("✅ Task Created Successfully")),
+        );
+        Navigator.pop(context);
+      } else {
+        // ❌ Handle failure
+        final res = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ Failed: ${res['message']}")),
+        );
+      }
     } else {
-      // ❌ Handle failure
-      final res = json.decode(response.body);
+      // ⚠️ Validation failed
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Failed: ${res['message']}")),
+        SnackBar(content: Text("❗ Please fill all fields")),
       );
     }
-  } else {
-    // ⚠️ Validation failed
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("❗ Please fill all fields")),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -130,9 +130,11 @@ void _createTask() async {
               SizedBox(height: 16),
               buildInput("Description", _descriptionController, maxLines: 3),
               SizedBox(height: 16),
-              buildDatePicker("Start Date", _startDate, () => _pickDate(context, true)),
+              buildDatePicker(
+                  "Start Date", _startDate, () => _pickDate(context, true)),
               SizedBox(height: 16),
-              buildDatePicker("End Date", _endDate, () => _pickDate(context, false)),
+              buildDatePicker(
+                  "End Date", _endDate, () => _pickDate(context, false)),
               SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _priority,
@@ -142,12 +144,14 @@ void _createTask() async {
                   fillColor: Color(0xFF1E1E2F),
                   labelText: 'Priority',
                   labelStyle: TextStyle(color: Colors.white),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 items: ['Low', 'Medium', 'High']
                     .map((level) => DropdownMenuItem(
                           value: level,
-                          child: Text(level, style: TextStyle(color: Colors.white)),
+                          child: Text(level,
+                              style: TextStyle(color: Colors.white)),
                         ))
                     .toList(),
                 onChanged: (value) {
@@ -163,7 +167,8 @@ void _createTask() async {
     );
   }
 
-  Widget buildInput(String label, TextEditingController controller, {int maxLines = 1}) {
+  Widget buildInput(String label, TextEditingController controller,
+      {int maxLines = 1}) {
     return TextFormField(
       controller: controller,
       style: TextStyle(color: Colors.white),

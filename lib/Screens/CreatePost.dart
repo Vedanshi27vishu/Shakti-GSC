@@ -100,8 +100,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
 
     final response = await http.post(
-      Uri.parse(
-          "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/post/create"),
+      Uri.parse("http://13.233.25.114:5000/api/post/create"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

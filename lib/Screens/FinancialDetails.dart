@@ -56,7 +56,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     }
 
     final url = Uri.parse(
-        "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup2");
+        "http://13.233.25.114:5000/api/signup/signup2");
 
     final loanList = loanControllers.map((loan) {
       return {

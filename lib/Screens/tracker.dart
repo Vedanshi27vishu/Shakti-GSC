@@ -64,8 +64,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/profits/last-6-months'),
+        Uri.parse('http://13.233.25.114:5000/api/profits/last-6-months'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

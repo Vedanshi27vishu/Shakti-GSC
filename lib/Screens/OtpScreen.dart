@@ -21,8 +21,7 @@ class _OTPScreenState extends State<OTPScreen> {
   bool _isResending = false;
   String _enteredOtp = '';
 
-  final String baseUrl =
-      'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/auth';
+  final String baseUrl = 'http://13.233.25.114:5000/api/auth';
 
   Future<void> _verifyOtp() async {
     if (_enteredOtp.length != 6) return;

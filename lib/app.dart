@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:shakti/Screens/Start.dart';
+import 'package:shakti/Screens/splash_Screen.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 
 class MyApp extends StatelessWidget {
@@ -12,6 +12,6 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
         theme: ThemeData(scaffoldBackgroundColor: Scolor.primary),
         debugShowCheckedModeBanner: false,
-        home: StartScreen());
+        home: SplashScreen());
   }
 }

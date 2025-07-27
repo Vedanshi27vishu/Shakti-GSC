@@ -29,7 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
     serverClientId:
         '701319090890-5ptlmu3ogiej1lneklmsh72n4d4im2uu.apps.googleusercontent.com',
   );
-
   bool isGoogleLoading = false;
 
   Future<void> _handleGoogleSignIn() async {
@@ -66,8 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Send idToken to your backend API for verification
       final response = await http.post(
-        Uri.parse(
-            "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/auth/google"),
+        Uri.parse("http://13.233.25.114:5000/api/auth/google"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"idToken": idToken}),
       );
@@ -102,8 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  final String loginUrl =
-      "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/auth/login";
+  final String loginUrl = "http://13.233.25.114:5000/api/auth/login";
 
   Future<void> loginUser() async {
     final email = emailController.text.trim();

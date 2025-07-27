@@ -36,7 +36,7 @@ class _FinanceState extends State<Finance> {
     setState(() => isLoading = true);
     final formattedDate = DateFormat('yyyy-MM-dd').format(date);
     final url = Uri.parse(
-        'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/tasks/filter?date=$formattedDate');
+        'http://13.233.25.114:5000/tasks/filter?date=$formattedDate');
 
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('token');
@@ -74,7 +74,7 @@ class _FinanceState extends State<Finance> {
     final String? token = prefs.getString('token');
 
     final url = Uri.parse(
-        'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/predict-profit');
+        'http://13.233.25.114:5000/predict-profit');
 
     try {
       final response = await http.get(

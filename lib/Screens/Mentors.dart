@@ -45,8 +45,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
 
       // Updated to use localhost API for followers/following counts
       final response = await http.get(
-        Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/user/all-users'),
+        Uri.parse('http://13.233.25.114:5000/user/all-users'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -84,8 +83,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       }
 
       final response = await http.get(
-        Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/followers-following'),
+        Uri.parse('http://13.233.25.114:5000/api/follow/followers-following'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -114,8 +112,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       }
 
       final response = await http.put(
-        Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/F/$userId'),
+        Uri.parse('http://13.233.25.114:5000/api/follow/F/$userId'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -160,8 +157,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       }
 
       final response = await http.put(
-        Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/U/$userId'),
+        Uri.parse('http://13.233.25.114:5000/api/follow/U/$userId'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',

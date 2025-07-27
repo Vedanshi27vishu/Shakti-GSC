@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/ScreenHeadings.dart';
 import 'package:shakti/Widgets/AppWidgets/YellowLine.dart';
-import 'package:shakti/Widgets/ScreenWidgets/progresscontent.dart';
 import 'package:shakti/helpers/helper_functions.dart';
 
 class YourProgressScreen extends StatelessWidget {
-  const YourProgressScreen({super.key});
+  final List<Map<String, dynamic>> progressData;
+
+  const YourProgressScreen({
+    super.key,
+    this.progressData = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = THelperFunctions.screenWidth(context);
 
     return Scaffold(
-      backgroundColor: Scolor.primary, // Dark background
+      backgroundColor: Scolor.primary,
       appBar: AppBar(
         backgroundColor: Scolor.primary,
         elevation: 0,
@@ -28,48 +32,88 @@ class YourProgressScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title Row with Icon
               Row(
                 children: [
                   Image.asset(
                     "assets/Progress.png",
-                    height: 24, // Adjust height as needed
-                    width: 24, // Adjust width as needed
+                    height: 24,
+                    width: 24,
                   ),
                   const SizedBox(width: 10),
                   ScreenHeadings(text: "Your Progress"),
                 ],
               ),
-
               const SizedBox(height: 10),
-
-              // Divider
               Yellowline(screenWidth: screenWidth),
-
               const SizedBox(height: 20),
 
-              // Section 1: Set Clear Financial Goals
-              buildSection(
-                title: "1. Set Clear Financial Goals",
-                description:
-                    "Establishing clear financial goals helps you define where you want your business to be in the short, medium, and long term. These goals guide your decision-making process and allow you to track progress. For example:\n\n"
-                    "• Short-term goals could include covering monthly expenses or improving cash flow.\n"
-                    "• Mid-term goals might focus on growing revenue or expanding your product range.\n"
-                    "• Long-term goals could involve building a strong financial base for sustainability or planning for business expansion.\n\n"
-                    "Setting goals will give your business direction and a clear path forward.",
-              ),
+              // Dynamic Progress Content
+              if (progressData.isNotEmpty) ...[
+                ...progressData.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  final item = entry.value;
+                  final title = item['title'] ?? '';
+                  final description = item['description'] ?? '';
 
-              const SizedBox(height: 20),
-
-              // Section 2: Track and Monitor Cash Flow
-              buildSection(
-                title: "2. Track and Monitor Cash Flow",
-                description:
-                    "Cash flow is critical for the survival and growth of any business, especially for SMEs. Regularly monitoring cash flow allows you to understand whether your business has enough liquidity to cover operational expenses and pursue opportunities.",
-              ),
+                  return Column(
+                    children: [
+                      buildSection(
+                        title: "${index + 1}. $title",
+                        description: description,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                }).toList(),
+              ] else ...[
+                buildSection(
+                  title: "1. Set Clear Financial Goals",
+                  description:
+                      "Establishing clear financial goals helps you define where you want your business to be in the short, medium, and long term.\n\n"
+                      "Implementation Tips:\n"
+                      "• Break this goal into smaller, manageable tasks\n"
+                      "• Set specific deadlines and milestones\n"
+                      "• Track your progress regularly\n"
+                      "• Adjust your approach based on results\n\n"
+                      "Remember: Consistent small steps lead to significant progress over time.",
+                ),
+              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildSection({required String title, required String description}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Scolor.primary,
+        borderRadius: BorderRadius.circular(12),
+        //    border: Border.all(color: Scolor.secondry.withOpacity(0.3), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Scolor.secondry,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            description,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
     );
   }

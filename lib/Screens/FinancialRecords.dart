@@ -28,8 +28,7 @@ class _FinancialRecordsScreenState extends State<FinancialRecordsScreen> {
     String? token = prefs.getString('token');
 
     final response = await http.get(
-      Uri.parse(
-          'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/pdfsearch'),
+      Uri.parse('http://13.233.25.114:5000/pdfsearch'),
       headers: {'Authorization': 'Bearer ${token ?? ''}'},
     );
 

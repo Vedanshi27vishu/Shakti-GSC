@@ -70,7 +70,7 @@ class _BusinessDetailsState extends State<BusinessDetails> {
       }
 
       final url = Uri.parse(
-          "http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup3");
+          "http://13.233.25.114:5000/api/signup/signup3");
 
       final response = await http.post(
         url,

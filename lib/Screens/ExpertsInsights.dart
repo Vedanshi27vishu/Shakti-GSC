@@ -29,8 +29,7 @@ class _FinancialInsightsScreenState extends State<FinancialInsightsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     final response = await http.get(
-      Uri.parse(
-          'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/videos'),
+      Uri.parse('http://13.233.25.114:5000/videos'),
       headers: {'Authorization': 'Bearer ${token ?? ''}'},
     );
 

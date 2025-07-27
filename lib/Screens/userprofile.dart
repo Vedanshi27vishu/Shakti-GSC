@@ -58,8 +58,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
 
       // Fetch user profile data
       final response = await http.get(
-        Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/profile/details'),
+        Uri.parse('http://13.233.25.114:5000/profile/details'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',

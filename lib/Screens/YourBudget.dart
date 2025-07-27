@@ -6,7 +6,9 @@ import 'package:shakti/Widgets/ScreenWidgets/progresscontent.dart';
 import 'package:shakti/helpers/helper_functions.dart';
 
 class YourBudgetScreen extends StatelessWidget {
-  const YourBudgetScreen({super.key});
+  final List<Map<String, dynamic>> budgetData;
+
+  const YourBudgetScreen({required this.budgetData, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,25 +50,40 @@ class YourBudgetScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Section 1: Set Clear Financial Goals
-              buildSection(
-                title: "1. Set Clear Financial Goals",
-                description:
-                    "Establishing clear financial goals helps you define where you want your business to be in the short, medium, and long term. These goals guide your decision-making process and allow you to track progress. For example:\n\n"
-                    "• Short-term goals could include covering monthly expenses or improving cash flow.\n"
-                    "• Mid-term goals might focus on growing revenue or expanding your product range.\n"
-                    "• Long-term goals could involve building a strong financial base for sustainability or planning for business expansion.\n\n"
-                    "Setting goals will give your business direction and a clear path forward.",
-              ),
+              if (budgetData.isNotEmpty) ...[
+                ...budgetData.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  final item = entry.value;
+                  final title = item['title'] ?? '';
+                  final description = item['description'] ?? '';
+
+                  return Column(
+                    children: [
+                      buildSection(
+                        title: "${index + 1}. $title",
+                        description: description,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                }).toList(),
+              ] else ...[
+                buildSection(
+                  title: "1. Set Clear Financial Goals",
+                  description:
+                      "Establishing clear financial goals helps you define where you want your business to be in the short, medium, and long term.\n\n"
+                      "Implementation Tips:\n"
+                      "• Break this goal into smaller, manageable tasks\n"
+                      "• Set specific deadlines and milestones\n"
+                      "• Track your progress regularly\n"
+                      "• Adjust your approach based on results\n\n"
+                      "Remember: Consistent small steps lead to significant progress over time.",
+                ),
+              ],
 
               const SizedBox(height: 20),
 
               // Section 2: Track and Monitor Cash Flow
-              buildSection(
-                title: "2. Track and Monitor Cash Flow",
-                description:
-                    "Cash flow is critical for the survival and growth of any business, especially for SMEs. Regularly monitoring cash flow allows you to understand whether your business has enough liquidity to cover operational expenses and pursue opportunities.",
-              ),
             ],
           ),
         ),

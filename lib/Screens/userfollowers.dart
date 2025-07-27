@@ -60,6 +60,7 @@ class _FollowersPageState extends State<FollowersPage> {
     super.initState();
     fetchFollowers();
   }
+
   static Future<String?> _getAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
@@ -71,16 +72,15 @@ class _FollowersPageState extends State<FollowersPage> {
         isLoading = true;
         errorMessage = '';
       });
-      
+
       final authToken = await _getAuthToken();
       if (authToken == null) {
         throw Exception('No auth token found');
       }
 
-
       // Try to fetch from API
       final response = await http.get(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/user/followers'),
+        Uri.parse('http://13.233.25.114:5000/user/followers'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -90,13 +90,14 @@ class _FollowersPageState extends State<FollowersPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> followersData = data['followers'] ?? [];
-        
+
         setState(() {
           followers = followersData
               .map((item) => Follower.fromJson(item))
-              .where((follower) => follower.id.isNotEmpty) // Filter out invalid entries
+              .where((follower) =>
+                  follower.id.isNotEmpty) // Filter out invalid entries
               .toList();
-          
+
           // If API returns empty or invalid data, use static data
           if (followers.isEmpty) {
             followers = staticFollowers;
@@ -169,7 +170,7 @@ class _FollowersPageState extends State<FollowersPage> {
                 ],
               ),
             ),
-            
+
             // Error message (if any)
             if (errorMessage.isNotEmpty)
               Container(
@@ -178,11 +179,13 @@ class _FollowersPageState extends State<FollowersPage> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFD700).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFFD700).withOpacity(0.3)),
+                  border: Border.all(
+                      color: const Color(0xFFFFD700).withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: const Color(0xFFFFD700), size: 16),
+                    Icon(Icons.info_outline,
+                        color: const Color(0xFFFFD700), size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -196,15 +199,16 @@ class _FollowersPageState extends State<FollowersPage> {
                   ],
                 ),
               ),
-            
+
             const SizedBox(height: 10),
-            
+
             // Followers list
             Expanded(
               child: isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
                       ),
                     )
                   : followers.isEmpty
@@ -309,9 +313,9 @@ class FollowerCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // User Info
           Expanded(
             child: Column(
@@ -348,7 +352,7 @@ class FollowerCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Follow Button
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

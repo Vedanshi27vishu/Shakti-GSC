@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:shakti/Screens/Budget_insights.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -101,11 +102,55 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
   final TextEditingController _profitController = TextEditingController();
   bool _isPredictingBudget = false;
   String _predictedBudget = '';
+  Map<String, dynamic>? insights;
 
   @override
   void initState() {
     super.initState();
+    fetchInsights();
     loadExpenditureData();
+  }
+
+  Future<void> fetchInsights() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse(
+          'http://13.233.25.114:5000/api/business/insights',
+        ),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData = json.decode(response.body);
+
+        // Assuming your API directly returns the insights JSON like:
+        // { "point1": "...", "point2": "...", ... }
+        setState(() {
+          insights = jsonData;
+          // List of all insight strings// insights should be a Map<String, dynamic> in your class
+        });
+      } else {
+        throw Exception('Failed to load data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error loading insights data: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load data: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> loadExpenditureData() async {
@@ -114,7 +159,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
       String? token = prefs.getString('token');
       final response = await http.get(
         Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/last-two-expenditures'),
+            'http://13.233.25.114:5000/api/last-two-expenditures'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -175,7 +220,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
 
       final response = await http.post(
         Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/predict-budget/$sector'),
+            'http://13.233.25.114:5000/api/predict-budget/$sector'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -302,7 +347,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
                     const SizedBox(height: 24),
                     _buildProfitInputSection(), // New section added
                     const SizedBox(height: 24),
-                    _buildKeyFeaturesSection(),
+                    _buildKeyFeaturesSection(context, insights),
                   ],
                 ),
               ),
@@ -628,26 +673,47 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
     );
   }
 
-  Widget _buildKeyFeaturesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Key Features',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
+  Widget _buildKeyFeaturesSection(
+      BuildContext context, Map<String, dynamic>? insights) {
+    final insightValues = insights?.values.toList() ?? [];
+
+    final formattedInsightData = List.generate(insightValues.length, (index) {
+      return {
+        'title': 'Insight ${index + 1}',
+        'description': insightValues[index],
+      };
+    });
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BudgetInsights(
+              budgetData: formattedInsightData,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildFeatureItem(Icons.info_outline, 'Raw material prices stable'),
-        const SizedBox(height: 12),
-        _buildFeatureItem(Icons.trending_up, 'Regular customer base growing'),
-        const SizedBox(height: 12),
-        _buildFeatureItem(
-            Icons.school_outlined, 'Staff training costs expected'),
-      ],
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildFeatureItem(
+            Icons.info_outline,
+            insightValues.isNotEmpty ? insightValues[0] : 'Loading...',
+          ),
+          const SizedBox(height: 12),
+          _buildFeatureItem(
+            Icons.trending_up,
+            insightValues.length > 1 ? insightValues[1] : 'Loading...',
+          ),
+          const SizedBox(height: 12),
+          _buildFeatureItem(
+            Icons.school_outlined,
+            insightValues.length > 2 ? insightValues[2] : 'Loading...',
+          ),
+        ],
+      ),
     );
   }
 

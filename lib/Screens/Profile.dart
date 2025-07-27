@@ -62,8 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/signup/signup1'),
+        Uri.parse('http://13.233.25.114:5000/api/signup/signup1'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );

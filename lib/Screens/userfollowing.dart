@@ -73,7 +73,8 @@ class _FollowingPageState extends State<FollowingPage> {
     super.initState();
     fetchFollowing();
   }
-          static Future<String?> _getAuthToken() async {
+
+  static Future<String?> _getAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
@@ -84,16 +85,16 @@ class _FollowingPageState extends State<FollowingPage> {
         isLoading = true;
         errorMessage = '';
       });
-            final authToken = await _getAuthToken();
+      final authToken = await _getAuthToken();
       if (authToken == null) {
         throw Exception('No auth token found');
       }
 
       // Try to fetch from API
       final response = await http.get(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/user/following'),
+        Uri.parse('http://13.233.25.114:5000/user/following'),
         headers: {
-                   'Authorization': 'Bearer $authToken',
+          'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
         },
       ).timeout(Duration(seconds: 10));
@@ -101,13 +102,14 @@ class _FollowingPageState extends State<FollowingPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> followingData = data['following'] ?? [];
-        
+
         setState(() {
           followingList = followingData
               .map((item) => Following.fromJson(item))
-              .where((following) => following.id.isNotEmpty) // Filter out invalid entries
+              .where((following) =>
+                  following.id.isNotEmpty) // Filter out invalid entries
               .toList();
-          
+
           // If API returns empty or invalid data, use static data
           if (followingList.isEmpty) {
             followingList = staticFollowing;
@@ -133,16 +135,16 @@ class _FollowingPageState extends State<FollowingPage> {
       setState(() {
         followingList[index].isFollowing = !followingList[index].isFollowing;
       });
-            final authToken = await _getAuthToken();
+      final authToken = await _getAuthToken();
       if (authToken == null) {
         throw Exception('No auth token found');
       }
 
       // Make API call to unfollow/follow
       final response = await http.post(
-        Uri.parse('http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/user/toggle-follow'),
+        Uri.parse('http://13.233.25.114:5000/user/toggle-follow'),
         headers: {
-                    'Authorization': 'Bearer $authToken',
+          'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
         },
         body: json.encode({'userId': userId}),
@@ -153,7 +155,7 @@ class _FollowingPageState extends State<FollowingPage> {
         setState(() {
           followingList[index].isFollowing = !followingList[index].isFollowing;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to update follow status'),
@@ -166,7 +168,7 @@ class _FollowingPageState extends State<FollowingPage> {
       setState(() {
         followingList[index].isFollowing = !followingList[index].isFollowing;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Network error occurred'),
@@ -229,7 +231,7 @@ class _FollowingPageState extends State<FollowingPage> {
                 ],
               ),
             ),
-            
+
             // Error message (if any)
             if (errorMessage.isNotEmpty)
               Container(
@@ -238,11 +240,13 @@ class _FollowingPageState extends State<FollowingPage> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFD700).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFFD700).withOpacity(0.3)),
+                  border: Border.all(
+                      color: const Color(0xFFFFD700).withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: const Color(0xFFFFD700), size: 16),
+                    Icon(Icons.info_outline,
+                        color: const Color(0xFFFFD700), size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -256,15 +260,16 @@ class _FollowingPageState extends State<FollowingPage> {
                   ],
                 ),
               ),
-            
+
             const SizedBox(height: 10),
-            
+
             // Following list
             Expanded(
               child: isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
                       ),
                     )
                   : followingList.isEmpty
@@ -307,7 +312,8 @@ class _FollowingPageState extends State<FollowingPage> {
                             itemBuilder: (context, index) {
                               return FollowingCard(
                                 following: followingList[index],
-                                onToggleFollow: () => toggleFollow(followingList[index].id, index),
+                                onToggleFollow: () => toggleFollow(
+                                    followingList[index].id, index),
                               );
                             },
                           ),
@@ -385,9 +391,9 @@ class FollowingCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // User Info
           Expanded(
             child: Column(
@@ -416,7 +422,8 @@ class FollowingCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _buildStatChip(following.getFormattedFollowersCount(), 'Followers'),
+                    _buildStatChip(
+                        following.getFormattedFollowersCount(), 'Followers'),
                     const SizedBox(width: 12),
                     _buildStatChip('${following.followingCount}', 'Following'),
                   ],
@@ -424,7 +431,7 @@ class FollowingCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Follow/Unfollow Button
           GestureDetector(
             onTap: onToggleFollow,
@@ -459,8 +466,8 @@ class FollowingCard extends StatelessWidget {
               child: Text(
                 following.isFollowing ? 'Following' : 'Follow',
                 style: TextStyle(
-                  color: following.isFollowing 
-                      ? Colors.white 
+                  color: following.isFollowing
+                      ? Colors.white
                       : const Color(0xFF0F1419),
                   fontSize: 12,
                   fontWeight: FontWeight.w600,

@@ -3,8 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PostService {
-  static const String baseUrl =
-      'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api';
+  static const String baseUrl = 'http://13.233.25.114:5000/api';
 
   // Get auth token from shared preferences
   static Future<String?> _getAuthToken() async {
@@ -81,17 +80,17 @@ class PostService {
         Uri.parse('$baseUrl/post/L/$postId'),
         headers: headers,
       );
-      
+
       print('Like Response: Status ${response.statusCode}');
       print('Response Body: ${response.body}');
-      
+
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         if (responseData['post'] != null) {
           return PostModel.fromJson(responseData['post']);
         }
       }
-      
+
       throw Exception('Failed to like post: ${response.statusCode}');
     } catch (e) {
       print('Error liking post: $e');
@@ -101,93 +100,103 @@ class PostService {
 
   // Comment on a post - Returns updated post data
   // Comment on a post - Returns updated post data
-static Future<PostModel?> commentOnPost(String postId, String commentText) async {
-  try {
-    final headers = await _getHeaders();
-    final response = await http.post(
-      Uri.parse('$baseUrl/post/C/$postId'),
-      headers: headers,
-      body: json.encode({'text': commentText}),
-    );
-    
-    print('Comment Response: Status ${response.statusCode}');
-    print('Response Body: ${response.body}');
-    
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final responseData = json.decode(response.body);
-      
-      // Check different possible response structures
-      if (responseData['post'] != null) {
-        return PostModel.fromJson(responseData['post']);
-      } else if (responseData['data'] != null) {
-        return PostModel.fromJson(responseData['data']);
-      } else if (responseData is Map<String, dynamic> && responseData.containsKey('_id')) {
-        // Direct post object
-        return PostModel.fromJson(responseData);
+  static Future<PostModel?> commentOnPost(
+      String postId, String commentText) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.post(
+        Uri.parse('$baseUrl/post/C/$postId'),
+        headers: headers,
+        body: json.encode({'text': commentText}),
+      );
+
+      print('Comment Response: Status ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+
+        // Check different possible response structures
+        if (responseData['post'] != null) {
+          return PostModel.fromJson(responseData['post']);
+        } else if (responseData['data'] != null) {
+          return PostModel.fromJson(responseData['data']);
+        } else if (responseData is Map<String, dynamic> &&
+            responseData.containsKey('_id')) {
+          // Direct post object
+          return PostModel.fromJson(responseData);
+        }
+
+        // If no post data returned, return null to indicate success without updated data
+        return null;
       }
-      
-      // If no post data returned, return null to indicate success without updated data
-      return null;
+
+      throw Exception(
+          'Failed to comment: ${response.statusCode} - ${response.body}');
+    } catch (e) {
+      print('Error commenting: $e');
+      throw Exception('Error commenting: $e');
     }
-    
-    throw Exception('Failed to comment: ${response.statusCode} - ${response.body}');
-  } catch (e) {
-    print('Error commenting: $e');
-    throw Exception('Error commenting: $e');
   }
-}
+
 // Update a comment
-static Future<PostModel?> updateComment(String postId, String commentId, String updatedText) async {
-  try {
-    final headers = await _getHeaders();
-    final response = await http.put(
-      Uri.parse('$baseUrl/post/$postId/comments/$commentId'),
-      headers: headers,
-      body: json.encode({'text': updatedText}),
-    );
-    
-    print('Update Comment Response: Status ${response.statusCode}');
-    print('Response Body: ${response.body}');
-    
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      if (responseData['post'] != null) {
-        return PostModel.fromJson(responseData['post']);
+  static Future<PostModel?> updateComment(
+      String postId, String commentId, String updatedText) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.put(
+        Uri.parse('$baseUrl/post/$postId/comments/$commentId'),
+        headers: headers,
+        body: json.encode({'text': updatedText}),
+      );
+
+      print('Update Comment Response: Status ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['post'] != null) {
+          return PostModel.fromJson(responseData['post']);
+        }
       }
+
+      throw Exception(
+          'Failed to update comment: ${response.statusCode} - ${response.body}');
+    } catch (e) {
+      print('Error updating comment: $e');
+      throw Exception('Error updating comment: $e');
     }
-    
-    throw Exception('Failed to update comment: ${response.statusCode} - ${response.body}');
-  } catch (e) {
-    print('Error updating comment: $e');
-    throw Exception('Error updating comment: $e');
   }
-}
 
 // Delete a comment
-static Future<PostModel?> deleteComment(String postId, String commentId) async {
-  try {
-    final headers = await _getHeaders();
-    final response = await http.delete(
-      Uri.parse('$baseUrl/post/$postId/comments/$commentId'),
-      headers: headers,
-    );
-    
-    print('Delete Comment Response: Status ${response.statusCode}');
-    print('Response Body: ${response.body}');
-    
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      // For delete, we might not get the full post back, so fetch it
-      return await getPostsByInterest().then((posts) => 
-        posts.firstWhere((p) => p.id == postId, orElse: () => throw Exception('Post not found')));
+  static Future<PostModel?> deleteComment(
+      String postId, String commentId) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.delete(
+        Uri.parse('$baseUrl/post/$postId/comments/$commentId'),
+        headers: headers,
+      );
+
+      print('Delete Comment Response: Status ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        // For delete, we might not get the full post back, so fetch it
+        return await getPostsByInterest().then((posts) => posts.firstWhere(
+            (p) => p.id == postId,
+            orElse: () => throw Exception('Post not found')));
+      }
+
+      throw Exception(
+          'Failed to delete comment: ${response.statusCode} - ${response.body}');
+    } catch (e) {
+      print('Error deleting comment: $e');
+      throw Exception('Error deleting comment: $e');
     }
-    
-    throw Exception('Failed to delete comment: ${response.statusCode} - ${response.body}');
-  } catch (e) {
-    print('Error deleting comment: $e');
-    throw Exception('Error deleting comment: $e');
   }
-}
+
   // Create a new post
   static Future<bool> createPost(String content, {String? mediaUrl}) async {
     try {
@@ -207,7 +216,8 @@ static Future<PostModel?> deleteComment(String postId, String commentId) async {
       if (response.statusCode == 201 || response.statusCode == 200) {
         return true;
       } else {
-        throw Exception('Failed to create post: ${response.statusCode} - ${response.body}');
+        throw Exception(
+            'Failed to create post: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       print('Error creating post: $e');
@@ -250,7 +260,7 @@ class PostModel {
     try {
       // Debug print to see the actual JSON structure
       print('Parsing PostModel from JSON: $json');
-      
+
       // Handle likes array safely
       List<String> likesList = [];
       if (json['likes'] != null) {
@@ -258,7 +268,7 @@ class PostModel {
           likesList = (json['likes'] as List).map((e) => e.toString()).toList();
         }
       }
-      
+
       // Handle comments array safely
       List<CommentModel> commentsList = [];
       if (json['comments'] != null) {
@@ -283,16 +293,15 @@ class PostModel {
       List<String> interestTagsList = [];
       if (json['interestTags'] != null) {
         if (json['interestTags'] is List) {
-          interestTagsList = (json['interestTags'] as List)
-              .map((e) => e.toString())
-              .toList();
+          interestTagsList =
+              (json['interestTags'] as List).map((e) => e.toString()).toList();
         }
       }
 
       // Parse dates safely
       DateTime createdAtDate = DateTime.now();
       DateTime updatedAtDate = DateTime.now();
-      
+
       try {
         if (json['createdAt'] != null) {
           createdAtDate = DateTime.parse(json['createdAt'].toString());
@@ -300,7 +309,7 @@ class PostModel {
       } catch (e) {
         print('Error parsing createdAt: $e');
       }
-      
+
       try {
         if (json['updatedAt'] != null) {
           updatedAtDate = DateTime.parse(json['updatedAt'].toString());
@@ -321,7 +330,8 @@ class PostModel {
         createdAt: createdAtDate,
         updatedAt: updatedAtDate,
         likesCount: _parseIntSafely(json['likesCount']) ?? likesList.length,
-        commentsCount: _parseIntSafely(json['commentsCount']) ?? commentsList.length,
+        commentsCount:
+            _parseIntSafely(json['commentsCount']) ?? commentsList.length,
       );
     } catch (e) {
       print('Error parsing PostModel: $e');
@@ -462,10 +472,10 @@ class CommentModel {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is CommentModel && 
-           other.text == text && 
-           other.postedBy == postedBy &&
-           other.id == id;
+    return other is CommentModel &&
+        other.text == text &&
+        other.postedBy == postedBy &&
+        other.id == id;
   }
 
   @override

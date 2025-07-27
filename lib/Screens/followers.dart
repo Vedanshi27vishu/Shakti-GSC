@@ -47,8 +47,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
       if (!mounted) return;
 
       final response = await http.get(
-        Uri.parse(
-            'http://shaktinxt-env.eba-x3dnqpku.ap-south-1.elasticbeanstalk.com/api/follow/followers_following'),
+        Uri.parse('http://13.233.25.114:5000/api/follow/followers_following'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -80,7 +79,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
         // Final check before setState
         if (!mounted) return;
-        
+
         setState(() {
           users = allUsers;
           isLoading = false;
@@ -112,16 +111,13 @@ class _UsersListScreenState extends State<UsersListScreen> {
   void navigateToChat(String userId, String fullName) {
     // Check if widget is still mounted before navigation
     if (!mounted) return;
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatScreen(
-          recipientUserId: userId,
-          recipientName: fullName,
-          // recipientAvatar: null, // Optional - can be added later
-        ),
-      ),
+          builder: (context) => ChatScreen(
+                recipientId: userId,
+              )),
     );
   }
 

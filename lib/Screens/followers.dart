@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class UsersListScreen extends StatefulWidget {
+  const UsersListScreen({super.key});
+
   @override
   _UsersListScreenState createState() => _UsersListScreenState();
 }
@@ -28,7 +30,6 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   Future<void> fetchUsers() async {
     try {
-      // Check if widget is still mounted before starting
       if (!mounted) return;
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -37,24 +38,22 @@ class _UsersListScreenState extends State<UsersListScreen> {
       if (token == null) {
         if (!mounted) return;
         setState(() {
-          errorMessage = 'Authentication token not found. Please login again.';
+          errorMessage = 'Authentication token not found. Please login.';
           isLoading = false;
         });
         return;
       }
 
-      // Check mounted state before making network request
       if (!mounted) return;
 
-      final response = await http.get(
-        Uri.parse('http://13.233.25.114:5000/api/follow/followers_following'),
+      final response = await http.post(
+        Uri.parse('http://65.2.82.85:5000/api/followers_following'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
 
-      // Always check mounted state after async operations
       if (!mounted) return;
 
       if (response.statusCode == 200) {
@@ -77,18 +76,16 @@ class _UsersListScreenState extends State<UsersListScreen> {
           }
         }
 
-        // Final check before setState
         if (!mounted) return;
-
         setState(() {
           users = allUsers;
           isLoading = false;
-          errorMessage = ''; // Clear any previous errors
+          errorMessage = '';
         });
       } else if (response.statusCode == 401) {
         if (!mounted) return;
         setState(() {
-          errorMessage = 'Authentication failed. Please login again.';
+          errorMessage = 'Authentication failed. Please login.';
           isLoading = false;
         });
       } else {
@@ -99,7 +96,6 @@ class _UsersListScreenState extends State<UsersListScreen> {
         });
       }
     } catch (e) {
-      // Always check mounted state in catch block
       if (!mounted) return;
       setState(() {
         errorMessage = 'Error: $e';
@@ -109,19 +105,18 @@ class _UsersListScreenState extends State<UsersListScreen> {
   }
 
   void navigateToChat(String userId, String fullName) {
-    // Check if widget is still mounted before navigation
     if (!mounted) return;
-
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => ChatScreen(
-                recipientId: userId,
-              )),
+        builder: (_) => ChatScreen(
+          recipientUserId: userId,
+          recipientName: fullName,
+        ),
+      ),
     );
   }
 
-  // Safe setState wrapper
   void safeSetState(VoidCallback fn) {
     if (mounted) {
       setState(fn);
@@ -130,13 +125,27 @@ class _UsersListScreenState extends State<UsersListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    // --- Responsive width logic ---
+    double contentMaxWidth;
+    if (screenWidth < 600) {
+      contentMaxWidth = screenWidth; // Phone: full width
+    } else if (screenWidth < 1000) {
+      contentMaxWidth = 700; // Tablet: max width
+    } else {
+      contentMaxWidth = 900; // Laptop/Desktop: max width
+    }
+    // -------------------------------------
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Users'),
-        backgroundColor: const Color(0xFF1E3A8A), // Dark blue
-        foregroundColor: Colors.white,
-        elevation: 2,
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Users'),
+      //   backgroundColor: const Color(0xFF1E3A8A), // Dark blue
+      //   foregroundColor: Colors.white,
+      //   elevation: 2,
+      // ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -145,137 +154,145 @@ class _UsersListScreenState extends State<UsersListScreen> {
             colors: [Colors.blue[50]!, Colors.white],
           ),
         ),
-        child: isLoading
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Colors.blue[600]!),
-                    ),
-                    SizedBox(height: 16),
-                    Text('Loading users...',
-                        style:
-                            TextStyle(color: Colors.grey[600], fontSize: 16)),
-                  ],
-                ),
-              )
-            : errorMessage.isNotEmpty
+        child: Center(
+          child: Container(
+            width: contentMaxWidth,
+            child: isLoading
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.error_outline,
-                            size: 64, color: Colors.red[400]),
-                        SizedBox(height: 16),
-                        Text(
-                          errorMessage,
-                          style:
-                              TextStyle(color: Colors.red[600], fontSize: 16),
-                          textAlign: TextAlign.center,
+                        CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.blue[600]!),
                         ),
-                        SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (!mounted) return;
-                            safeSetState(() {
-                              isLoading = true;
-                              errorMessage = '';
-                            });
-                            fetchUsers();
-                          },
-                          child: Text('Retry'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color(0xFF1E3A8A), // Dark blue
-                            foregroundColor: Colors.white,
-                          ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Loading users...',
+                          style: TextStyle(
+                              color: Colors.grey[600], fontSize: 16),
                         ),
                       ],
                     ),
                   )
-                : users.isEmpty
+                : errorMessage.isNotEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.people_outline,
-                                size: 64, color: Colors.grey[400]),
-                            SizedBox(height: 16),
+                            Icon(Icons.error_outline,
+                                size: 64, color: Colors.red[400]),
+                            const SizedBox(height: 16),
                             Text(
-                              'No users found',
+                              errorMessage,
                               style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
+                                  color: Colors.red[600], fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                if (!mounted) return;
+                                safeSetState(() {
+                                  isLoading = true;
+                                  errorMessage = '';
+                                });
+                                fetchUsers();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color(0xFF1E3A8A), // Dark blue
+                                foregroundColor: Colors.white,
                               ),
+                              child: const Text('Retry'),
                             ),
                           ],
                         ),
                       )
-                    : RefreshIndicator(
-                        onRefresh: fetchUsers,
-                        child: ListView.builder(
-                          padding: EdgeInsets.all(16),
-                          itemCount: users.length,
-                          itemBuilder: (context, index) {
-                            final user = users[index];
-                            return Container(
-                              margin: EdgeInsets.only(bottom: 12),
-                              child: Card(
-                                elevation: 3,
-                                shadowColor: Colors.grey.withOpacity(0.3),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                    : users.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.people_outline,
+                                    size: 64, color: Colors.grey[600]),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No users found',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                                child: ListTile(
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 8),
-                                  leading: CircleAvatar(
-                                    radius: 25,
-                                    backgroundColor:
-                                        const Color(0xFFFBBF24), // Yellow
-                                    child: Text(
-                                      user.fullName.isNotEmpty
-                                          ? user.fullName[0].toUpperCase()
-                                          : 'U',
-                                      style: TextStyle(
-                                        color: const Color(
-                                            0xFF1E3A8A), // Dark blue
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: fetchUsers,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: users.length,
+                              itemBuilder: (context, index) {
+                                final user = users[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  child: Card(
+                                    elevation: 3,
+                                    shadowColor: Colors.grey.withOpacity(0.3),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: ListTile(
+                                      contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 8),
+                                      leading: CircleAvatar(
+                                        radius: 25,
+                                        backgroundColor:
+                                            const Color(0xFFFBBF24),
+                                        child: Text(
+                                          user.fullName.isNotEmpty
+                                              ? user.fullName[0]
+                                                  .toUpperCase()
+                                              : 'U',
+                                          style: const TextStyle(
+                                            color:
+                                                Color(0xFF1E3A8A),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
                                       ),
+                                      title: Text(
+                                        user.fullName,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        'ID: ${user.userId}',
+                                        style: TextStyle(
+                                          color: Colors.grey[800],
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      trailing: Icon(
+                                        Icons.chat_bubble_outline,
+                                        color: const Color(0xFF1E3A8A),
+                                        size: 20,
+                                      ),
+                                      onTap: () => navigateToChat(
+                                          user.userId, user.fullName),
                                     ),
                                   ),
-                                  title: Text(
-                                    user.fullName,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                      color: Colors.grey[800],
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    'ID: ${user.userId}',
-                                    style: TextStyle(
-                                      color: Colors.grey[500],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  trailing: Icon(
-                                    Icons.chat_bubble_outline,
-                                    color: const Color(0xFF1E3A8A), // Dark blue
-                                    size: 20,
-                                  ),
-                                  onTap: () => navigateToChat(
-                                      user.userId, user.fullName),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                                );
+                              },
+                            ),
+                          ),
+          ),
+        ),
       ),
     );
   }

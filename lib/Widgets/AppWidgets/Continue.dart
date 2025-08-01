@@ -17,9 +17,27 @@ class ContinueButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Define responsive height and fontSize based on screenWidth breakpoints
+    double buttonHeight;
+    double fontSize;
+
+    if (screenWidth < 600) {
+      // Mobile
+      buttonHeight = screenHeight * 0.6;
+      fontSize = screenWidth * 0.09;
+    } else if (screenWidth < 1000) {
+      // Tablet
+      buttonHeight = 65;
+      fontSize = 25;
+    } else {
+      // Desktop / Laptop
+      buttonHeight = 70;
+      fontSize = 25;
+    }
+
     return SizedBox(
       width: double.infinity,
-      height: screenHeight * 0.06,
+      height: buttonHeight,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -29,7 +47,7 @@ class ContinueButton extends StatelessWidget {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: screenWidth * 0.045,
+            fontSize: fontSize,
             fontWeight: FontWeight.bold,
           ),
         ),

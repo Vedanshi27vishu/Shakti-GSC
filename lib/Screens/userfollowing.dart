@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FollowingPage extends StatefulWidget {
-  const FollowingPage({Key? key}) : super(key: key);
+  const FollowingPage({super.key});
 
   @override
   _FollowingPageState createState() => _FollowingPageState();
@@ -92,7 +92,7 @@ class _FollowingPageState extends State<FollowingPage> {
 
       // Try to fetch from API
       final response = await http.get(
-        Uri.parse('http://13.233.25.114:5000/user/following'),
+        Uri.parse('http://65.2.82.85:5000/user/following'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ class _FollowingPageState extends State<FollowingPage> {
 
       // Make API call to unfollow/follow
       final response = await http.post(
-        Uri.parse('http://13.233.25.114:5000/user/toggle-follow'),
+        Uri.parse('http://65.2.82.85:5000/user/toggle-follow'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -331,10 +331,10 @@ class FollowingCard extends StatelessWidget {
   final VoidCallback onToggleFollow;
 
   const FollowingCard({
-    Key? key,
+    super.key,
     required this.following,
     required this.onToggleFollow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

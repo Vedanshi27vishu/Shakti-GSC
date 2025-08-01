@@ -1,11 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Utils/constants/colors.dart';
-import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ShaktiProfileScreen extends StatefulWidget {
+  const ShaktiProfileScreen({super.key});
+
   @override
   _ShaktiProfileScreenState createState() => _ShaktiProfileScreenState();
 }
@@ -32,7 +34,7 @@ class _ShaktiProfileScreenState extends State<ShaktiProfileScreen> {
         throw Exception('No auth token found');
       }
       final response = await http.get(
-        Uri.parse('http://13.233.25.114:5000/shakti/shaktidetails'),
+        Uri.parse('http://65.2.82.85:5000/shakti/shaktidetails'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -111,7 +113,7 @@ class _ShaktiProfileScreenState extends State<ShaktiProfileScreen> {
       }
 
       final response = await http.put(
-        Uri.parse('http://13.233.25.114:5000/shakti/shaktidetails'),
+        Uri.parse('http://65.2.82.85:5000/shakti/shaktidetails'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -991,7 +993,7 @@ class _ShaktiProfileScreenState extends State<ShaktiProfileScreen> {
           Expanded(
             flex: 3,
             child: Text(
-              value?.toString() ?? 'N/A',
+              value.toString() ?? 'N/A',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,

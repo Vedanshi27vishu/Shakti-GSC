@@ -1,13 +1,14 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/OtpScreen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/Continue.dart';
 import 'package:shakti/Widgets/AppWidgets/InputField.dart';
 import 'package:shakti/Widgets/AppWidgets/ThreeCircle.dart';
 import 'package:shakti/helpers/helper_functions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -62,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://13.233.25.114:5000/api/signup/signup1'),
+        Uri.parse('http://65.2.82.85:5000/api/signup/signup1'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
@@ -74,7 +75,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final sessionId = data['sessionId'];
-
         if (sessionId != null) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString("sessionId", sessionId);
@@ -111,6 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // You can keep this or use MediaQuery directly; both fine.
     double screenWidth = THelperFunctions.screenWidth(context);
     double screenHeight = THelperFunctions.screenHeight(context);
 
@@ -124,85 +125,116 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ThreeCircle(screenWidth: screenWidth),
-              SizedBox(height: screenHeight * 0.03),
-              const Text(
-                "Create Your Profile",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: screenHeight * 0.02),
-
-              // Personal Information
-              buildSectionHeader("Personal Information"),
-              InputField(label: "Full Name", controller: nameController),
-              InputField(label: "Email", controller: emailController),
-              InputField(
-                  label: "Preferred Language", controller: languageController),
-
-              buildSectionHeader("Password"),
-              TextField(
-                controller: passwordController,
-                obscureText: obscurePassword,
-                style: const TextStyle(color: Scolor.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Scolor.primary,
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Scolor.secondry, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Scolor.white, width: 3.5),
-                  ),
-                  hintText: "Enter Password",
-                  hintStyle: TextStyle(color: Scolor.white.withOpacity(0.5)),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        obscurePassword = !obscurePassword;
-                      });
-                    },
-                  ),
+      // ================
+      // RESPONSIVE BODY
+      // ================
+      body: Center(
+        // 1️⃣ Center everything
+        child: SingleChildScrollView(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              double maxWidth;
+              if (constraints.maxWidth < 600) {
+                // Mobile: natural (full width with padding)
+                maxWidth = double.infinity;
+              } else if (constraints.maxWidth < 1000) {
+                // Tablet
+                maxWidth = 450;
+              } else {
+                // Desktop/laptop
+                maxWidth = 500;
+              }
+              return Container(
+                // Always centered because of Center above, width is limited
+                width: maxWidth,
+                padding: EdgeInsets.symmetric(
+                  horizontal:
+                      maxWidth == double.infinity ? screenWidth * 0.08 : 36,
+                  vertical: 32,
                 ),
-              ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ThreeCircle(screenWidth: screenWidth),
+                    SizedBox(height: screenHeight * 0.03),
+                    const Text(
+                      "Create Your Profile",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: screenHeight * 0.02),
 
-              SizedBox(height: screenHeight * 0.02),
+                    // Personal Information
+                    buildSectionHeader("Personal Information"),
+                    InputField(label: "Full Name", controller: nameController),
+                    InputField(label: "Email", controller: emailController),
+                    InputField(
+                        label: "Preferred Language",
+                        controller: languageController),
 
-              // Professional Information
-              buildSectionHeader("Professional Details"),
-              InputField(
-                  label: "Business Experience",
-                  controller: experienceController),
-              InputField(
-                  label: "Educational Qualifications",
-                  controller: qualificationController),
+                    buildSectionHeader("Password"),
+                    TextField(
+                      controller: passwordController,
+                      obscureText: obscurePassword,
+                      style: const TextStyle(color: Scolor.white),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Scolor.primary,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                              color: Scolor.secondry, width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              const BorderSide(color: Scolor.white, width: 3.5),
+                        ),
+                        hintText: "Enter Password",
+                        hintStyle:
+                            TextStyle(color: Scolor.white.withOpacity(0.5)),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              obscurePassword = !obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
 
-              SizedBox(height: screenHeight * 0.04),
+                    SizedBox(height: screenHeight * 0.02),
 
-              ContinueButton(
-                screenHeight: screenHeight,
-                screenWidth: screenWidth,
-                text: isLoading ? "Loading..." : "Continue",
-                onPressed: isLoading ? () {} : submitForm,
-              ),
-              SizedBox(height: screenHeight * 0.05),
-            ],
+                    // Professional Information
+                    buildSectionHeader("Professional Details"),
+                    InputField(
+                        label: "Business Experience",
+                        controller: experienceController),
+                    InputField(
+                        label: "Educational Qualifications",
+                        controller: qualificationController),
+
+                    SizedBox(height: screenHeight * 0.04),
+
+                    ContinueButton(
+                      screenHeight: screenHeight,
+                      screenWidth: screenWidth,
+                      text: isLoading ? "Loading..." : "Continue",
+                      onPressed: isLoading ? () {} : submitForm,
+                    ),
+                    SizedBox(height: screenHeight * 0.05),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),

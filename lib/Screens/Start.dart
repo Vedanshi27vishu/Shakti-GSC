@@ -1,106 +1,119 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shakti/Screens/Login.dart';
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/helpers/helper_functions.dart'; // Importing helper functions
 
 class StartScreen extends StatelessWidget {
   const StartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth(context);
-    double screenHeight = THelperFunctions.screenHeight(context);
-
     return Scaffold(
       backgroundColor: Scolor.primary,
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(height: screenHeight * 0.25),
+      body: Center(
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400), // ✅ Centered & limited width
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
 
-            // Logo
-            CircleAvatar(
-              radius: screenWidth * 0.20, // Responsive size
-              backgroundColor: Colors.transparent,
-              backgroundImage: const AssetImage(
-                  'assets/logo.png'), // Update with your logo path
-            ),
+                SizedBox(height: 120.h),
 
-            SizedBox(height: screenHeight * 0.02), // Responsive spacing
+                // Logo
+                CircleAvatar(
+                  radius: 70.r,
+                  backgroundColor: Colors.transparent,
+                  backgroundImage: const AssetImage('assets/logo.png'),
+                ),
 
-            // App Name
-            Text(
-              "Shakti-Nxt",
-              style: TextStyle(
-                color: Scolor.light,
-                fontSize: screenWidth * 0.07, // Responsive font size
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                SizedBox(height: 20.h),
 
-            SizedBox(height: screenHeight * 0.01),
+                // App Name
+                Text(
+                  "Shakti-Nxt",
+                  style: TextStyle(
+                    color: Scolor.light,
+                    fontSize: 28.sp.clamp(20, 32),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
 
-            // Tagline
-            Text(
-              "Your AI-Powered Business Guide",
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Scolor.secondry.withOpacity(0.8),
-                fontSize: screenWidth * 0.05,
-              ),
-            ),
+                SizedBox(height: 8.h),
 
-            SizedBox(height: screenHeight * 0.05),
+                // Tagline
+                Text(
+                  "Your AI-Powered Business Guide",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Scolor.secondry.withOpacity(0.8),
+                    fontSize: 16.sp.clamp(12, 20),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
 
-            // Buttons
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
-              child: Column(
-                children: [
-                  ElevatedButton(
+                SizedBox(height: 40.h),
+
+                // Buttons
+                SizedBox(
+                  width: double.infinity,
+                  height: 50.h.clamp(45, 55),
+                  child: ElevatedButton(
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const LoginScreen()));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Scolor.secondry,
                       foregroundColor: Scolor.primary,
-                      minimumSize: Size(double.infinity,
-                          screenHeight * 0.07), // Responsive button height
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                     ),
                     child: Text(
                       "Start Your Journey",
                       style: TextStyle(
-                        fontSize: screenWidth * 0.045,
+                        fontSize: 16.sp.clamp(12, 20),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.015),
-                  OutlinedButton(
+                ),
+
+                SizedBox(height: 12.h),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50.h.clamp(45, 55),
+                  child: OutlinedButton(
                     onPressed: () {},
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Scolor.secondry,
                       side: BorderSide(color: Scolor.secondry),
-                      minimumSize: Size(double.infinity, screenHeight * 0.07),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                     ),
                     child: Text(
                       "Learn More",
                       style: TextStyle(
-                        fontSize: screenWidth * 0.045,
+                        fontSize: 16.sp.clamp(12, 20),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            SizedBox(height: screenHeight * 0.1),
-          ],
+                SizedBox(height: 80.h),
+              ],
+            ),
+          ),
         ),
       ),
     );

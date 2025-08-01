@@ -1,15 +1,30 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/InvestScreen.dart';
 import 'package:shakti/Screens/InvestmentGroup.dart';
 import 'package:shakti/Screens/government.dart';
 import 'package:shakti/Screens/tracker.dart';
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/helpers/helper_functions.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum DeviceScreenType { Mobile, Tablet, Laptop }
+
+DeviceScreenType getDeviceType(BuildContext context) {
+  final width = MediaQuery.of(context).size.width;
+  if (width >= 900) {
+    return DeviceScreenType.Laptop;
+  } else if (width >= 600) {
+    return DeviceScreenType.Tablet;
+  } else {
+    return DeviceScreenType.Mobile;
+  }
+}
+
 class Invest extends StatefulWidget {
+  const Invest({super.key});
+
   @override
   State<Invest> createState() => _InvestState();
 }
@@ -37,7 +52,7 @@ class _InvestState extends State<Invest> {
       fetchUserLoans(),
     ]);
     if (!mounted) return;
-    setState(() {}); // trigger general UI update if needed
+    setState(() {});
   }
 
   String _formatCurrency(double amount) {
@@ -66,18 +81,15 @@ class _InvestState extends State<Invest> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('token');
+      final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
 
-      final url = Uri.parse('http://13.233.25.114:5000/filter-loans');
+      final url = Uri.parse('http://65.2.82.85:5000/filter-loans');
 
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
+      final response = await http.post(url, headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -94,26 +106,22 @@ class _InvestState extends State<Invest> {
         error = 'Error fetching recommended loans: $e';
       });
     } finally {
-      if (!mounted) return;
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   Future<void> fetchPrivateSchemes() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('token');
+      final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
 
-      final url = Uri.parse('http://13.233.25.114:5000/private-schemes');
+      final url = Uri.parse('http://65.2.82.85:5000/private-schemes');
 
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
+      final response = await http.post(url, headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -136,18 +144,15 @@ class _InvestState extends State<Invest> {
   Future<void> fetchUserLoans() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('token');
+      final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
 
-      final url = Uri.parse('http://13.233.25.114:5000/api/financial/loans');
+      final url = Uri.parse('http://65.2.82.85:5000/api/financial/loans');
 
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -155,7 +160,7 @@ class _InvestState extends State<Invest> {
         setState(() {
           userLoans = data['loans'] ?? [];
           totalRemainingLoanAmount =
-              (data['totalRemainingLoanAmount'] ?? 0).toDouble();
+              (data['totalRemainingAmount'] ?? 0).toDouble();
           investmentAmount = (data['investmentAmount'] ?? 0).toDouble();
           totalInstallment = (data['totalinstallment'] ?? 0).toDouble();
         });
@@ -172,184 +177,415 @@ class _InvestState extends State<Invest> {
 
   @override
   Widget build(BuildContext context) {
-    double height = THelperFunctions.screenHeight(context);
-    double width = THelperFunctions.screenWidth(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Determine max width of main content based on screen size
+    double contentMaxWidth;
+    if (screenWidth < 600) {
+      contentMaxWidth = screenWidth; // Phones — full width
+    } else if (screenWidth < 1000) {
+      contentMaxWidth = 700; // Tablets — max width 700
+    } else {
+      contentMaxWidth = 900; // Laptops/Desktops — max width 900
+    }
+    final deviceType = getDeviceType(context);
+
+    // Define layout parameters based on device type
+    double headingFontSize;
+    double cardHeightFactor;
+    Axis cardsDirection;
+    double bottomButtonWidthFactor;
+
+    switch (deviceType) {
+      case DeviceScreenType.Laptop:
+        headingFontSize = screenHeight * 0.019;
+        cardHeightFactor = 0.16;
+        cardsDirection = Axis.horizontal;
+        bottomButtonWidthFactor = 0.18;
+        break;
+      case DeviceScreenType.Tablet:
+        headingFontSize = screenHeight * 0.13;
+        cardHeightFactor = 0.16;
+        cardsDirection = Axis.horizontal;
+        bottomButtonWidthFactor = 0.18;
+        break;
+      case DeviceScreenType.Mobile:
+      default:
+        headingFontSize = screenHeight * 0.045;
+        cardHeightFactor = 0.15;
+        cardsDirection = Axis.vertical;
+        bottomButtonWidthFactor = 0.74;
+        break;
+    }
 
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: width * 0.04,
-          vertical: height * 0.02,
-        ),
-        child: SingleChildScrollView(
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Hi, Entrepreneur!",
-                  style: TextStyle(
-                    fontSize: height * 0.04,
-                    fontWeight: FontWeight.bold,
-                    color: Scolor.white,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: LayoutBuilder(builder: (context, constraints) {
+          double width = constraints.maxWidth;
+          double iconSize = (deviceType == DeviceScreenType.Mobile)
+              ? 26
+              : (deviceType == DeviceScreenType.Tablet)
+                  ? 30
+                  : 36;
+          double horizontalPadding = (deviceType == DeviceScreenType.Mobile)
+              ? 0
+              : (deviceType == DeviceScreenType.Tablet)
+                  ? 10
+                  : 30;
+
+          return AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: Scolor.primary,
+            elevation: 0,
+            titleSpacing: 0,
+            // title:
+            title: LayoutBuilder(
+              builder: (context, constraints) {
+                // You may define custom breakpoints as per your design
+                double width;
+                if (constraints.maxWidth < 600) {
+                  // Mobile: use full width with padding
+                  width = double.infinity;
+                } else if (constraints.maxWidth < 1000) {
+                  // Tablet: medium box
+                  width = 400;
+                } else {
+                  // Desktop/Laptop: slightly larger, but still centered
+                  width = 500;
+                }
+
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: Text(
+                    "Hi, Entrepreneur!",
+                    style: TextStyle(
+                      fontSize: headingFontSize,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 1,
                   ),
-                ),
-                SizedBox(height: height * 0.05),
-
-                // Info Cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: _infoCard(
-                        "Total Outstanding Loans",
-                        "₹${_formatCurrency(totalRemainingLoanAmount)}",
-                        "Across ${userLoans.length} active loans",
-                        height,
-                        "assets/images/rupeesyellow.png",
-                      ),
-                    ),
-                    SizedBox(width: width * 0.02),
-                    Expanded(
-                      child: _infoCard(
-                        "Monthly Payment",
-                        "₹${_formatCurrency(totalInstallment)}",
-                        "Due Every Month",
-                        height,
-                        "assets/images/Vector-1.png",
-                      ),
-                    ),
-                    SizedBox(width: width * 0.02),
-                    Expanded(
-                      child: _infoCard(
-                        "Investment Amount",
-                        "₹${_formatCurrency(investmentAmount)}",
-                        "Available Funds",
-                        height,
-                        "assets/images/arrow (1).png",
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: height * 0.05),
-
-                // Active Loans
-                Text(
-                  "Active Loans",
-                  style: TextStyle(
-                    fontSize: width * 0.045,
-                    fontWeight: FontWeight.w600,
-                    color: Scolor.white,
-                  ),
-                ),
-                SizedBox(height: height * 0.02),
-                _loanTable(),
-
-                SizedBox(height: height * 0.05),
-
-                // Loan Scheme Scrollable Row
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GovernmentLoansScreen(
-                                loans: recommendedLoans,
-                              ),
-                            ),
-                          );
-                        },
-                        child: _schemeCard(
-                          height,
-                          width,
-                          "Government Schemes",
-                          "assets/images/raphael_piechart.png",
-                          true,
-                        ),
-                      ),
-                      SizedBox(width: width * 0.02),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GovernmentLoansScreen(
-                                loans: privateSchemes,
-                              ),
-                            ),
-                          );
-                        },
-                        child: _schemeCard(
-                          height,
-                          width,
-                          "Private Schemes",
-                          "assets/images/famicons_person-outline.png",
-                          false,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: height * 0.05),
-
-                // Bottom Navigation Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => InvestmentScreen(),
-                          ),
-                        );
-                      },
-                      child: BottomContainer(
-                        height: height,
-                        width: width,
-                        heading: "INVEST",
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => InvestmentGroupsScreen(),
-                          ),
-                        );
-                      },
-                      child: BottomContainer(
-                        height: height,
-                        width: width,
-                        heading: "GROUPS",
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TrackerScreen(),
-                          ),
-                        );
-                      },
-                      child: BottomContainer(
-                        height: height,
-                        width: width,
-                        heading: "TRACKER",
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                );
+              },
             ),
+            actions: [
+              Padding(
+                padding: EdgeInsets.only(right: horizontalPadding + 10),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => TrackerScreen()));
+                  },
+                  child: SizedBox(
+                    height: iconSize,
+                    width: iconSize,
+                    child: Image.asset("assets/images/newwallet.png"),
+                  ),
+                ),
+              )
+            ],
+          );
+        }),
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: SizedBox(
+            width: contentMaxWidth,
+            child: LayoutBuilder(builder: (context, constraints) {
+              double maxWidth;
+              if (screenWidth < 600) {
+                maxWidth = screenWidth;
+              } else if (screenWidth < 1000) {
+                maxWidth = 700;
+              } else {
+                maxWidth = 900;
+              }
+
+              // Info card width based on maxWidth and layout direction
+              double infoCardWidth = (cardsDirection == Axis.horizontal)
+                  ? (maxWidth - 2 * 16) / 3
+                  : maxWidth;
+
+              return Container(
+                width: maxWidth,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Text(
+                    //   "Hi, Entrepreneur!",
+                    //   style: TextStyle(
+                    //     fontSize: headingFontSize,
+                    //     fontWeight: FontWeight.bold,
+                    //     color: Colors.white,
+                    //   ),
+                    // ),
+                    // SizedBox(height: screenHeight * 0.05),
+
+                    // Info cards
+                    cardsDirection == Axis.horizontal
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _infoCard(
+                                "Total Outstanding Loans",
+                                "₹${_formatCurrency(totalRemainingLoanAmount)}",
+                                "Across ${userLoans.length} active loans",
+                                cardHeightFactor * screenHeight,
+                                infoCardWidth,
+                                "assets/images/rupeesyellow.png",
+                              ),
+                              _infoCard(
+                                "Monthly Payment",
+                                "₹${_formatCurrency(totalInstallment)}",
+                                "Due Every Month",
+                                cardHeightFactor * screenHeight,
+                                infoCardWidth,
+                                "assets/images/Vector-1.png",
+                              ),
+                              _infoCard(
+                                "Investment Amount",
+                                "₹${_formatCurrency(investmentAmount)}",
+                                "Available Funds",
+                                cardHeightFactor * screenHeight,
+                                infoCardWidth,
+                                "assets/images/arrow (1).png",
+                              ),
+                            ],
+                          )
+                        : Column(
+                            children: [
+                              _infoCard(
+                                "Total Outstanding Loans",
+                                "₹${_formatCurrency(totalRemainingLoanAmount)}",
+                                "Across ${userLoans.length} active loans",
+                                cardHeightFactor * screenHeight,
+                                infoCardWidth,
+                                "assets/images/rupeesyellow.png",
+                              ),
+                              SizedBox(height: screenHeight * 0.02),
+                              _infoCard(
+                                "Monthly Payment",
+                                "₹${_formatCurrency(totalInstallment)}",
+                                "Due Every Month",
+                                cardHeightFactor * screenHeight,
+                                infoCardWidth,
+                                "assets/images/Vector-1.png",
+                              ),
+                              SizedBox(height: screenHeight * 0.02),
+                              _infoCard(
+                                "Investment Amount",
+                                "₹${_formatCurrency(investmentAmount)}",
+                                "Available Funds",
+                                cardHeightFactor * screenHeight,
+                                infoCardWidth,
+                                "assets/images/arrow (1).png",
+                              ),
+                            ],
+                          ),
+
+                    SizedBox(height: screenHeight * 0.05),
+
+                    // Active loans heading
+                    Text(
+                      "Active Loans",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.045,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.02),
+
+                    // loan table inside limited height
+                    SizedBox(
+                      height: screenHeight * 0.35,
+                      child: _loanTable(),
+                    ),
+
+                    SizedBox(height: screenHeight * 0.05),
+
+                    // Scheme cards horizontal view or wrap on mobile
+                    if (deviceType == DeviceScreenType.Mobile)
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 20,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => GovernmentLoansScreen(
+                                      loans: recommendedLoans),
+                                ),
+                              );
+                            },
+                            child: SizedBox(
+                              width: maxWidth * 0.9,
+                              child: _schemeCard(
+                                screenHeight,
+                                maxWidth,
+                                "Government Schemes",
+                                "assets/images/raphael_piechart.png",
+                                true,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => GovernmentLoansScreen(
+                                      loans: privateSchemes),
+                                ),
+                              );
+                            },
+                            child: SizedBox(
+                              width: maxWidth * 0.9,
+                              child: _schemeCard(
+                                screenHeight,
+                                maxWidth,
+                                "Private Schemes",
+                                "assets/images/famicons_person-outline.png",
+                                false,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => GovernmentLoansScreen(
+                                        loans: recommendedLoans),
+                                  ),
+                                );
+                              },
+                              child: _schemeCard(
+                                screenHeight,
+                                maxWidth,
+                                "Government Schemes",
+                                "assets/images/raphael_piechart.png",
+                                true,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => GovernmentLoansScreen(
+                                        loans: privateSchemes),
+                                  ),
+                                );
+                              },
+                              child: _schemeCard(
+                                screenHeight,
+                                maxWidth,
+                                "Private Schemes",
+                                "assets/images/famicons_person-outline.png",
+                                false,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    SizedBox(height: screenHeight * 0.05),
+
+                    // Bottom buttons (responsive layout)
+                    if (deviceType == DeviceScreenType.Mobile)
+                      Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const Invest())),
+                            child: BottomContainer(
+                                width: maxWidth * bottomButtonWidthFactor,
+                                height: screenHeight,
+                                heading: "INVEST"),
+                          ),
+                          SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        const InvestmentGroupsScreen())),
+                            child: BottomContainer(
+                                width: maxWidth * bottomButtonWidthFactor,
+                                height: screenHeight,
+                                heading: "GROUPS"),
+                          ),
+                          SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const TrackerScreen())),
+                            child: BottomContainer(
+                                width: maxWidth * bottomButtonWidthFactor,
+                                height: screenHeight,
+                                heading: "TRACKER"),
+                          ),
+                        ],
+                      )
+                    else
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const InvestmentScreen())),
+                            child: BottomContainer(
+                                width: maxWidth * bottomButtonWidthFactor,
+                                height: screenHeight,
+                                heading: "INVEST"),
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        const InvestmentGroupsScreen())),
+                            child: BottomContainer(
+                                width: maxWidth * bottomButtonWidthFactor,
+                                height: screenHeight,
+                                heading: "GROUPS"),
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const TrackerScreen())),
+                            child: BottomContainer(
+                                width: maxWidth * bottomButtonWidthFactor,
+                                height: screenHeight,
+                                heading: "TRACKER"),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              );
+            }),
           ),
         ),
       ),
@@ -357,50 +593,50 @@ class _InvestState extends State<Invest> {
   }
 
   Widget _infoCard(String title, String amount, String subtitle, double height,
-      String image) {
+      double width, String image) {
     return Container(
-      height: height * 0.22,
-      padding: const EdgeInsets.all(10),
+      height: height * 1.2,
+      width: width,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(color: Scolor.secondry),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: height * 0.03,
-            width: height * 0.03,
+            height: height * 0.25,
+            width: height * 0.25,
             child: Image.asset(image),
           ),
-          SizedBox(height: height * 0.01),
+          SizedBox(height: height * 0.05),
           Text(
             title,
             style: TextStyle(
-              fontSize: height * 0.018,
+              fontSize: height * 0.11,
               fontWeight: FontWeight.bold,
               color: Scolor.secondry,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: height * 0.005),
+          SizedBox(height: height * 0.05),
           Text(
             amount,
             style: TextStyle(
-              fontSize: height * 0.020,
+              fontSize: height * 0.14,
               fontWeight: FontWeight.bold,
-              color: Scolor.white,
+              color: Colors.white,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: height * 0.005),
+          SizedBox(height: height * 0.05),
           Text(
             subtitle,
             style: TextStyle(
-              fontSize: height * 0.016,
+              fontSize: height * 0.1,
               color: const Color(0xFF41836B),
             ),
             maxLines: 2,
@@ -412,93 +648,79 @@ class _InvestState extends State<Invest> {
   }
 
   Widget _loanTable() {
-    return Column(
-      children: [
-        // Make the entire table horizontally scrollable
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Container(
-            width: MediaQuery.of(context).size.width *
-                1.2, // Make it wider than screen
-            child: Column(
-              children: [
-                // Header row
-                Container(
-                  color: Scolor.secondry,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                  child: Row(
-                    children: [
-                      _tableHeader("Lender"),
-                      _tableHeader("Type"),
-                      _tableHeader("Total Amount"), // New column
-                      _tableHeader("Remaining"),
-                      _tableHeader("Monthly"),
-                    ],
-                  ),
+    return LayoutBuilder(builder: (context, constraints) {
+      double tableWidth = MediaQuery.of(context).size.width < 600
+          ? MediaQuery.of(context).size.width
+          : 700;
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: tableWidth * 1.2,
+          child: Column(
+            children: [
+              Container(
+                color: Scolor.secondry,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                child: Row(
+                  children: [
+                    _tableHeader("Lender"),
+                    _tableHeader("Type"),
+                    _tableHeader("Total Amount"),
+                    _tableHeader("Remaining"),
+                    _tableHeader("Monthly"),
+                  ],
                 ),
-
-                // Loading, error, or data rows
-                if (isLoading)
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: Scolor.secondry,
-                      ),
-                    ),
-                  )
-                else if (error != null)
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      error!,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                else if (userLoans.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      "No active loans found",
-                      style: TextStyle(
-                        color: Scolor.white,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                else
-                  // Data rows with scrollable content
-                  ...userLoans.map((loan) => _loanRow(
-                        loan['Lender_Name']?.toString() ?? 'Unknown Lender',
-                        loan['Loan_Type']?.toString() ?? 'Unknown Type',
-                        "₹${_formatCurrency((loan['Total_Loan_Amount'] ?? 0).toDouble())}", // New total amount
-                        "₹${_formatCurrency((loan['Remaining_Loan_Amount'] ?? 0).toDouble())}",
-                        "₹${_formatCurrency((loan['Monthly_Payment'] ?? 0).toDouble())}",
-                      )),
-              ],
-            ),
+              ),
+              if (isLoading)
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Center(
+                      child: CircularProgressIndicator(color: Scolor.secondry)),
+                )
+              else if (error != null)
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    error!,
+                    style: const TextStyle(color: Colors.red, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              else if (userLoans.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    "No active loans found",
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              else
+                ...userLoans.map((loan) => _loanRow(
+                      loan['Lender_Name'] ?? 'Unknown',
+                      loan['Loan_Type'] ?? 'Unknown',
+                      "₹${_formatCurrency((loan['Total_Loan_Amount'] ?? 0).toDouble())}",
+                      "₹${_formatCurrency((loan['Remaining_Loan_Amount'] ?? 0).toDouble())}",
+                      "₹${_formatCurrency((loan['Monthly_Payment'] ?? 0).toDouble())}",
+                    )),
+            ],
           ),
         ),
-      ],
-    );
+      );
+    });
   }
 
   Widget _tableHeader(String text) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 12,
-            color: Scolor.primary,
+            color: Colors.white,
           ),
           textAlign: TextAlign.center,
           maxLines: 2,
@@ -511,96 +733,75 @@ class _InvestState extends State<Invest> {
   Widget _loanRow(String lender, String loanType, String totalAmount,
       String remaining, String monthly) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Scolor.secondry.withOpacity(0.3),
-            width: 0.5,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.white24, width: 0.5)),
       ),
       child: Row(
         children: [
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                lender,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: Scolor.white,
-                ),
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                maxLines: 2,
+            child: Text(
+              lender,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.white,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              textAlign: TextAlign.left,
             ),
           ),
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                loanType,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: Scolor.white,
-                ),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
+            child: Text(
+              loanType,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.white,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                totalAmount, // New total amount column
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Scolor
-                      .secondry, // Different color to distinguish from remaining
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+            child: Text(
+              totalAmount,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.amber,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                remaining,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Scolor.white,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+            child: Text(
+              remaining,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.white,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                monthly,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: Scolor.white,
-                ),
-                textAlign: TextAlign.right,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+            child: Text(
+              monthly,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.white,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              textAlign: TextAlign.right,
             ),
           ),
         ],
@@ -611,7 +812,6 @@ class _InvestState extends State<Invest> {
   Widget _schemeCard(double height, double width, String heading, String image,
       bool isGovernment) {
     final schemes = isGovernment ? recommendedLoans : privateSchemes;
-
     return Container(
       height: height * 0.22,
       width: width * 0.55,
@@ -624,18 +824,18 @@ class _InvestState extends State<Invest> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               SizedBox(
                 height: height * 0.03,
                 width: height * 0.03,
                 child: Image.asset(image),
               ),
+              SizedBox(width: 8),
               Flexible(
                 child: Text(
                   heading,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: height * 0.035,
                     fontWeight: FontWeight.bold,
                     color: Scolor.secondry,
                   ),
@@ -646,52 +846,35 @@ class _InvestState extends State<Invest> {
           ),
           SizedBox(height: height * 0.01),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (isLoading)
-                    Center(
-                      child: CircularProgressIndicator(
-                        color: Scolor.secondry,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  else if (error != null)
-                    Text(
-                      "Error loading ${isGovernment ? 'loans' : 'schemes'}",
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.red,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    )
-                  else if (schemes.isEmpty)
-                    Text(
-                      "No ${isGovernment ? 'loans' : 'schemes'} available",
+            child: schemes.isEmpty
+                ? Center(
+                    child: Text(
+                      isGovernment
+                          ? "No Government Schemes."
+                          : "No Private Schemes.",
                       style: TextStyle(
-                        fontSize: 10,
-                        color: Scolor.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    )
-                  else
-                    ...schemes.take(4).map((scheme) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 2),
-                          child: Text(
-                            "• ${scheme['name']?.toString() ?? 'Unknown ${isGovernment ? 'Loan' : 'Scheme'}'}",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Scolor.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          color: Colors.white70, fontSize: height * 0.03),
+                    ),
+                  )
+                : ListView(
+                    padding: EdgeInsets.zero,
+                    children: schemes.take(4).map<Widget>((scheme) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 2, horizontal: 4),
+                        child: Text(
+                          "• ${scheme['name'] ?? (isGovernment ? "Government Scheme" : "Private Scheme")}",
+                          style: TextStyle(
+                            fontSize: height * 0.028,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
                           ),
-                        )),
-                ],
-              ),
-            ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                  ),
           ),
         ],
       ),
@@ -699,24 +882,23 @@ class _InvestState extends State<Invest> {
   }
 }
 
-// Assuming BottomContainer is defined elsewhere, here's a basic implementation
 class BottomContainer extends StatelessWidget {
-  final double height;
   final double width;
+  final double height;
   final String heading;
 
-  const BottomContainer({
-    Key? key,
-    required this.height,
-    required this.width,
-    required this.heading,
-  }) : super(key: key);
+  const BottomContainer(
+      {required this.width,
+      required this.height,
+      required this.heading,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
+    final fontSize = width * 0.045 > 16 ? 16 : width * 0.045;
     return Container(
-      height: height * 0.06,
-      width: width * 0.25,
+      width: width * 1,
+      height: height * 0.1,
       decoration: BoxDecoration(
         border: Border.all(color: Scolor.secondry),
         borderRadius: BorderRadius.circular(8),
@@ -725,9 +907,9 @@ class BottomContainer extends StatelessWidget {
         child: Text(
           heading,
           style: TextStyle(
-            color: Scolor.white,
+            // fontSize: fontSize,
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            color: Colors.white,
           ),
         ),
       ),

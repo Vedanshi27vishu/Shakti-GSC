@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FollowersPage extends StatefulWidget {
-  const FollowersPage({Key? key}) : super(key: key);
+  const FollowersPage({super.key});
 
   @override
   _FollowersPageState createState() => _FollowersPageState();
@@ -80,7 +80,7 @@ class _FollowersPageState extends State<FollowersPage> {
 
       // Try to fetch from API
       final response = await http.get(
-        Uri.parse('http://13.233.25.114:5000/user/followers'),
+        Uri.parse('http://65.2.82.85:5000/user/followers'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -256,7 +256,7 @@ class _FollowersPageState extends State<FollowersPage> {
 class FollowerCard extends StatelessWidget {
   final Follower follower;
 
-  const FollowerCard({Key? key, required this.follower}) : super(key: key);
+  const FollowerCard({super.key, required this.follower});
 
   @override
   Widget build(BuildContext context) {

@@ -1,18 +1,18 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shakti/Screens/AI.dart';
 import 'package:shakti/Screens/ExpertsInsights.dart';
 import 'package:shakti/Screens/FinancialRecords.dart';
 import 'package:shakti/Screens/YourBudget.dart';
 import 'package:shakti/Screens/YourFeedback.dart';
 import 'package:shakti/Screens/YourProgress.dart';
 import 'package:shakti/Screens/links.dart';
-import 'package:shakti/Screens/payment_screen.dart';
 import 'package:shakti/Screens/usershaktidetails.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Utils/constants/sizes.dart';
 import 'package:shakti/helpers/helper_functions.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
 class AvatarScreen extends StatefulWidget {
   const AvatarScreen({super.key});
@@ -56,8 +56,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
 
       if (token == null) throw Exception('No authentication token found');
 
-      final url = Uri.parse(
-          'http://13.233.25.114:5000/api/progress/insights');
+      final url = Uri.parse('http://65.2.82.85:5000/api/progress/insights');
 
       final response = await http.get(
         url,
@@ -71,7 +70,6 @@ class _AvatarScreenState extends State<AvatarScreen> {
         final Map<String, dynamic> data = json.decode(response.body);
         final Map<String, dynamic> progressMap = data;
 
-        // Convert to list of maps for uniformity
         List<Map<String, dynamic>> parsedProgress = [];
         progressMap.forEach((key, value) {
           if (value is Map<String, dynamic>) {
@@ -81,11 +79,12 @@ class _AvatarScreenState extends State<AvatarScreen> {
             });
           }
         });
+
         if (!mounted) return;
 
         setState(() {
           allProgressData = parsedProgress;
-          suggestion1 = parsedProgress.length > 0
+          suggestion1 = parsedProgress.isNotEmpty
               ? parsedProgress[0]['description']!
               : "No data";
           suggestion2 = parsedProgress.length > 1
@@ -97,10 +96,10 @@ class _AvatarScreenState extends State<AvatarScreen> {
           isLoadingProgress = false;
         });
       } else {
-        throw Exception(
-            'Failed to fetch progress data: ${response.statusCode}');
+        throw Exception('Failed to fetch progress data: ${response.statusCode}');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         error = 'Error fetching progress data: $e';
         suggestion1 = "Error loading data";
@@ -124,11 +123,9 @@ class _AvatarScreenState extends State<AvatarScreen> {
 
       if (token == null) throw Exception('No authentication token found');
 
-      final url = Uri.parse(
-        'http://13.233.25.114:5000/api/budget/insights',
-      );
+      final url = Uri.parse('http://65.2.82.85:5000/api/budget/insights');
 
-      final response = await http.get(
+      final response = await http.post(
         url,
         headers: {
           'Authorization': 'Bearer $token',
@@ -138,10 +135,10 @@ class _AvatarScreenState extends State<AvatarScreen> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        final Map<String, dynamic> progressMap = data;
+        final Map<String, dynamic> budgetMap = data;
 
         List<Map<String, dynamic>> parsedbudget = [];
-        progressMap.forEach((key, value) {
+        budgetMap.forEach((key, value) {
           if (value is Map<String, dynamic>) {
             parsedbudget.add({
               "title": value["title"] ?? "",
@@ -151,9 +148,10 @@ class _AvatarScreenState extends State<AvatarScreen> {
         });
 
         if (!mounted) return;
+
         setState(() {
           allBudgetData = parsedbudget;
-          suggestionbudget1 = parsedbudget.length > 0
+          suggestionbudget1 = parsedbudget.isNotEmpty
               ? parsedbudget[0]['description']!
               : "No data";
           suggestionbudget2 = parsedbudget.length > 1
@@ -181,194 +179,285 @@ class _AvatarScreenState extends State<AvatarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double height = THelperFunctions.screenHeight(context);
-    double width = THelperFunctions.screenWidth(context);
-
+    // Using LayoutBuilder and Center for responsive width control
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Scolor.primary,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Hi, Entrepreneur!',
-              style: TextStyle(
-                color: Scolor.white,
-                fontSize: height * 0.04,
-                fontWeight: FontWeight.bold,
+        elevation: 0,
+        // Responsive: LayoutBuilder ka istemaal
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            double screenWidth = constraints.maxWidth;
+            double screenHeight = THelperFunctions.screenHeight(context);
+
+            // ⬇️ AppBar ki size/app icon responsive:
+            double titleFontSize;
+            double avatarRadius;
+            double horizontalPad;
+
+            if (screenWidth < 600) {
+              // Mobile
+              titleFontSize = screenHeight * 0.03;
+              avatarRadius = screenHeight * 0.025;
+              horizontalPad = 0;
+            } else if (screenWidth < 1000) {
+              // Tablet
+              titleFontSize = 24;
+              avatarRadius = 30;
+              horizontalPad = 10;
+            } else {
+              // Desktop/Laptop
+              titleFontSize = 28;
+              avatarRadius = 35;
+              horizontalPad = 24;
+            }
+
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPad),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Hi, Entrepreneur!',
+                    style: TextStyle(
+                      color: Scolor.white,
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  CircleAvatar(
+                    radius: avatarRadius,
+                    backgroundColor: Colors.white,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ShaktiProfileScreen()),
+                        );
+                      },
+                      child: Icon(Icons.person,
+                          color: Scolor.primary, size: avatarRadius + 4),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            CircleAvatar(
-              radius: height * 0.025,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                            builder: (context) => ShaktiProfileScreen()));
-                       //   builder: (context) => RazorpayPayment()));
-                },
-                child: Icon(Icons.person, color: Scolor.primary),
-              ),
-              backgroundColor: Colors.white,
-            ),
-          ],
+            );
+          },
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(ESizes.md),
-          child: Column(
-            children: [
-              Center(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: height * 0.3,
-                        width: width * 0.6,
-                        child: Image.asset("assets/images/image 20.png",
-                            fit: BoxFit.cover),
-                      ),
-                      SizedBox(height: height * 0.05),
-                      const Text(
-                        'I am here to help you...',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: ESizes.fontSizeLg,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: height * 0.05),
-                      SizedBox(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            CircularContainer(
-                              image: "assets/images/video.png",
-                              label: "Video",
-                              screen: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            FinancialInsightsScreen()));
-                              },
-                            ),
-                            CircularContainer(
-                              image: "assets/images/doc.png",
-                              label: "Document",
-                              screen: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            FinancialRecordsScreen()));
-                              },
-                            ),
-                            CircularContainer(
-                              image: "assets/images/flowchart.png",
-                              label: "Process",
-                              screen: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            FinancialLinkInsights()));
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: height * 0.02),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: double.infinity,
+      body: Center(
+        child: SingleChildScrollView(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              double maxWidth;
+              if (constraints.maxWidth < 600) {
+                maxWidth = double.infinity;
+              } else if (constraints.maxWidth < 1000) {
+                maxWidth = 600;
+              } else {
+                maxWidth = 700;
+              }
+
+              // Calculate height and width scaling factors based on maxWidth for better scaling inside suggestions
+              double scalingHeight = THelperFunctions.screenHeight(context);
+              double scalingWidth = maxWidth == double.infinity
+                  ? THelperFunctions.screenWidth(context)
+                  : maxWidth;
+
+              return Container(
+                width: maxWidth,
+                padding: const EdgeInsets.all(ESizes.md),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("What I would suggest is..",
-                        style: TextStyle(
-                            fontSize: ESizes.fontSizeLg,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(height: height * 0.02),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
+                    // Top content section with Image and "I am here to help you..."
+                    SizedBox(
+                      width: double.infinity,
+                      child: Column(
                         children: [
-                          SuggestionContainer(
-                            height: height,
-                            image: "assets/Progress.png",
-                            heading: "Your Progress",
-                            suggestion1: suggestion1,
-                            suggestion2: suggestion2,
-                            suggestion3: suggestion3,
-                            suggestionbudget1: "",
-                            suggestionbudget2: "",
-                            suggestionbudget3: "",
-                            width: width,
-                            isLoading: isLoadingProgress,
-                            screen: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => YourProgressScreen(
-                                          progressData: allProgressData)));
-                            },
-                          ),
-                          SuggestionContainer(
-                            height: height,
-                            image: "assets/images/newwallet.png",
-                            heading: "Your Budget",
-                            suggestion1: "",
-                            suggestion2: "",
-                            suggestion3: "",
-                            suggestionbudget1: suggestionbudget1,
-                            suggestionbudget2: suggestionbudget2,
-                            suggestionbudget3: suggestionbudget3,
-                            width: width,
-                            isLoading:
-                                isLoadingBudget, // Fixed: use isLoadingBudget instead of false
-                            screen: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => YourBudgetScreen(
-                                          budgetData: allBudgetData)));
-                            },
-                          ),
-                          SuggestionContainer(
-                            height: height,
-                            image: "assets/images/Group (3).png",
-                            heading: "Your Feedback",
-                            suggestion1: "Ask for reviews",
-                            suggestion2: "Improve quality",
-                            suggestion3: "Engage with clients",
-                            suggestionbudget1: "",
-                            suggestionbudget2: "",
-                            suggestionbudget3: "",
-                            width: width,
-                            isLoading: false, // Feedback doesn't load from API
-                            screen: () {
-                              Navigator.push(
+                          SizedBox(
+                            height: scalingHeight * 0.3,
+                            width: maxWidth * 0.6,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          YourFeedbackScreen()));
-                            },
+                                          BusinessAdvicePage()),
+                                );
+                              },
+                              child: Image.asset(
+                                  "assets/3D Business GIF by L3S Research Center.gif",
+                                  fit: BoxFit.cover),
+                            ),
                           ),
+                          SizedBox(height: scalingHeight * 0.05),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => BusinessAdvicePage()),
+                              );
+                            },
+                            child: const Text(
+                              'I am here to help you...',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: ESizes.fontSizeLg,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: scalingHeight * 0.05),
+                          SizedBox(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                CircularContainer(
+                                  image: "assets/images/video.png",
+                                  label: "Video",
+                                  screen: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              FinancialInsightsScreen()),
+                                    );
+                                  },
+                                ),
+                                CircularContainer(
+                                  image: "assets/images/doc.png",
+                                  label: "Document",
+                                  screen: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              FinancialRecordsScreen()),
+                                    );
+                                  },
+                                ),
+                                CircularContainer(
+                                  image: "assets/images/flowchart.png",
+                                  label: "Process",
+                                  screen: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              FinancialLinkInsights()),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: scalingHeight * 0.02),
+                        ],
+                      ),
+                    ),
+
+                    // Suggestions Section
+                    SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "What I would suggest is..",
+                            style: TextStyle(
+                                fontSize: ESizes.fontSizeLg,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: scalingHeight * 0.02),
+                          // Horizontal Scroll with suggestion cards
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                SuggestionContainer(
+                                  height: scalingHeight,
+                                  width: maxWidth,
+                                  image: "assets/Progress.png",
+                                  heading: "Your Progress",
+                                  suggestion1: suggestion1,
+                                  suggestion2: suggestion2,
+                                  suggestion3: suggestion3,
+                                  suggestionbudget1: "",
+                                  suggestionbudget2: "",
+                                  suggestionbudget3: "",
+                                  isLoading: isLoadingProgress,
+                                  screen: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            YourProgressScreen(
+                                                progressData: allProgressData),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                SuggestionContainer(
+                                  height: scalingHeight,
+                                  width: maxWidth,
+                                  image: "assets/images/newwallet.png",
+                                  heading: "Your Budget",
+                                  suggestion1: "",
+                                  suggestion2: "",
+                                  suggestion3: "",
+                                  suggestionbudget1: suggestionbudget1,
+                                  suggestionbudget2: suggestionbudget2,
+                                  suggestionbudget3: suggestionbudget3,
+                                  isLoading: isLoadingBudget,
+                                  screen: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => YourBudgetScreen(
+                                            budgetData: allBudgetData),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                SuggestionContainer(
+                                  height: scalingHeight,
+                                  width: maxWidth,
+                                  image: "assets/images/Group (3).png",
+                                  heading: "Your Feedback",
+                                  suggestion1: "Ask for reviews",
+                                  suggestion2: "Improve quality",
+                                  suggestion3: "Engage with clients",
+                                  suggestionbudget1: "",
+                                  suggestionbudget2: "",
+                                  suggestionbudget3: "",
+                                  isLoading: false,
+                                  screen: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              YourFeedbackScreen()),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          )
                         ],
                       ),
                     )
                   ],
                 ),
-              )
-            ],
+              );
+            },
           ),
         ),
       ),
@@ -408,13 +497,23 @@ class SuggestionContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use breakpoint based width for container to prevent it from being too wide on large screens
+    double containerWidth;
+    if (width < 600) {
+      containerWidth = width * 0.85;
+    } else if (width < 1000) {
+      containerWidth = 400;
+    } else {
+      containerWidth = 450;
+    }
+
     return SizedBox(
+      width: containerWidth,
       child: GestureDetector(
         onTap: screen,
         child: Container(
           margin: const EdgeInsets.only(right: 10),
           height: height * 0.28,
-          width: width * 0.38,
           decoration: BoxDecoration(
               color: Scolor.primary,
               borderRadius: BorderRadius.circular(10),
@@ -517,7 +616,7 @@ class SuggestionContainer extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                  ],
+                  ]
                 ],
               ),
             ),
@@ -542,15 +641,31 @@ class CircularContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double height = THelperFunctions.screenHeight(context);
-    double width = THelperFunctions.screenWidth(context);
+    double screenWidth = THelperFunctions.screenWidth(context);
+    double screenHeight = THelperFunctions.screenHeight(context);
+
+    // Responsive sizing for circular containers based on screen width breakpoints
+    double containerSize;
+    double fontSize;
+
+    if (screenWidth < 600) {
+      containerSize = screenWidth * 0.16;
+      fontSize = ESizes.fontSizeMd;
+    } else if (screenWidth < 1000) {
+      containerSize = 100;
+      fontSize = 18;
+    } else {
+      containerSize = 110;
+      fontSize = 20;
+    }
+
     return Column(
       children: [
         GestureDetector(
           onTap: screen,
           child: Container(
-            height: height * 0.08,
-            width: width * 0.16,
+            height: containerSize,
+            width: containerSize,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(1000),
                 color: Scolor.secondry),
@@ -560,12 +675,12 @@ class CircularContainer extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: height * 0.01),
+        SizedBox(height: screenHeight * 0.01),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
               color: Colors.white,
-              fontSize: ESizes.fontSizeMd,
+              fontSize: fontSize,
               fontWeight: FontWeight.w600),
         )
       ],

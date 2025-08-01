@@ -32,10 +32,7 @@ class _SplashScreenState extends State<SplashScreen>
   _navigateToHome() async {
     await Future.delayed(Duration(seconds: 3), () {});
     Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                StartScreen())); // Replace with your main screen widget
+        context, MaterialPageRoute(builder: (context) => StartScreen()));
   }
 
   @override
@@ -46,34 +43,63 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth(context);
-    double screenHeight = THelperFunctions.screenHeight(context);
+    // Use LayoutBuilder for responsive breakpoints
     return Scaffold(
       backgroundColor: Scolor.primary,
-      body: FadeTransition(
-        opacity: _animation!,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                  height: 250,
-                  width: 250,
-                  child: Image.asset('assets/logo.png')),
-              SizedBox(height: screenHeight * 0.02), // Responsive spacing
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double screenWidth = constraints.maxWidth;
+          double screenHeight = constraints.maxHeight;
 
-              // App Name
-              Text(
-                "Shakti-Nxt",
-                style: TextStyle(
-                  color: Scolor.light,
-                  fontSize: screenWidth * 0.10, // Responsive font size
-                  fontWeight: FontWeight.bold,
-                ),
+          // --- Set logo and font size by breakpoints ---
+          double logoSize;
+          double fontSize;
+          double spacing;
+          if (screenWidth < 600) {
+            // Mobile
+            logoSize = screenWidth * 0.55;  // e.g. 220px at 400px width
+            fontSize = screenWidth * 0.10;
+            spacing = screenHeight * 0.02;
+          } else if (screenWidth < 1000) {
+            // Tablet
+            logoSize = 320;
+            fontSize = 48;
+            spacing = 30;
+          } else {
+            // Laptop/Desktop
+            logoSize = 400;
+            fontSize = 64;
+            spacing = 38;
+          }
+          // ---------------------------------------------
+
+          return FadeTransition(
+            opacity: _animation!,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo
+                  Container(
+                    height: logoSize,
+                    width: logoSize,
+                    child: Image.asset('assets/logo.png'),
+                  ),
+                  SizedBox(height: spacing),
+                  // App Name
+                  Text(
+                    "Shakti-Nxt",
+                    style: TextStyle(
+                      color: Scolor.light,
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ), // Replace with your image asset
-        ),
+            ),
+          );
+        },
       ),
     );
   }

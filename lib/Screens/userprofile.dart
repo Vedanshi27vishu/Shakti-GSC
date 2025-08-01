@@ -56,9 +56,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
         throw Exception('No auth token found');
       }
 
-      // Fetch user profile data
       final response = await http.get(
-        Uri.parse('http://13.233.25.114:5000/profile/details'),
+        Uri.parse('http://65.2.82.85:5000/profile/details'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -90,7 +89,6 @@ class _ProfileScreenState extends State<UserProfileScreen>
         userName = "Error loading profile";
       });
 
-      // Show error dialog
       if (mounted) {
         showDialog(
           context: context,
@@ -123,6 +121,17 @@ class _ProfileScreenState extends State<UserProfileScreen>
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    // <-- Added responsive width logic here
+    double contentMaxWidth;
+    if (screenWidth < 600) {
+      contentMaxWidth = screenWidth; // Phone: full width
+    } else if (screenWidth < 1000) {
+      contentMaxWidth = 700; // Tablet: max width 700
+    } else {
+      contentMaxWidth = 900; // Laptop/Desktop: max width 900
+    }
+    // -->
 
     return Scaffold(
       backgroundColor: darkBlue,
@@ -159,18 +168,34 @@ class _ProfileScreenState extends State<UserProfileScreen>
               child: CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
-                    child: _buildProfileHeader(screenWidth, screenHeight),
+                    child: Center(
+                      // <-- constrained container width for profile header
+                      child: Container(
+                        width: contentMaxWidth,
+                        child: _buildProfileHeader(screenWidth, screenHeight),
+                      ),
+                    ),
                   ),
                   SliverToBoxAdapter(
-                    child: _buildTabBar(),
+                    child: Center(
+                      child: Container(
+                        width: contentMaxWidth,
+                        child: _buildTabBar(),
+                      ),
+                    ),
                   ),
                   SliverFillRemaining(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildPostsGrid(),
-                        _buildTaggedPosts(),
-                      ],
+                    child: Center(
+                      child: Container(
+                        width: contentMaxWidth,
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildPostsGrid(),
+                            _buildTaggedPosts(),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -287,8 +312,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                     ),
                   ),
                 ],
-                if (businessSector.isNotEmpty ||
-                    businessLocation.isNotEmpty) ...[
+                if (businessSector.isNotEmpty || businessLocation.isNotEmpty) ...[
                   SizedBox(height: 10),
                   Row(
                     children: [
@@ -303,15 +327,13 @@ class _ProfileScreenState extends State<UserProfileScreen>
                           ),
                         ),
                       ],
-                      if (businessSector.isNotEmpty &&
-                          businessLocation.isNotEmpty)
+                      if (businessSector.isNotEmpty && businessLocation.isNotEmpty)
                         Text(
                           ' • ',
                           style: TextStyle(color: Colors.grey[400]),
                         ),
                       if (businessLocation.isNotEmpty) ...[
-                        Icon(Icons.location_on,
-                            color: Colors.grey[400], size: 16),
+                        Icon(Icons.location_on, color: Colors.grey[400], size: 16),
                         SizedBox(width: 5),
                         Text(
                           businessLocation,
@@ -382,9 +404,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
     );
   }
 
-  Widget _buildActionButton(
-      String text, IconData icon, VoidCallback onPressed) {
-    return Container(
+  Widget _buildActionButton(String text, IconData icon, VoidCallback onPressed) {
+    return SizedBox(
       height: 35,
       child: ElevatedButton.icon(
         onPressed: onPressed,
@@ -439,11 +460,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.camera_alt_outlined,
-              size: 80,
-              color: Colors.grey[600],
-            ),
+            Icon(Icons.camera_alt_outlined, size: 80, color: Colors.grey[600]),
             SizedBox(height: 20),
             Text(
               'No posts yet',
@@ -511,7 +528,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                           color: lightBlue,
                           child: Center(
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(yellow),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(yellow),
                               value: loadingProgress.expectedTotalBytes != null
                                   ? loadingProgress.cumulativeBytesLoaded /
                                       loadingProgress.expectedTotalBytes!
@@ -558,8 +576,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                       if (post['likes'] != null &&
                           (post['likes'] as List).isNotEmpty)
                         Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(10),
@@ -581,8 +599,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                       if (post['comments'] != null &&
                           (post['comments'] as List).isNotEmpty)
                         Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(10),
@@ -616,11 +634,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.person_pin_outlined,
-            size: 80,
-            color: Colors.grey[600],
-          ),
+          Icon(Icons.person_pin_outlined, size: 80, color: Colors.grey[600]),
           SizedBox(height: 20),
           Text(
             'No tagged posts',
@@ -654,8 +668,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
           ),
           child: Container(
             padding: EdgeInsets.all(20),
-            constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8),
+            constraints:
+                BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -667,8 +681,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                       backgroundColor: lightBlue,
                       child: Text(
                         userName.isNotEmpty ? userName[0].toUpperCase() : '?',
-                        style: TextStyle(
-                            color: yellow, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: yellow, fontWeight: FontWeight.bold),
                       ),
                     ),
                     SizedBox(width: 10),
@@ -687,10 +700,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                               (post['interestTags'] as List).isNotEmpty)
                             Text(
                               (post['interestTags'] as List).join(', '),
-                              style: TextStyle(
-                                color: Colors.grey[400],
-                                fontSize: 12,
-                              ),
+                              style: TextStyle(color: Colors.grey[400], fontSize: 12),
                             ),
                         ],
                       ),
@@ -700,14 +710,11 @@ class _ProfileScreenState extends State<UserProfileScreen>
                 SizedBox(height: 15),
 
                 // Post Image or Content
-                if (post['mediaUrl'] != null &&
-                    post['mediaUrl'].toString().isNotEmpty)
+                if (post['mediaUrl'] != null && post['mediaUrl'].toString().isNotEmpty)
                   Container(
                     height: 200,
                     width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.network(
@@ -716,11 +723,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             color: lightBlue,
-                            child: Icon(
-                              Icons.broken_image,
-                              color: yellow,
-                              size: 60,
-                            ),
+                            child: Icon(Icons.broken_image, color: yellow, size: 60),
                           );
                         },
                       ),
@@ -735,14 +738,9 @@ class _ProfileScreenState extends State<UserProfileScreen>
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
-                      child: Icon(
-                        Icons.text_fields,
-                        color: yellow,
-                        size: 40,
-                      ),
+                      child: Icon(Icons.text_fields, color: yellow, size: 40),
                     ),
                   ),
-
                 SizedBox(height: 15),
 
                 // Post Content
@@ -750,10 +748,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                   alignment: Alignment.centerLeft,
                   child: Text(
                     post['content'] ?? 'No content',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
 
@@ -795,10 +790,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                 // Close button
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Close',
-                    style: TextStyle(color: yellow),
-                  ),
+                  child: Text('Close', style: TextStyle(color: yellow)),
                 ),
               ],
             ),

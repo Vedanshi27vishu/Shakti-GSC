@@ -1,15 +1,16 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Screens/BusinessDetails.dart';
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/Widgets/AppWidgets/UnderlineHeading.dart';
 import 'package:shakti/Widgets/AppWidgets/Continue.dart';
 import 'package:shakti/Widgets/AppWidgets/InputField.dart';
 import 'package:shakti/Widgets/AppWidgets/Subheading.dart';
 import 'package:shakti/Widgets/AppWidgets/ThreeCircle.dart';
+import 'package:shakti/Widgets/AppWidgets/UnderlineHeading.dart';
 import 'package:shakti/helpers/helper_functions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FinancialDetails extends StatefulWidget {
   const FinancialDetails({super.key});
@@ -55,8 +56,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
       return;
     }
 
-    final url = Uri.parse(
-        "http://13.233.25.114:5000/api/signup/signup2");
+    final url = Uri.parse("http://65.2.82.85:5000/api/signup/signup2");
 
     final loanList = loanControllers.map((loan) {
       return {

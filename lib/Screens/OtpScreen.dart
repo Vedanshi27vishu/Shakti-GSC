@@ -10,7 +10,7 @@ import 'package:shakti/helpers/helper_functions.dart';
 class OTPScreen extends StatefulWidget {
   final String sessionId;
 
-  const OTPScreen({Key? key, required this.sessionId}) : super(key: key);
+  const OTPScreen({super.key, required this.sessionId});
 
   @override
   State<OTPScreen> createState() => _OTPScreenState();
@@ -21,7 +21,7 @@ class _OTPScreenState extends State<OTPScreen> {
   bool _isResending = false;
   String _enteredOtp = '';
 
-  final String baseUrl = 'http://13.233.25.114:5000/api/auth';
+  final String baseUrl = 'http://65.2.82.85:5000/api/auth';
 
   Future<void> _verifyOtp() async {
     if (_enteredOtp.length != 6) return;

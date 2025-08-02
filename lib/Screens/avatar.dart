@@ -181,7 +181,6 @@ class _AvatarScreenState extends State<AvatarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Using LayoutBuilder and Center for responsive width control
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -281,29 +280,30 @@ class _AvatarScreenState extends State<AvatarScreen> {
                       width: double.infinity,
                       child: Column(
                         children: [
-                         SizedBox(
-                      width: (maxWidth == double.infinity)
-                          ? THelperFunctions.screenWidth(context) * 0.9
-                          : maxWidth * 0.9,
-                      height: scalingHeight * 0.5,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BusinessAdvicePage()),
-                          );
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            "assets/—Pngtree—cutting-edge ai robot displaying seo_20858701.png",
-                            fit: BoxFit.cover,
-                            alignment: Alignment.topCenter,
+                          SizedBox(
+                            width: (maxWidth == double.infinity)
+                                ? THelperFunctions.screenWidth(context) * 0.9
+                                : maxWidth * 0.9,
+                            height: scalingHeight * 0.5,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          BusinessAdvicePage()),
+                                );
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  "assets/—Pngtree—cutting-edge ai robot displaying seo_20858701.png",
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.topCenter,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
                           SizedBox(height: scalingHeight * 0.05),
                           GestureDetector(
                             onTap: () {

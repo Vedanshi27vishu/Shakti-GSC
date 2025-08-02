@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/InvestScreen.dart';
@@ -9,22 +8,8 @@ import 'package:shakti/Screens/tracker.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum DeviceScreenType { Mobile, Tablet, Laptop }
-
-DeviceScreenType getDeviceType(BuildContext context) {
-  final width = MediaQuery.of(context).size.width;
-  if (width >= 900) {
-    return DeviceScreenType.Laptop;
-  } else if (width >= 600) {
-    return DeviceScreenType.Tablet;
-  } else {
-    return DeviceScreenType.Mobile;
-  }
-}
-
 class Invest extends StatefulWidget {
   const Invest({super.key});
-
   @override
   State<Invest> createState() => _InvestState();
 }
@@ -78,19 +63,15 @@ class _InvestState extends State<Invest> {
       isLoading = true;
       error = null;
     });
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
-
       final url = Uri.parse('http://65.2.82.85:5000/filter-loans');
-
       final response = await http.post(url, headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       });
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (!mounted) return;
@@ -115,14 +96,11 @@ class _InvestState extends State<Invest> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
-
       final url = Uri.parse('http://65.2.82.85:5000/private-schemes');
-
       final response = await http.post(url, headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       });
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (!mounted) return;
@@ -146,14 +124,11 @@ class _InvestState extends State<Invest> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
-
       final url = Uri.parse('http://65.2.82.85:5000/api/financial/loans');
-
       final response = await http.get(url, headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       });
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (!mounted) return;
@@ -180,464 +155,233 @@ class _InvestState extends State<Invest> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Determine max width of main content based on screen size
-    double contentMaxWidth;
+    double maxContentWidth;
     if (screenWidth < 600) {
-      contentMaxWidth = screenWidth; // Phones — full width
+      maxContentWidth = double.infinity; // Mobile: full width
     } else if (screenWidth < 1000) {
-      contentMaxWidth = 700; // Tablets — max width 700
+      maxContentWidth = 600; // Tablet
     } else {
-      contentMaxWidth = 900; // Laptops/Desktops — max width 900
-    }
-    final deviceType = getDeviceType(context);
-
-    // Define layout parameters based on device type
-    double headingFontSize;
-    double cardHeightFactor;
-    Axis cardsDirection;
-    double bottomButtonWidthFactor;
-
-    switch (deviceType) {
-      case DeviceScreenType.Laptop:
-        headingFontSize = screenHeight * 0.019;
-        cardHeightFactor = 0.16;
-        cardsDirection = Axis.horizontal;
-        bottomButtonWidthFactor = 0.18;
-        break;
-      case DeviceScreenType.Tablet:
-        headingFontSize = screenHeight * 0.13;
-        cardHeightFactor = 0.16;
-        cardsDirection = Axis.horizontal;
-        bottomButtonWidthFactor = 0.18;
-        break;
-      case DeviceScreenType.Mobile:
-      default:
-        headingFontSize = screenHeight * 0.045;
-        cardHeightFactor = 0.15;
-        cardsDirection = Axis.vertical;
-        bottomButtonWidthFactor = 0.74;
-        break;
+      maxContentWidth = 700; // Laptop/Desktop
     }
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: LayoutBuilder(builder: (context, constraints) {
-          double width = constraints.maxWidth;
-          double iconSize = (deviceType == DeviceScreenType.Mobile)
-              ? 26
-              : (deviceType == DeviceScreenType.Tablet)
-                  ? 30
-                  : 36;
-          double horizontalPadding = (deviceType == DeviceScreenType.Mobile)
-              ? 0
-              : (deviceType == DeviceScreenType.Tablet)
-                  ? 10
-                  : 30;
-
-          return AppBar(
-            automaticallyImplyLeading: false,
-            backgroundColor: Scolor.primary,
-            elevation: 0,
-            titleSpacing: 0,
-            // title:
-            title: LayoutBuilder(
-              builder: (context, constraints) {
-                // You may define custom breakpoints as per your design
-                double width;
-                if (constraints.maxWidth < 600) {
-                  // Mobile: use full width with padding
-                  width = double.infinity;
-                } else if (constraints.maxWidth < 1000) {
-                  // Tablet: medium box
-                  width = 400;
-                } else {
-                  // Desktop/Laptop: slightly larger, but still centered
-                  width = 500;
-                }
-
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                  child: Text(
-                    "Hi, Entrepreneur!",
-                    style: TextStyle(
-                      fontSize: headingFontSize,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    maxLines: 1,
-                  ),
-                );
-              },
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Scolor.primary,
+        elevation: 0,
+        titleSpacing: 0,
+        title: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            "Hi, Entrepreneur!",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              overflow: TextOverflow.ellipsis,
             ),
-            actions: [
-              Padding(
-                padding: EdgeInsets.only(right: horizontalPadding + 10),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => TrackerScreen()));
-                  },
-                  child: SizedBox(
-                    height: iconSize,
-                    width: iconSize,
-                    child: Image.asset("assets/images/newwallet.png"),
-                  ),
-                ),
-              )
-            ],
-          );
-        }),
+            maxLines: 1,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 22),
+            child: GestureDetector(
+              onTap: () => Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => TrackerScreen())),
+              child: SizedBox(
+                height: 28,
+                width: 28,
+                child: Image.asset("assets/images/newwallet.png"),
+              ),
+            ),
+          )
+        ],
       ),
       body: SingleChildScrollView(
-        child: Center(
-          child: SizedBox(
-            width: contentMaxWidth,
-            child: LayoutBuilder(builder: (context, constraints) {
-              double maxWidth;
-              if (screenWidth < 600) {
-                maxWidth = screenWidth;
-              } else if (screenWidth < 1000) {
-                maxWidth = 700;
-              } else {
-                maxWidth = 900;
-              }
-
-              // Info card width based on maxWidth and layout direction
-              double infoCardWidth = (cardsDirection == Axis.horizontal)
-                  ? (maxWidth - 2 * 16) / 3
-                  : maxWidth;
-
-              return Container(
-                width: maxWidth,
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Text(
-                    //   "Hi, Entrepreneur!",
-                    //   style: TextStyle(
-                    //     fontSize: headingFontSize,
-                    //     fontWeight: FontWeight.bold,
-                    //     color: Colors.white,
-                    //   ),
-                    // ),
-                    // SizedBox(height: screenHeight * 0.05),
-
-                    // Info cards
-                    cardsDirection == Axis.horizontal
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _infoCard(
-                                "Total Outstanding Loans",
-                                "₹${_formatCurrency(totalRemainingLoanAmount)}",
-                                "Across ${userLoans.length} active loans",
-                                cardHeightFactor * screenHeight,
-                                infoCardWidth,
-                                "assets/images/rupeesyellow.png",
-                              ),
-                              _infoCard(
-                                "Monthly Payment",
-                                "₹${_formatCurrency(totalInstallment)}",
-                                "Due Every Month",
-                                cardHeightFactor * screenHeight,
-                                infoCardWidth,
-                                "assets/images/Vector-1.png",
-                              ),
-                              _infoCard(
-                                "Investment Amount",
-                                "₹${_formatCurrency(investmentAmount)}",
-                                "Available Funds",
-                                cardHeightFactor * screenHeight,
-                                infoCardWidth,
-                                "assets/images/arrow (1).png",
-                              ),
-                            ],
-                          )
-                        : Column(
-                            children: [
-                              _infoCard(
-                                "Total Outstanding Loans",
-                                "₹${_formatCurrency(totalRemainingLoanAmount)}",
-                                "Across ${userLoans.length} active loans",
-                                cardHeightFactor * screenHeight,
-                                infoCardWidth,
-                                "assets/images/rupeesyellow.png",
-                              ),
-                              SizedBox(height: screenHeight * 0.02),
-                              _infoCard(
-                                "Monthly Payment",
-                                "₹${_formatCurrency(totalInstallment)}",
-                                "Due Every Month",
-                                cardHeightFactor * screenHeight,
-                                infoCardWidth,
-                                "assets/images/Vector-1.png",
-                              ),
-                              SizedBox(height: screenHeight * 0.02),
-                              _infoCard(
-                                "Investment Amount",
-                                "₹${_formatCurrency(investmentAmount)}",
-                                "Available Funds",
-                                cardHeightFactor * screenHeight,
-                                infoCardWidth,
-                                "assets/images/arrow (1).png",
-                              ),
-                            ],
-                          ),
-
-                    SizedBox(height: screenHeight * 0.05),
-
-                    // Active loans heading
-                    Text(
-                      "Active Loans",
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.045,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-
-                    // loan table inside limited height
-                    SizedBox(
-                      height: screenHeight * 0.35,
-                      child: _loanTable(),
-                    ),
-
-                    SizedBox(height: screenHeight * 0.05),
-
-                    // Scheme cards horizontal view or wrap on mobile
-                    if (deviceType == DeviceScreenType.Mobile)
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 20,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => GovernmentLoansScreen(
-                                      loans: recommendedLoans),
-                                ),
-                              );
-                            },
-                            child: SizedBox(
-                              width: maxWidth * 0.9,
-                              child: _schemeCard(
-                                screenHeight,
-                                maxWidth,
-                                "Government Schemes",
-                                "assets/images/raphael_piechart.png",
-                                true,
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => GovernmentLoansScreen(
-                                      loans: privateSchemes),
-                                ),
-                              );
-                            },
-                            child: SizedBox(
-                              width: maxWidth * 0.9,
-                              child: _schemeCard(
-                                screenHeight,
-                                maxWidth,
-                                "Private Schemes",
-                                "assets/images/famicons_person-outline.png",
-                                false,
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => GovernmentLoansScreen(
-                                        loans: recommendedLoans),
-                                  ),
-                                );
-                              },
-                              child: _schemeCard(
-                                screenHeight,
-                                maxWidth,
-                                "Government Schemes",
-                                "assets/images/raphael_piechart.png",
-                                true,
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => GovernmentLoansScreen(
-                                        loans: privateSchemes),
-                                  ),
-                                );
-                              },
-                              child: _schemeCard(
-                                screenHeight,
-                                maxWidth,
-                                "Private Schemes",
-                                "assets/images/famicons_person-outline.png",
-                                false,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    SizedBox(height: screenHeight * 0.05),
-
-                    // Bottom buttons (responsive layout)
-                    if (deviceType == DeviceScreenType.Mobile)
-                      Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const Invest())),
-                            child: BottomContainer(
-                                width: maxWidth * bottomButtonWidthFactor,
-                                height: screenHeight,
-                                heading: "INVEST"),
-                          ),
-                          SizedBox(height: 12),
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        const InvestmentGroupsScreen())),
-                            child: BottomContainer(
-                                width: maxWidth * bottomButtonWidthFactor,
-                                height: screenHeight,
-                                heading: "GROUPS"),
-                          ),
-                          SizedBox(height: 12),
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const TrackerScreen())),
-                            child: BottomContainer(
-                                width: maxWidth * bottomButtonWidthFactor,
-                                height: screenHeight,
-                                heading: "TRACKER"),
-                          ),
-                        ],
-                      )
-                    else
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const InvestmentScreen())),
-                            child: BottomContainer(
-                                width: maxWidth * bottomButtonWidthFactor,
-                                height: screenHeight,
-                                heading: "INVEST"),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        const InvestmentGroupsScreen())),
-                            child: BottomContainer(
-                                width: maxWidth * bottomButtonWidthFactor,
-                                height: screenHeight,
-                                heading: "GROUPS"),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const TrackerScreen())),
-                            child: BottomContainer(
-                                width: maxWidth * bottomButtonWidthFactor,
-                                height: screenHeight,
-                                heading: "TRACKER"),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-              );
-            }),
+        child: SafeArea(
+          child: Center(
+            child: Container(
+              width: maxContentWidth,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: _buildContent(screenWidth, screenHeight, maxContentWidth),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _infoCard(String title, String amount, String subtitle, double height,
-      double width, String image) {
+  Widget _buildContent(
+      double screenWidth, double screenHeight, double maxWidth) {
+    double cardWidth;
+    if (screenWidth < 600) {
+      cardWidth = screenWidth * 0.48;
+    } else if (screenWidth < 1000) {
+      cardWidth = 280;
+    } else {
+      cardWidth = 300;
+    }
+    double cardHeight = 114;
+
+    double tableWidth;
+    if (screenWidth < 600) {
+      tableWidth = screenWidth * 0.9;
+    } else if (screenWidth < 1000) {
+      tableWidth = 600;
+    } else {
+      tableWidth = 700;
+    }
+    double tableHeight;
+    if (screenWidth < 600) {
+      tableHeight = screenHeight * 0.3;
+    } else {
+      tableHeight = 200;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _infoCard(
+                  "Total Loans",
+                  "₹${_formatCurrency(totalRemainingLoanAmount)}",
+                  "${userLoans.length} active loans",
+                  cardHeight,
+                  cardWidth,
+                  "assets/images/rupeesyellow.png"),
+              const SizedBox(width: 10),
+              _infoCard(
+                  "Monthly Payment",
+                  "₹${_formatCurrency(totalInstallment)}",
+                  "Due Every Month",
+                  cardHeight,
+                  cardWidth,
+                  "assets/images/Vector-1.png"),
+              const SizedBox(width: 10),
+              _infoCard(
+                  "Investment",
+                  "₹${_formatCurrency(investmentAmount)}",
+                  "Available Funds",
+                  cardHeight,
+                  cardWidth,
+                  "assets/images/arrow (1).png"),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          "Active Loans",
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: tableHeight,
+          width: tableWidth,
+          child: _loanTable(),
+        ),
+        
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _schemeCard(cardHeight, cardWidth, "Government Schemes",
+                  "assets/images/raphael_piechart.png", true),
+              const SizedBox(width: 10),
+              _schemeCard(cardHeight, cardWidth, "Private Schemes",
+                  "assets/images/famicons_person-outline.png", false),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const Invest())),
+                child: BottomContainer(width: cardWidth * 0.6, height: 45, heading: "INVEST"),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const InvestmentGroupsScreen())),
+                child: BottomContainer(width: cardWidth * 0.6, height: 45, heading: "GROUPS"),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const TrackerScreen())),
+                child: BottomContainer(width: cardWidth * 0.6, height: 45, heading: "TRACKER"),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _infoCard(
+    String title,
+    String amount,
+    String subtitle,
+    double height,
+    double width,
+    String image,
+  ) {
     return Container(
-      height: height * 1.2,
-      width: width,
-      padding: const EdgeInsets.all(12),
+      height: height * 0.9,
+      width: width * 0.58,
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 2),
       decoration: BoxDecoration(
         border: Border.all(color: Scolor.secondry),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(7),
+        color: Scolor.primary,
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: height * 0.25,
-            width: height * 0.25,
-            child: Image.asset(image),
+          Row(
+            children: [
+              Image.asset(image, height: height * 0.2, width: height * 0.15),
+              const SizedBox(width: 5),
+              Expanded(
+                  child: Text(title,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Scolor.secondry,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis)),
+            ],
           ),
-          SizedBox(height: height * 0.05),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: height * 0.11,
-              fontWeight: FontWeight.bold,
-              color: Scolor.secondry,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          SizedBox(height: height * 0.05),
+          const SizedBox(height: 7),
           Text(
             amount,
-            style: TextStyle(
-              fontSize: height * 0.14,
+            style: const TextStyle(
+              fontSize: 13.5,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: height * 0.05),
+          const SizedBox(height: 2),
           Text(
             subtitle,
-            style: TextStyle(
-              fontSize: height * 0.1,
-              color: const Color(0xFF41836B),
+            style: const TextStyle(
+              fontSize: 10,
+              color: Color(0xFF41836B),
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -647,26 +391,98 @@ class _InvestState extends State<Invest> {
     );
   }
 
+  Widget _schemeCard(
+      double height, double width, String heading, String image, bool isGovernment) {
+    final schemes = isGovernment ? recommendedLoans : privateSchemes;
+    return Container(
+      height: height * 1.2,
+      width: width * 0.9,
+      padding: const EdgeInsets.all(7),
+      margin: const EdgeInsets.only(bottom: 6, right: 7),
+      decoration: BoxDecoration(
+        border: Border.all(color: Scolor.secondry),
+        borderRadius: BorderRadius.circular(8),
+        color: Scolor.primary,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Image.asset(image, height: height * 0.19, width: height * 0.17),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  heading,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Scolor.secondry,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Expanded(
+            child: schemes.isEmpty
+                ? Center(
+                    child: Text(
+                      isGovernment
+                          ? "No Government Schemes."
+                          : "No Private Schemes.",
+                      style: const TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
+                  )
+                : ListView(
+                    padding: EdgeInsets.zero,
+                    children: schemes.take(4).map<Widget>((scheme) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 1, horizontal: 2),
+                        child: Text(
+                          "• ${scheme['name'] ?? (isGovernment ? "Government Scheme" : "Private Scheme")}",
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _loanTable() {
     return LayoutBuilder(builder: (context, constraints) {
+      double tableheight = MediaQuery.of(context).size.height < 600
+          ? MediaQuery.of(context).size.height * 0.4
+          : 600;
       double tableWidth = MediaQuery.of(context).size.width < 600
-          ? MediaQuery.of(context).size.width
-          : 700;
+          ? MediaQuery.of(context).size.width * 1.2
+          : 600;
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(
-          width: tableWidth * 1.2,
+          width: tableWidth,
+          height: tableheight,
           child: Column(
             children: [
               Container(
                 color: Scolor.secondry,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 8),
                 child: Row(
                   children: [
                     _tableHeader("Lender"),
                     _tableHeader("Type"),
-                    _tableHeader("Total Amount"),
+                    _tableHeader("Total"),
                     _tableHeader("Remaining"),
                     _tableHeader("Monthly"),
                   ],
@@ -674,25 +490,25 @@ class _InvestState extends State<Invest> {
               ),
               if (isLoading)
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(12),
                   child: Center(
                       child: CircularProgressIndicator(color: Scolor.secondry)),
                 )
               else if (error != null)
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(10),
                   child: Text(
                     error!,
-                    style: const TextStyle(color: Colors.red, fontSize: 14),
+                    style: const TextStyle(color: Colors.red, fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
                 )
               else if (userLoans.isEmpty)
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(10),
                   child: Text(
                     "No active loans found",
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
                 )
@@ -714,13 +530,13 @@ class _InvestState extends State<Invest> {
   Widget _tableHeader(String text) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Text(
           text,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 12,
-            color: Colors.white,
+            fontSize: 15,
+            color: Colors.black,
           ),
           textAlign: TextAlign.center,
           maxLines: 2,
@@ -733,10 +549,9 @@ class _InvestState extends State<Invest> {
   Widget _loanRow(String lender, String loanType, String totalAmount,
       String remaining, String monthly) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white24, width: 0.5)),
-      ),
+          border: Border(bottom: BorderSide(color: Colors.white24, width: 0.5))),
       child: Row(
         children: [
           Expanded(
@@ -744,7 +559,7 @@ class _InvestState extends State<Invest> {
               lender,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 14,
                 color: Colors.white,
               ),
               overflow: TextOverflow.ellipsis,
@@ -808,106 +623,33 @@ class _InvestState extends State<Invest> {
       ),
     );
   }
-
-  Widget _schemeCard(double height, double width, String heading, String image,
-      bool isGovernment) {
-    final schemes = isGovernment ? recommendedLoans : privateSchemes;
-    return Container(
-      height: height * 0.22,
-      width: width * 0.55,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Scolor.secondry),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                height: height * 0.03,
-                width: height * 0.03,
-                child: Image.asset(image),
-              ),
-              SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  heading,
-                  style: TextStyle(
-                    fontSize: height * 0.035,
-                    fontWeight: FontWeight.bold,
-                    color: Scolor.secondry,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: height * 0.01),
-          Expanded(
-            child: schemes.isEmpty
-                ? Center(
-                    child: Text(
-                      isGovernment
-                          ? "No Government Schemes."
-                          : "No Private Schemes.",
-                      style: TextStyle(
-                          color: Colors.white70, fontSize: height * 0.03),
-                    ),
-                  )
-                : ListView(
-                    padding: EdgeInsets.zero,
-                    children: schemes.take(4).map<Widget>((scheme) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 2, horizontal: 4),
-                        child: Text(
-                          "• ${scheme['name'] ?? (isGovernment ? "Government Scheme" : "Private Scheme")}",
-                          style: TextStyle(
-                            fontSize: height * 0.028,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class BottomContainer extends StatelessWidget {
   final double width;
   final double height;
   final String heading;
-
   const BottomContainer(
       {required this.width,
       required this.height,
       required this.heading,
       super.key});
-
   @override
   Widget build(BuildContext context) {
-    final fontSize = width * 0.045 > 16 ? 16 : width * 0.045;
+    final fontSize = width * 0.038 > 13 ? 13 : width * 0.038;
     return Container(
-      width: width * 1,
-      height: height * 0.1,
+      width: width,
+      height: height,
       decoration: BoxDecoration(
         border: Border.all(color: Scolor.secondry),
         borderRadius: BorderRadius.circular(8),
+        color: Scolor.primary,
       ),
       child: Center(
         child: Text(
           heading,
           style: TextStyle(
-            // fontSize: fontSize,
+           // fontSize: fontSize,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),

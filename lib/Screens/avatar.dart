@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/AI.dart';
@@ -96,7 +97,8 @@ class _AvatarScreenState extends State<AvatarScreen> {
           isLoadingProgress = false;
         });
       } else {
-        throw Exception('Failed to fetch progress data: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch progress data: ${response.statusCode}');
       }
     } catch (e) {
       if (!mounted) return;
@@ -279,23 +281,29 @@ class _AvatarScreenState extends State<AvatarScreen> {
                       width: double.infinity,
                       child: Column(
                         children: [
-                          SizedBox(
-                            height: scalingHeight * 0.3,
-                            width: maxWidth * 0.6,
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          BusinessAdvicePage()),
-                                );
-                              },
-                              child: Image.asset(
-                                  "assets/3D Business GIF by L3S Research Center.gif",
-                                  fit: BoxFit.cover),
-                            ),
+                         SizedBox(
+                      width: (maxWidth == double.infinity)
+                          ? THelperFunctions.screenWidth(context) * 0.9
+                          : maxWidth * 0.9,
+                      height: scalingHeight * 0.5,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => BusinessAdvicePage()),
+                          );
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.asset(
+                            "assets/—Pngtree—cutting-edge ai robot displaying seo_20858701.png",
+                            fit: BoxFit.cover,
+                            alignment: Alignment.topCenter,
                           ),
+                        ),
+                      ),
+                    ),
                           SizedBox(height: scalingHeight * 0.05),
                           GestureDetector(
                             onTap: () {
@@ -320,7 +328,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 CircularContainer(
-                                  image: "assets/images/video.png",
+                                  image: "assets/video-editing.png",
                                   label: "Video",
                                   screen: () {
                                     Navigator.push(
@@ -332,7 +340,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
                                   },
                                 ),
                                 CircularContainer(
-                                  image: "assets/images/doc.png",
+                                  image: "assets/portfolio.png",
                                   label: "Document",
                                   screen: () {
                                     Navigator.push(
@@ -344,7 +352,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
                                   },
                                 ),
                                 CircularContainer(
-                                  image: "assets/images/flowchart.png",
+                                  image: "assets/flowchart (1).png",
                                   label: "Process",
                                   screen: () {
                                     Navigator.push(
@@ -497,14 +505,15 @@ class SuggestionContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use breakpoint based width for container to prevent it from being too wide on large screens
+    // 👇 REDUCED CARD WIDTH
+    final width = MediaQuery.of(context).size.width;
     double containerWidth;
     if (width < 600) {
-      containerWidth = width * 0.85;
+      containerWidth = width * 0.31;
     } else if (width < 1000) {
-      containerWidth = 400;
+      containerWidth = 300;
     } else {
-      containerWidth = 450;
+      containerWidth = 320;
     }
 
     return SizedBox(
@@ -513,7 +522,7 @@ class SuggestionContainer extends StatelessWidget {
         onTap: screen,
         child: Container(
           margin: const EdgeInsets.only(right: 10),
-          height: height * 0.28,
+          height: height * 0.23, // 👈 Slightly smaller height (was 0.28)
           decoration: BoxDecoration(
               color: Scolor.primary,
               borderRadius: BorderRadius.circular(10),
@@ -528,8 +537,8 @@ class SuggestionContainer extends StatelessWidget {
                   Row(
                     children: [
                       SizedBox(
-                        height: 30,
-                        width: 30,
+                        height: 24,
+                        width: 24,
                         child: Image.asset(image),
                       ),
                       const SizedBox(width: 10),
@@ -538,7 +547,7 @@ class SuggestionContainer extends StatelessWidget {
                           heading,
                           style: const TextStyle(
                               color: Scolor.secondry,
-                              fontSize: ESizes.fontSizeMd,
+                              fontSize: ESizes.fontSizeSm,
                               fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -553,7 +562,6 @@ class SuggestionContainer extends StatelessWidget {
                       ),
                     )
                   else ...[
-                    // Show budget suggestions for "Your Budget" heading
                     if (heading == "Your Budget") ...[
                       Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -587,7 +595,6 @@ class SuggestionContainer extends StatelessWidget {
                             ),
                           ])
                     ] else ...[
-                      // Show progress or feedback suggestions for other headings
                       Text(
                         "1. $suggestion1",
                         style: const TextStyle(

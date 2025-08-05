@@ -3,19 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Utils/constants/colors.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Business Advice AI',
-      home: BusinessAdvicePage(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
 class BusinessAdvicePage extends StatefulWidget {
   @override
   _BusinessAdvicePageState createState() => _BusinessAdvicePageState();
@@ -27,7 +14,8 @@ class _BusinessAdvicePageState extends State<BusinessAdvicePage> {
   bool isLoading = false;
 
   // Replace with your real Gemini API key
-  final String apiKey = 'AIzaSyC8rJwNfHjl_PJEcf0cjrSvoa8yR6gb2lE'; // Your actual API key
+  final String apiKey =
+      'AIzaSyC8rJwNfHjl_PJEcf0cjrSvoa8yR6gb2lE'; // Your actual API key
 
   Future<void> getBusinessAdvice(String query, String language) async {
     setState(() {
@@ -85,9 +73,10 @@ class _BusinessAdvicePageState extends State<BusinessAdvicePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Business AI Advisor', style: TextStyle(color: Colors.white)),
-        backgroundColor: Scolor.primary,
-        foregroundColor: Colors.white,
+        title:
+            Text('Business AI Advisor', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Scolor.secondry,
         centerTitle: true,
       ),
       body: LayoutBuilder(
@@ -114,13 +103,15 @@ class _BusinessAdvicePageState extends State<BusinessAdvicePage> {
 
           return Center(
             child: Container(
-              color: Color.fromARGB(255, 172, 214, 244),
+              color: Scolor.primary,
               width: maxWidth,
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16),
+              padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   DropdownButtonFormField<String>(
+                    dropdownColor: Scolor.primary,
                     value: selectedLang,
                     items: languages.map((lang) {
                       return DropdownMenuItem<String>(
@@ -135,22 +126,53 @@ class _BusinessAdvicePageState extends State<BusinessAdvicePage> {
                     },
                     decoration: InputDecoration(
                       labelText: 'Choose Language',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      labelStyle: TextStyle(color: Colors.white),
+                      border: OutlineInputBorder(), // fallback
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Colors.white), // default state
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Scolor.secondry, width: 2.0), // when focused
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                     ),
-                    style: TextStyle(fontSize: inputFontSize, color: Colors.black87),
+                    style:
+                        TextStyle(fontSize: inputFontSize, color: Colors.white),
                   ),
                   SizedBox(height: spacing),
                   TextField(
                     controller: queryController,
                     decoration: InputDecoration(
                       labelText: 'Enter your business problem or question',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      labelStyle: TextStyle(color: Scolor.white),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+
+                      // Custom border color when not focused
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Scolor.white), // change color here
+                      ),
+
+                      // Custom border color when focused
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Scolor.secondry,
+                            width: 2), // change color here
+                      ),
                     ),
                     maxLines: null,
-                    style: TextStyle(fontSize: inputFontSize),
+                    style: TextStyle(
+                      fontSize: inputFontSize,
+                      color: Colors.white, // Input text color
+                    ),
+                    cursorColor: Colors
+                        .white, // Optional: white cursor for dark background
                   ),
+
                   SizedBox(height: spacing),
                   SizedBox(
                     height: 48,
@@ -162,11 +184,11 @@ class _BusinessAdvicePageState extends State<BusinessAdvicePage> {
                       },
                       child: Text('Get Advice',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: buttonFontSize,
-                          )),
+                              color: Scolor.primary,
+                              fontSize: buttonFontSize,
+                              fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Scolor.primary,
+                        backgroundColor: Scolor.secondry,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
@@ -179,20 +201,22 @@ class _BusinessAdvicePageState extends State<BusinessAdvicePage> {
 
                   Expanded(
                     child: isLoading
-                        ? Center(child: CircularProgressIndicator())
+                        ? Center(
+                            child: CircularProgressIndicator(
+                                color: Scolor.secondry))
                         : responseText.isNotEmpty
                             ? SingleChildScrollView(
                                 child: Container(
                                   padding: EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.teal.shade50,
+                                    color: Colors.transparent,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
                                     responseText,
                                     style: TextStyle(
                                       fontSize: responseFontSize,
-                                      color: Colors.black87,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ),
@@ -200,7 +224,9 @@ class _BusinessAdvicePageState extends State<BusinessAdvicePage> {
                             : Center(
                                 child: Text(
                                 'Enter a query and tap Get Advice to see results.',
-                                style: TextStyle(fontSize: responseFontSize, color: Colors.grey),
+                                style: TextStyle(
+                                    fontSize: responseFontSize,
+                                    color: Colors.grey),
                                 textAlign: TextAlign.center,
                               )),
                   ),

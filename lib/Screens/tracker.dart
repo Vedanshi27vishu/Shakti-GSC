@@ -193,7 +193,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
           width: contentMaxWidth,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const Text(
                 'Track Your Growth',
                 style: TextStyle(
@@ -261,11 +262,13 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                   showTitles: true,
                                   reservedSize: 30,
                                   interval: 1,
-                                  getTitlesWidget: (double value, TitleMeta meta) {
+                                  getTitlesWidget:
+                                      (double value, TitleMeta meta) {
                                     if (value.toInt() >= 0 &&
                                         value.toInt() < months.length) {
                                       return Padding(
-                                        padding: const EdgeInsets.only(top: 8.0),
+                                        padding:
+                                            const EdgeInsets.only(top: 8.0),
                                         child: Text(
                                           months[value.toInt()],
                                           style: const TextStyle(
@@ -285,7 +288,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                   showTitles: true,
                                   interval: maxY / 5,
                                   reservedSize: 80,
-                                  getTitlesWidget: (double value, TitleMeta meta) {
+                                  getTitlesWidget:
+                                      (double value, TitleMeta meta) {
                                     String formattedValue;
                                     if (value >= 1000000) {
                                       formattedValue =
@@ -328,7 +332,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                 isStrokeCapRound: true,
                                 dotData: FlDotData(
                                   show: true,
-                                  getDotPainter: (spot, percent, barData, index) {
+                                  getDotPainter:
+                                      (spot, percent, barData, index) {
                                     return FlDotCirclePainter(
                                       radius: 4,
                                       color: Scolor.secondry,

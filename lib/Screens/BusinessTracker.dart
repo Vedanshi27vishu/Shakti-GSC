@@ -6,8 +6,71 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+class ExpenditureData {
+  final double cogs;
+  final double salaries;
+  final double maintenance;
+  final double marketing;
+  final double investment;
+
+  ExpenditureData({
+    required this.cogs,
+    required this.salaries,
+    required this.maintenance,
+    required this.marketing,
+    required this.investment,
+  });
+
+  factory ExpenditureData.fromJson(Map<String, dynamic> json) {
+    return ExpenditureData(
+      cogs: json['COGs'].toDouble(),
+      salaries: json['Salaries'].toDouble(),
+      maintenance: json['Maintenance'].toDouble(),
+      marketing: json['Marketing'].toDouble(),
+      investment: json['Investment'].toDouble(),
+    );
+  }
+
+  double get total => cogs + salaries + maintenance + marketing + investment;
+}
+
+class BusinessExpenditure {
+  final String businessType;
+  final List<ExpenditureData> lastTwoExpenditures;
+
+  BusinessExpenditure({
+    required this.businessType,
+    required this.lastTwoExpenditures,
+  });
+
+  factory BusinessExpenditure.fromJson(Map<String, dynamic> json) {
+    var expendituresList = json['lastTwoExpenditures'] as List;
+    List<ExpenditureData> expenditures =
+        expendituresList.map((e) => ExpenditureData.fromJson(e)).toList();
+
+    return BusinessExpenditure(
+      businessType: json['businessType'],
+      lastTwoExpenditures: expenditures,
+    );
+  }
+}
+
+class ApiResponse {
+  final List<BusinessExpenditure> expenditures;
+
+  ApiResponse({required this.expenditures});
+
+  factory ApiResponse.fromJson(Map<String, dynamic> json) {
+    var expendituresList = json['expenditures'] as List;
+    List<BusinessExpenditure> expenditures =
+        expendituresList.map((e) => BusinessExpenditure.fromJson(e)).toList();
+
+    return ApiResponse(expenditures: expenditures);
+  }
+}
+
 class ComparativeTrackerScreen extends StatefulWidget {
-  const ComparativeTrackerScreen({super.key});
+  const ComparativeTrackerScreen({Key? key}) : super(key: key);
 
   @override
   State<ComparativeTrackerScreen> createState() =>
@@ -15,6 +78,7 @@ class ComparativeTrackerScreen extends StatefulWidget {
 }
 
 class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
+  // Data variables
   List<double> currentMonthData = [];
   List<double> nextMonthData = [];
   List<String> monthLabels = [
@@ -25,6 +89,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
     'Investment'
   ];
 
+  // Business metrics
   String currentMonthValue = '0';
   String currentMonthGrowth = '0%';
   String projectedValue = '0';
@@ -33,6 +98,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
 
   bool isLoading = true;
 
+  // New variables for profit input
   final TextEditingController _profitController = TextEditingController();
   bool _isPredictingBudget = false;
   String _predictedBudget = '';
@@ -47,11 +113,13 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
 
   Future<void> fetchInsights() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
 
-      final response = await http.post(
-        Uri.parse('http://65.2.82.85:5000/api/business/insights'),
+      final response = await http.get(
+        Uri.parse(
+          'http://65.2.82.85:5000/api/business/insights',
+        ),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -59,17 +127,20 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
       );
 
       if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        final Map<String, dynamic> jsonData = json.decode(response.body);
 
-        if (mounted) {
-          setState(() {
-            insights = jsonData;
-          });
-        }
+        // Assuming your API directly returns the insights JSON like:
+        // { "point1": "...", "point2": "...", ... }
+        setState(() {
+          insights = jsonData;
+          // List of all insight strings// insights should be a Map<String, dynamic> in your class
+        });
       } else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
     } catch (e) {
+      print('Error loading insights data: $e');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -84,9 +155,8 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
 
   Future<void> loadExpenditureData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
       final response = await http.get(
         Uri.parse('http://65.2.82.85:5000/api/last-two-expenditures'),
         headers: {
@@ -96,22 +166,16 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        final apiResponse = ApiResponse.fromJson(data);
-
-        if (mounted) {
-          if (apiResponse.expenditures.isNotEmpty) {
-            processExpenditureData(apiResponse.expenditures.first);
-          }
-          setState(() {
-            isLoading = false;
-          });
+        final apiResponse = ApiResponse.fromJson(json.decode(response.body));
+        if (apiResponse.expenditures.isNotEmpty) {
+          processExpenditureData(apiResponse.expenditures.first);
         }
       } else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
     } catch (e) {
+      print('Error loading expenditure data: $e');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -120,35 +184,17 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
             duration: const Duration(seconds: 3),
           ),
         );
-        useFallback();
-        setState(() {
-          isLoading = false;
-        });
       }
+
+      useFallbackData();
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
-  void useFallback() {
-    if (mounted) {
-      setState(() {
-        currentMonthData = [2000, 1500, 1200, 800, 1800];
-        nextMonthData = [2200, 1600, 1300, 900, 1900];
-        monthLabels = [
-          'COGs',
-          'Salaries',
-          'Maintenance',
-          'Marketing',
-          'Investment'
-        ];
-        currentMonthValue = '727500';
-        currentMonthGrowth = '6.2%';
-        projectedValue = '940000';
-        projectedGrowth = '9.6%';
-        businessType = 'BUSINESS';
-      });
-    }
-  }
-
+  // New method to predict budget
   Future<void> _predictBudget() async {
     if (_profitController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -165,9 +211,10 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
 
+      // Convert business type to lowercase for query parameter
       String sector = businessType.toLowerCase();
 
       final response = await http.post(
@@ -176,14 +223,18 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: json.encode({'newProfit': double.parse(_profitController.text)}),
+        body: json.encode({
+          'newProfit': double.parse(_profitController.text),
+        }),
       );
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         setState(() {
-          _predictedBudget = responseData['predictedBudget']?.toString() ?? '';
+          _predictedBudget =
+              responseData['predictedBudget']?.toString() ?? 'N/A';
         });
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Budget uploaded successfully'),
@@ -194,6 +245,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
         throw Exception('Failed to predict budget: ${response.statusCode}');
       }
     } catch (e) {
+      print('Error predicting budget: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to predict budget: $e'),
@@ -202,436 +254,111 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
       );
     }
 
-    if (mounted) {
-      setState(() {
-        _isPredictingBudget = false;
-      });
-    }
-  }
-
-  void processExpenditureData(BusinessExpenditure data) {
-    if (data.lastTwoExpenditures.length >= 2) {
-      final first = data.lastTwoExpenditures[0];
-      final second = data.lastTwoExpenditures[1];
-
-      currentMonthData = [
-        first.cogs,
-        first.salaries,
-        first.maintenance,
-        first.marketing,
-        first.investment
-      ];
-      nextMonthData = [
-        second.cogs,
-        second.salaries,
-        second.maintenance,
-        second.marketing,
-        second.investment
-      ];
-
-      final double currentTotal = first.total;
-      final double nextTotal = second.total;
-      final double growth = ((nextTotal - currentTotal) / currentTotal) * 100;
-
-      if (mounted) {
-        setState(() {
-          businessType = data.businessType.toUpperCase();
-          currentMonthValue = currentTotal.toInt().toString();
-          projectedValue = nextTotal.toInt().toString();
-          currentMonthGrowth = '${growth.toStringAsFixed(1)}%';
-          projectedGrowth =
-              '${(growth + 2).toStringAsFixed(1)}%'; // simple projection increase
-        });
-      }
-    }
-  }
-
-  double maxY = 0;
-
-  double _getMaxYValue() {
-    if (currentMonthData.isEmpty && nextMonthData.isEmpty) return 3000;
-    return [...currentMonthData, ...nextMonthData]
-        .reduce((a, b) => a > b ? a : b);
-  }
-
-  List<BarChartGroupData> _buildBarGroups() {
-    return List.generate(monthLabels.length, (i) {
-      final currVal = (currentMonthData.length > i) ? currentMonthData[i] : 0;
-      final nextVal = (nextMonthData.length > i) ? nextMonthData[i] : 0;
-
-      return BarChartGroupData(
-        x: i,
-        // barRods: [
-        //   BarChartRodData(
-        //       toY: currentMonthData.isNotEmpty ? currentMonthData[index] : 0,
-        //       width: 16,
-        //       color: const Color(0xFF95A5A6),
-        //       borderRadius: BorderRadius.zero),
-        //   BarChartRodData(
-        //       toY: nextMonthData.isNotEmpty ? nextMonthData[index] : 0,
-        //       width: 16,
-        //       color: Scolor.secondry,
-        //       borderRadius: BorderRadius.zero),
-        // ],
-        barsSpace: 1,
-      );
+    setState(() {
+      _isPredictingBudget = false;
     });
+  }
+
+  void processExpenditureData(BusinessExpenditure businessExpenditure) {
+    // Extract data from the two expenditure periods
+    if (businessExpenditure.lastTwoExpenditures.length >= 2) {
+      ExpenditureData period1 = businessExpenditure.lastTwoExpenditures[0];
+      ExpenditureData period2 = businessExpenditure.lastTwoExpenditures[1];
+
+      // Set chart data
+      currentMonthData = [
+        period1.cogs,
+        period1.salaries,
+        period1.maintenance,
+        period1.marketing,
+        period1.investment,
+      ];
+
+      nextMonthData = [
+        period2.cogs,
+        period2.salaries,
+        period2.maintenance,
+        period2.marketing,
+        period2.investment,
+      ];
+
+      // Calculate metrics
+      double currentTotal = period1.total;
+      double nextTotal = period2.total;
+      double growthPercentage =
+          ((nextTotal - currentTotal) / currentTotal) * 100;
+
+      // Update business metrics
+      businessType = businessExpenditure.businessType.toUpperCase();
+      currentMonthValue = currentTotal.toInt().toString();
+      projectedValue = nextTotal.toInt().toString();
+      currentMonthGrowth = '${growthPercentage.toStringAsFixed(1)}%';
+      projectedGrowth =
+          '${(growthPercentage + 2).toStringAsFixed(1)}%'; // Slight projection increase
+    }
+  }
+
+  void useFallbackData() {
+    currentMonthData = [2000, 1500, 1200, 800, 1800, 1000];
+    nextMonthData = [2200, 1600, 1300, 900, 1900, 1200];
+    monthLabels = [
+      'COGs',
+      'Salaries',
+      'Maintenance',
+      'Marketing',
+      'Investment'
+    ];
+    currentMonthValue = '727500';
+    currentMonthGrowth = '6.2%';
+    projectedValue = '940000';
+    projectedGrowth = '9.6%';
+    businessType = 'BUSINESS';
+  }
+
+  Future<void> refreshData() async {
+    setState(() {
+      isLoading = true;
+    });
+    await loadExpenditureData();
   }
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
-    final screenWidth = media.size.width;
-    final screenHeight = media.size.height;
-
     return Scaffold(
-        backgroundColor: Scolor.primary,
-        appBar: PreferredSize(
-          
-          preferredSize: const Size.fromHeight(56),
-          child: LayoutBuilder(builder: (context, constraints) {
-            final width = constraints.maxWidth;
-
-            double titleFont;
-            double iconSize;
-            double horizontalPad;
-
-            if (width < 600) {
-              titleFont = screenHeight * 0.033;
-              iconSize = 26;
-              horizontalPad = 0;
-            } else if (width < 1000) {
-              titleFont = 22;
-              iconSize = 30;
-              horizontalPad = 10;
-            } else {
-              titleFont = 26;
-              iconSize = 36;
-              horizontalPad = 30;
-            }
-
-            return AppBar(
-              leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Scolor.secondry),
-          onPressed: () => Navigator.pop(context),
-        ),
-              automaticallyImplyLeading: false,
-              backgroundColor: Scolor.primary,
-              elevation: 0,
-              titleSpacing: 0,
-              title: Padding(
-                padding: EdgeInsets.symmetric(horizontal: horizontalPad),
-                child: Text(
-                  'Hi, Entrepreneur!',
-                  style: TextStyle(
-                      fontSize: titleFont,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      overflow: TextOverflow.ellipsis),
-                  maxLines: 1,
+      backgroundColor: Scolor.primary,
+      appBar: _buildAppBar(),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Scolor.secondry,
+              ),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildComparativeChart(),
+                    const SizedBox(height: 24),
+                    _buildBusinessMetricsSection(),
+                    const SizedBox(height: 24),
+                    _buildProfitInputSection(), // New section added
+                    const SizedBox(height: 24),
+                    _buildKeyFeaturesSection(context, insights),
+                  ],
                 ),
               ),
-              actions: [
-                Padding(
-                  padding: EdgeInsets.only(right: horizontalPad + 10),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) =>
-                                  const ComparativeTrackerScreen()));
-                    },
-                    child: SizedBox(
-                      height: iconSize,
-                      width: iconSize,
-                      child: Image.asset('assets/images/newwallet.png'),
-                    ),
-                  ),
-                )
-              ],
-            );
-          }),
-        ),
-        body: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: Scolor.secondry))
-            : Center(
-                child: SingleChildScrollView(
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    final width = constraints.maxWidth;
-
-                    double maxContentWidth;
-                    if (width < 600) {
-                      maxContentWidth = width; // full width mobile
-                    } else if (width < 1000) {
-                      maxContentWidth = 700;
-                    } else {
-                      maxContentWidth = 900;
-                    }
-
-                    // Dynamic paddings and font sizes for section content
-                    double greetingFont;
-                    double scoreFont;
-                    double sectionPadding;
-
-                    if (width < 600) {
-                      greetingFont = screenHeight * 0.032;
-                      scoreFont = screenHeight * 0.02;
-                      sectionPadding = 0;
-                    } else if (width < 1000) {
-                      greetingFont = 24;
-                      scoreFont = 15;
-                      sectionPadding = 5;
-                    } else {
-                      greetingFont = 28;
-                      scoreFont = 17;
-                      sectionPadding = 10;
-                    }
-
-                    double suggestionWidth;
-                    if (width < 600) {
-                      suggestionWidth = maxContentWidth * 0.9;
-                    } else if (width < 1000) {
-                      suggestionWidth = 280;
-                    } else {
-                      suggestionWidth = 300;
-                    }
-
-                    return Container(
-                      width: maxContentWidth,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Greeting Section
-                          Padding(
-                            padding: EdgeInsets.only(top: sectionPadding),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  businessType,
-                                  style: TextStyle(
-                                    fontSize: greetingFont,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                SizedBox(height: sectionPadding),
-                                Text(
-                                  'Current Month Profit: $currentMonthValue',
-                                  style: TextStyle(
-                                    fontSize: scoreFont,
-                                    color: Scolor.secondry,
-                                  ),
-                                ),
-                                SizedBox(height: sectionPadding),
-                                Text(
-                                  'Growth This Month: $currentMonthGrowth',
-                                  style: TextStyle(
-                                    fontSize: scoreFont,
-                                    color: Scolor.secondry,
-                                  ),
-                                ),
-                                SizedBox(height: screenHeight * 0.03),
-                              ],
-                            ),
-                          ),
-
-                          // Chart Container (fixed height for smooth display)
-                          Container(
-                            height: 320,
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF34495E).withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                  color: const Color(0xFF34495E), width: 1),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                     _buildLegend('Previous Month', const Color(0xFF95A5A6)),
-              const SizedBox(width: 20),
-              _buildLegend('Current Month', Scolor.secondry),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-                                Expanded(
-                                  child: BarChart(
-                                    BarChartData(
-                                      alignment: BarChartAlignment.spaceAround,
-                                      maxY: _getMaxYValue() * 1.2,
-                                      minY: 0,
-                                      barTouchData: BarTouchData(
-                                        enabled: true,
-                                        touchTooltipData: BarTouchTooltipData(
-                                          getTooltipItem: (group, groupIndex,
-                                              rod, rodIndex) {
-                                            final label =
-                                                monthLabels[group.x.toInt()];
-                                            final period = rodIndex == 0
-                                                ? 'Current'
-                                                : 'Projected';
-                                            return BarTooltipItem(
-                                              '$period Month\n$label: ${rod.toY.round()}',
-                                              const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 12),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      titlesData: FlTitlesData(
-                                        show: true,
-                                        rightTitles: const AxisTitles(
-                                            sideTitles:
-                                                SideTitles(showTitles: false)),
-                                        topTitles: const AxisTitles(
-                                            sideTitles:
-                                                SideTitles(showTitles: false)),
-                                        bottomTitles: AxisTitles(
-                                          sideTitles: SideTitles(
-                                            showTitles: true,
-                                            reservedSize: 30,
-                                            interval: 1,
-                                            getTitlesWidget: (value, meta) {
-                                              final idx = value.toInt();
-                                              if (idx >= 0 &&
-                                                  idx < monthLabels.length) {
-                                                return Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 8.0),
-                                                  child: Text(
-                                                    monthLabels[idx],
-                                                    style: const TextStyle(
-                                                      color: Colors.white70,
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                              return const SizedBox.shrink();
-                                            },
-                                          ),
-                                        ),
-                                        leftTitles: AxisTitles(
-                                          sideTitles: SideTitles(
-                                            showTitles: true,
-                                            reservedSize: 30,
-                                            interval: _getMaxYValue() / 5,
-                                            getTitlesWidget: (value, meta) {
-                                              double val = value;
-                                              String text;
-                                              if (val >= 1000000) {
-                                                text =
-                                                    '${(val / 1000000).toStringAsFixed(1)}M';
-                                              } else if (val >= 1000) {
-                                                text =
-                                                    '${(val / 1000).toStringAsFixed(0)}K';
-                                              } else {
-                                                text = val.toInt().toString();
-                                              }
-                                              return Text(
-                                                text,
-                                                style: const TextStyle(
-                                                  color: Colors.white70,
-                                                  fontSize: 11,
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                      borderData: FlBorderData(show: false),
-                                      gridData: FlGridData(
-                                        show: true,
-                                        drawVerticalLine: false,
-                                        drawHorizontalLine: true,
-                                        horizontalInterval: _getMaxYValue() / 5,
-                                        getDrawingHorizontalLine: (_) => FlLine(
-                                          color: const Color(0xFF34495E)
-                                              .withOpacity(0.5),
-                                          strokeWidth: 1,
-                                        ),
-                                      ),
-                                      barGroups: _buildBarGroups(),
-                                      groupsSpace: 20,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Metrics Container
-                          _buildMetricsSection(greetingFont, scoreFont),
-
-                          const SizedBox(height: 24),
-
-                          // Profit input section
-                          _buildProfitInput(),
-
-                          const SizedBox(height: 24),
-
-                          // Insights section - tapping leads to Budget Insights screen
-                          _buildInsightsSection(context),
-
-                          const SizedBox(height: 24),
-                        ],
-                      ),
-                    );
-                  }),
-                ),
-              ));
-  }
-
-  Widget _buildMetricsSection(double greetingFont, double scoreFont) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          businessType,
-          style: TextStyle(
-            fontSize: greetingFont,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Current Month Profit: $currentMonthValue',
-          style: TextStyle(
-            fontSize: scoreFont,
-            color: Scolor.secondry,
-          ),
-        ),
-        Text(
-          'Growth This Month: $currentMonthGrowth',
-          style: TextStyle(
-            fontSize: scoreFont,
-            color: Scolor.secondry,
-          ),
-        ),
-      ],
+            ),
     );
   }
 
-  Widget _buildProfitInput() {
+  // New method for profit input section
+  Widget _buildProfitInputSection() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF34495E).withOpacity(0.2),
+        color: const Color(0xFF34495E).withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFF34495E), width: 1),
       ),
@@ -647,23 +374,25 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          TextField(
+          TextFormField(
             controller: _profitController,
             keyboardType: TextInputType.number,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFF34495E).withOpacity(0.5),
-              hintText: 'Enter current month profit',
+              labelText: 'Current Month Profit',
+              labelStyle: const TextStyle(color: Colors.white70),
+              hintText: 'Enter profit amount',
               hintStyle: const TextStyle(color: Colors.white54),
-              border: OutlineInputBorder(
+              enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.transparent),
+                borderSide: const BorderSide(color: Colors.white54),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Scolor.secondry),
               ),
+              filled: true,
+              fillColor: const Color(0xFF34495E).withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 16),
@@ -690,8 +419,10 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
                     )
                   : const Text(
                       'Predict Budget',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
             ),
           ),
@@ -700,130 +431,117 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
     );
   }
 
-  Widget _buildInsightsSection(BuildContext context) {
-    final values = insights?.values.toList() ?? [];
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BudgetInsights(
-                budgetData: values
-                    .map((e) => {'title': '', 'description': e.toString()})
-                    .toList()),
-          ),
-        );
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (values.isNotEmpty) ...[
-            _buildFeatureItem(Icons.info_outline, values[0]),
-            const SizedBox(height: 12),
-            if (values.length > 1)
-              _buildFeatureItem(Icons.trending_up, values[1]),
-            if (values.length > 2) ...[
-              const SizedBox(height: 12),
-              _buildFeatureItem(Icons.school_outlined, values[2]),
-            ],
-          ] else
-            const Text('Loading insights...',
-                style: TextStyle(color: Colors.white, fontSize: 16)),
-        ],
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: Scolor.primary,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Scolor.secondry, size: 24),
+        onPressed: () => Navigator.pop(context),
       ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh, color: Colors.white),
+          onPressed: refreshData,
+        ),
+        IconButton(
+          icon: const Icon(Icons.more_vert, color: Colors.white),
+          onPressed: () {},
+        ),
+      ],
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String text) {
+  Widget _buildComparativeChart() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      height: 320,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: const Color(0xFF34495E).withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFF34495E), width: 1),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Scolor.secondry,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(icon, color: Scolor.primary, size: 16),
+          // Legend
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLegend('Previous Month', const Color(0xFF95A5A6)),
+              const SizedBox(width: 20),
+              _buildLegend('Current Month', Scolor.secondry),
+            ],
           ),
-          const SizedBox(width: 16),
+          const SizedBox(height: 20),
+          // Chart
           Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: _getMaxValue() * 1.2,
+                minY: 0,
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (group) => const Color(0xFF34495E),
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      String categoryName = monthLabels[group.x];
+                      String dataType = rodIndex == 0 ? 'Current' : 'Next';
+                      return BarTooltipItem(
+                        '$dataType Period\n$categoryName: ${rod.toY.round()}',
+                        const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  show: true,
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 30,
+                      getTitlesWidget: (value, meta) =>
+                          _buildBottomTitle(value.toInt()),
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: _getMaxValue() / 5,
+                      reservedSize: 30,
+                      getTitlesWidget: (value, meta) => _buildLeftTitle(value),
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  drawHorizontalLine: true,
+                  horizontalInterval: _getMaxValue() / 5,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: const Color(0xFF34495E).withOpacity(0.5),
+                    strokeWidth: 1,
+                  ),
+                ),
+                barGroups: _buildComparativeBarGroups(),
+                groupsSpace: 20,
+              ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
-}
 
-// Model classes
-
-class ExpenditureData {
-  final double cogs;
-  final double salaries;
-  final double maintenance;
-  final double marketing;
-  final double investment;
-
-  ExpenditureData({
-    required this.cogs,
-    required this.salaries,
-    required this.maintenance,
-    required this.marketing,
-    required this.investment,
-  });
-
-  factory ExpenditureData.fromJson(Map<String, dynamic> json) {
-    return ExpenditureData(
-      cogs: (json['COGs'] as num).toDouble(),
-      salaries: (json['Salaries'] as num).toDouble(),
-      maintenance: (json['Maintenance'] as num).toDouble(),
-      marketing: (json['Marketing'] as num).toDouble(),
-      investment: (json['Investment'] as num).toDouble(),
-    );
-  }
-
-  double get total => cogs + salaries + maintenance + marketing + investment;
-}
-
-class BusinessExpenditure {
-  final String businessType;
-  final List<ExpenditureData> lastTwoExpenditures;
-
-  BusinessExpenditure(
-      {required this.businessType, required this.lastTwoExpenditures});
-
-  factory BusinessExpenditure.fromJson(Map<String, dynamic> json) {
-    var list = (json['lastTwoExpenditures'] as List)
-        .map((e) => ExpenditureData.fromJson(e))
-        .toList();
-    return BusinessExpenditure(
-        businessType: json['businessType'], lastTwoExpenditures: list);
-  }
-}
-
-class ApiResponse {
-  final List<BusinessExpenditure> expenditures;
-
-  ApiResponse({required this.expenditures});
-
-  factory ApiResponse.fromJson(Map<String, dynamic> json) {
-    var list = (json['expenditures'] as List)
-        .map((e) => BusinessExpenditure.fromJson(e))
-        .toList();
-    return ApiResponse(expenditures: list);
-  }
-}
   Widget _buildLegend(String label, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -848,3 +566,274 @@ class ApiResponse {
       ],
     );
   }
+
+  Widget _buildBusinessMetricsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          businessType,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Current Period Card (Yellow)
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Scolor.secondry,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Current Month Profit',
+                    style: TextStyle(
+                      color: Scolor.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    currentMonthGrowth,
+                    style: const TextStyle(
+                      color: Scolor.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                currentMonthValue,
+                style: const TextStyle(
+                  color: Scolor.primary,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF34495E).withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF34495E), width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Previous Month Profit',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    projectedGrowth,
+                    style: const TextStyle(
+                      color: Color(0xFFF1C40F),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                projectedValue,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildKeyFeaturesSection(
+      BuildContext context, Map<String, dynamic>? insights) {
+    final insightValues = insights?.values.toList() ?? [];
+
+    final formattedInsightData = List.generate(insightValues.length, (index) {
+      final value = insightValues[index];
+      // If the value is a Map, extract the 'description' or convert to string
+      String description = value is Map && value.containsKey('description')
+          ? value['description'].toString()
+          : value.toString();
+
+      return {
+        'title': 'Insight ${index + 1}',
+        'description': description,
+      };
+    });
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BudgetInsights(
+              budgetData: formattedInsightData,
+            ),
+          ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildFeatureItem(
+            Icons.info_outline,
+            formattedInsightData.isNotEmpty
+                ? formattedInsightData[0]['description'] ?? 'Loading...'
+                : 'Loading...',
+          ),
+          const SizedBox(height: 12),
+          _buildFeatureItem(
+            Icons.trending_up,
+            formattedInsightData.length > 1
+                ? formattedInsightData[1]['description'] ?? 'Loading...'
+                : 'Loading...',
+          ),
+          const SizedBox(height: 12),
+          _buildFeatureItem(
+            Icons.school_outlined,
+            formattedInsightData.length > 2
+                ? formattedInsightData[2]['description'] ?? 'Loading...'
+                : 'Loading...',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF34495E).withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF34495E), width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Scolor.secondry,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(icon, color: Scolor.primary, size: 16),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomTitle(int index) {
+    if (index >= 0 && index < monthLabels.length) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Text(
+          monthLabels[index],
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildLeftTitle(double value) {
+    String formattedValue;
+    if (value >= 1000000) {
+      formattedValue = '${(value / 1000000).toStringAsFixed(1)}M';
+    } else if (value >= 1000) {
+      formattedValue = '${(value / 1000).toStringAsFixed(0)}K';
+    } else {
+      formattedValue = value.toInt().toString();
+    }
+
+    return Text(
+      formattedValue,
+      style: const TextStyle(
+        color: Colors.white70,
+        fontSize: 11,
+        fontWeight: FontWeight.w400,
+      ),
+    );
+  }
+
+  List<BarChartGroupData> _buildComparativeBarGroups() {
+    return List.generate(monthLabels.length, (index) {
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          // Current Period Bar (Yellow)
+          BarChartRodData(
+            toY: currentMonthData.isNotEmpty ? currentMonthData[index] : 0,
+            color: const Color(0xFF95A5A6),
+            width: 16,
+            borderRadius: BorderRadius.circular(0),
+          ),
+          // Next Period Bar (Gray)
+          BarChartRodData(
+            toY: nextMonthData.isNotEmpty ? nextMonthData[index] : 0,
+            color: Scolor.secondry,
+            width: 16,
+            borderRadius: BorderRadius.circular(0),
+          ),
+        ],
+        barsSpace: 1,
+      );
+    });
+  }
+
+  double _getMaxValue() {
+    if (currentMonthData.isEmpty && nextMonthData.isEmpty) return 3000;
+
+    List<double> allValues = [...currentMonthData, ...nextMonthData];
+    return allValues.reduce((a, b) => a > b ? a : b);
+  }
+
+  @override
+  void dispose() {
+    _profitController.dispose();
+    super.dispose();
+  }
+}

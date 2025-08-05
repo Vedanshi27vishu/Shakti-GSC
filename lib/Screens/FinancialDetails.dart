@@ -56,7 +56,8 @@ class _FinancialDetailsState extends State<FinancialDetails> {
       return;
     }
 
-    final url = Uri.parse("http://65.2.82.85:5000/api/signup/signup2");
+    // Corrected URL here
+    final url = Uri.parse("http://65.2.82.85:5000/auth/signup2");
 
     final loanList = loanControllers.map((loan) {
       return {
@@ -66,6 +67,10 @@ class _FinancialDetailsState extends State<FinancialDetails> {
         "Loan_Type": loan["Loan_Type"]!.text.trim(),
         "Total_Loan_Amount":
             int.tryParse(loan["Total_Loan_Amount"]!.text.trim()) ?? 0,
+        // Added missing fields
+        "Loan_Years": int.tryParse(loan["Loan_Years"]!.text.trim()) ?? 0,
+        "Interest_Rate":
+            double.tryParse(loan["Interest_Rate"]!.text.trim()) ?? 0.0,
       };
     }).toList();
 
@@ -186,6 +191,12 @@ class _FinancialDetailsState extends State<FinancialDetails> {
                       InputField(
                           label: "Total Loan Amount",
                           controller: loan["Total_Loan_Amount"]!),
+                      // Added fields for Loan Years and Interest Rate
+                      InputField(
+                          label: "Loan Years", controller: loan["Loan_Years"]!),
+                      InputField(
+                          label: "Interest Rate",
+                          controller: loan["Interest_Rate"]!),
                       const SizedBox(height: 16),
                     ],
                   );
@@ -214,11 +225,11 @@ class _FinancialDetailsState extends State<FinancialDetails> {
               SizedBox(height: screenHeight * 0.04),
               ContinueButton(
                 screenHeight: screenHeight,
-                screenWidth: screenWidth,
+                screenWidth: 200,
                 text: "Continue",
                 onPressed: submitFinancialDetails,
               ),
-              SizedBox(height: screenHeight * 0.05),
+              SizedBox(height: screenHeight * 0.01),
             ],
           ),
         ),

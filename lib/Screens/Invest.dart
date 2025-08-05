@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/InvestScreen.dart';
@@ -6,6 +7,7 @@ import 'package:shakti/Screens/InvestmentGroup.dart';
 import 'package:shakti/Screens/government.dart';
 import 'package:shakti/Screens/tracker.dart';
 import 'package:shakti/Utils/constants/colors.dart';
+import 'package:shakti/Utils/constants/sizes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Invest extends StatefulWidget {
@@ -135,7 +137,7 @@ class _InvestState extends State<Invest> {
         setState(() {
           userLoans = data['loans'] ?? [];
           totalRemainingLoanAmount =
-              (data['totalRemainingAmount'] ?? 0).toDouble();
+              (data['totalRemainingLoanAmount'] ?? 0).toDouble();
           investmentAmount = (data['investmentAmount'] ?? 0).toDouble();
           totalInstallment = (data['totalinstallment'] ?? 0).toDouble();
         });
@@ -152,59 +154,165 @@ class _InvestState extends State<Invest> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    double maxContentWidth;
-    if (screenWidth < 600) {
-      maxContentWidth = double.infinity; // Mobile: full width
-    } else if (screenWidth < 1000) {
-      maxContentWidth = 600; // Tablet
-    } else {
-      maxContentWidth = 700; // Laptop/Desktop
-    }
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Scolor.primary,
-        elevation: 0,
-        titleSpacing: 0,
-        title: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            "Hi, Entrepreneur!",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              overflow: TextOverflow.ellipsis,
-            ),
-            maxLines: 1,
-          ),
+      body: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: width * 0.04,
+          vertical: height * 0.02,
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 22),
-            child: GestureDetector(
-              onTap: () => Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => TrackerScreen())),
-              child: SizedBox(
-                height: 28,
-                width: 28,
-                child: Image.asset("assets/images/newwallet.png"),
-              ),
-            ),
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Center(
-            child: Container(
-              width: maxContentWidth,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: _buildContent(screenWidth, screenHeight, maxContentWidth),
+        child: SingleChildScrollView(
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Hi, Entrepreneur!",
+                  style: TextStyle(
+                    fontSize: height * 0.04,
+                    fontWeight: FontWeight.bold,
+                    color: Scolor.white,
+                  ),
+                ),
+                SizedBox(height: height * 0.05),
+
+                // Info Cards
+                Row(
+                  children: [
+                    Expanded(
+                      child: _infoCard(
+                        "Total Outstanding Loans",
+                        "₹${_formatCurrency(totalRemainingLoanAmount)}",
+                        "Across ${userLoans.length} active loans",
+                        height,
+                        "assets/images/rupeesyellow.png",
+                      ),
+                    ),
+                    SizedBox(width: width * 0.02),
+                    Expanded(
+                      child: _infoCard(
+                        "Monthly Payment",
+                        "₹${_formatCurrency(totalInstallment)}",
+                        "Due Every Month",
+                        height,
+                        "assets/images/Vector-1.png",
+                      ),
+                    ),
+                    SizedBox(width: width * 0.02),
+                    Expanded(
+                      child: _infoCard(
+                        "Investment Amount",
+                        "₹${_formatCurrency(investmentAmount)}",
+                        "Available Funds",
+                        height,
+                        "assets/images/arrow (1).png",
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: height * 0.05),
+
+                // Active Loans
+                Text(
+                  "Active Loans",
+                  style: TextStyle(
+                    fontSize: width * 0.045,
+                    fontWeight: FontWeight.w600,
+                    color: Scolor.white,
+                  ),
+                ),
+                SizedBox(height: height * 0.02),
+                _loanTable(),
+
+                SizedBox(height: height * 0.05),
+
+                // Loan Scheme Scrollable Row
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GovernmentLoansScreen(
+                                loans: recommendedLoans,
+                              ),
+                            ),
+                          );
+                        },
+                        child: _schemeCard(
+                          height,
+                          width,
+                          "Government Schemes",
+                          "assets/images/raphael_piechart.png",
+                          true,
+                        ),
+                      ),
+                      SizedBox(width: width * 0.02),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GovernmentLoansScreen(
+                                loans: privateSchemes,
+                              ),
+                            ),
+                          );
+                        },
+                        child: _schemeCard(
+                          height,
+                          width,
+                          "Private Schemes",
+                          "assets/images/famicons_person-outline.png",
+                          false,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: height * 0.05),
+
+                // Bottom Navigation Buttons with Premium Overlay
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _premiumButton(
+                      context: context,
+                      heading: "INVEST",
+                      width: width,
+                      height: height,
+                    ),
+                    _premiumButton(
+                      context: context,
+                      heading: "GROUPS",
+                      width: width,
+                      height: height,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TrackerScreen(),
+                          ),
+                        );
+                      },
+                      child: BottomContainer(
+                        height: height,
+                        width: width,
+                        heading: "TRACKER",
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -212,176 +320,98 @@ class _InvestState extends State<Invest> {
     );
   }
 
-  Widget _buildContent(
-      double screenWidth, double screenHeight, double maxWidth) {
-    double cardWidth;
-    if (screenWidth < 600) {
-      cardWidth = screenWidth * 0.48;
-    } else if (screenWidth < 1000) {
-      cardWidth = 280;
-    } else {
-      cardWidth = 300;
-    }
-    double cardHeight = 114;
-
-    double tableWidth;
-    if (screenWidth < 600) {
-      tableWidth = screenWidth * 0.9;
-    } else if (screenWidth < 1000) {
-      tableWidth = 600;
-    } else {
-      tableWidth = 700;
-    }
-    double tableHeight;
-    if (screenWidth < 600) {
-      tableHeight = screenHeight * 0.3;
-    } else {
-      tableHeight = 200;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  // Bottom premium overlay button
+  Widget _premiumButton({
+    required BuildContext context,
+    required String heading,
+    required double width,
+    required double height,
+  }) {
+    return Stack(
+      alignment: Alignment.center,
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _infoCard(
-                  "Total Loans",
-                  "₹${_formatCurrency(totalRemainingLoanAmount)}",
-                  "${userLoans.length} active loans",
-                  cardHeight,
-                  cardWidth,
-                  "assets/images/rupeesyellow.png"),
-              const SizedBox(width: 10),
-              _infoCard(
-                  "Monthly Payment",
-                  "₹${_formatCurrency(totalInstallment)}",
-                  "Due Every Month",
-                  cardHeight,
-                  cardWidth,
-                  "assets/images/Vector-1.png"),
-              const SizedBox(width: 10),
-              _infoCard(
-                  "Investment",
-                  "₹${_formatCurrency(investmentAmount)}",
-                  "Available Funds",
-                  cardHeight,
-                  cardWidth,
-                  "assets/images/arrow (1).png"),
-            ],
-          ),
+        BottomContainer(
+          height: height,
+          width: width,
+          heading: heading,
         ),
-        const SizedBox(height: 20),
-        const Text(
-          "Active Loans",
-          style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: tableHeight,
-          width: tableWidth,
-          child: _loanTable(),
-        ),
-        
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _schemeCard(cardHeight, cardWidth, "Government Schemes",
-                  "assets/images/raphael_piechart.png", true),
-              const SizedBox(width: 10),
-              _schemeCard(cardHeight, cardWidth, "Private Schemes",
-                  "assets/images/famicons_person-outline.png", false),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const Invest())),
-                child: BottomContainer(width: cardWidth * 0.6, height: 45, heading: "INVEST"),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(
+              height: height * 0.06,
+              width: width * 0.25,
+              color: Colors.black.withOpacity(0.3),
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock, color: Colors.white, size: 20),
+                  SizedBox(height: 2),
+                  Text(
+                    'Premium Feature',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const InvestmentGroupsScreen())),
-                child: BottomContainer(width: cardWidth * 0.6, height: 45, heading: "GROUPS"),
-              ),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: () => Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const TrackerScreen())),
-                child: BottomContainer(width: cardWidth * 0.6, height: 45, heading: "TRACKER"),
-              ),
-            ],
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _infoCard(
-    String title,
-    String amount,
-    String subtitle,
-    double height,
-    double width,
-    String image,
-  ) {
+  Widget _infoCard(String title, String amount, String subtitle, double height,
+      String image) {
     return Container(
-      height: height * 0.9,
-      width: width * 0.58,
-      padding: const EdgeInsets.all(8),
-      margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 2),
+      height: height * 0.22,
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         border: Border.all(color: Scolor.secondry),
-        borderRadius: BorderRadius.circular(7),
-        color: Scolor.primary,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Image.asset(image, height: height * 0.2, width: height * 0.15),
-              const SizedBox(width: 5),
-              Expanded(
-                  child: Text(title,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Scolor.secondry,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis)),
-            ],
+          SizedBox(
+            height: height * 0.03,
+            width: height * 0.03,
+            child: Image.asset(image),
           ),
-          const SizedBox(height: 7),
+          SizedBox(height: height * 0.01),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: height * 0.018,
+              fontWeight: FontWeight.bold,
+              color: Scolor.secondry,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: height * 0.005),
           Text(
             amount,
-            style: const TextStyle(
-              fontSize: 13.5,
+            style: TextStyle(
+              fontSize: height * 0.020,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Scolor.white,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: height * 0.005),
           Text(
             subtitle,
-            style: const TextStyle(
-              fontSize: 10,
-              color: Color(0xFF41836B),
+            style: TextStyle(
+              fontSize: height * 0.016,
+              color: const Color(0xFF41836B),
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -391,140 +421,82 @@ class _InvestState extends State<Invest> {
     );
   }
 
-  Widget _schemeCard(
-      double height, double width, String heading, String image, bool isGovernment) {
-    final schemes = isGovernment ? recommendedLoans : privateSchemes;
-    return Container(
-      height: height * 1.2,
-      width: width * 0.9,
-      padding: const EdgeInsets.all(7),
-      margin: const EdgeInsets.only(bottom: 6, right: 7),
-      decoration: BoxDecoration(
-        border: Border.all(color: Scolor.secondry),
-        borderRadius: BorderRadius.circular(8),
-        color: Scolor.primary,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Image.asset(image, height: height * 0.19, width: height * 0.17),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  heading,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Scolor.secondry,
+  Widget _loanTable() {
+    return Column(
+      children: [
+        // Make the entire table horizontally scrollable
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Container(
+            width: MediaQuery.of(context).size.width *
+                1.2, // Make it wider than screen
+            child: Column(
+              children: [
+                // Header row
+                Container(
+                  color: Scolor.secondry,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  child: Row(
+                    children: [
+                      _tableHeader("Lender"),
+                      _tableHeader("Type"),
+                      _tableHeader("Total Amount"),
+                      _tableHeader("Remaining"),
+                      _tableHeader("Monthly"),
+                    ],
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Expanded(
-            child: schemes.isEmpty
-                ? Center(
-                    child: Text(
-                      isGovernment
-                          ? "No Government Schemes."
-                          : "No Private Schemes.",
-                      style: const TextStyle(color: Colors.white70, fontSize: 11),
+
+                // Loading, error, or data rows
+                if (isLoading)
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Scolor.secondry,
+                      ),
                     ),
                   )
-                : ListView(
-                    padding: EdgeInsets.zero,
-                    children: schemes.take(4).map<Widget>((scheme) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 1, horizontal: 2),
-                        child: Text(
-                          "• ${scheme['name'] ?? (isGovernment ? "Government Scheme" : "Private Scheme")}",
-                          style: const TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _loanTable() {
-    return LayoutBuilder(builder: (context, constraints) {
-      double tableheight = MediaQuery.of(context).size.height < 600
-          ? MediaQuery.of(context).size.height * 0.4
-          : 600;
-      double tableWidth = MediaQuery.of(context).size.width < 600
-          ? MediaQuery.of(context).size.width * 1.2
-          : 600;
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: tableWidth,
-          height: tableheight,
-          child: Column(
-            children: [
-              Container(
-                color: Scolor.secondry,
-                padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 8),
-                child: Row(
-                  children: [
-                    _tableHeader("Lender"),
-                    _tableHeader("Type"),
-                    _tableHeader("Total"),
-                    _tableHeader("Remaining"),
-                    _tableHeader("Monthly"),
-                  ],
-                ),
-              ),
-              if (isLoading)
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Center(
-                      child: CircularProgressIndicator(color: Scolor.secondry)),
-                )
-              else if (error != null)
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    error!,
-                    style: const TextStyle(color: Colors.red, fontSize: 13),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              else if (userLoans.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    "No active loans found",
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              else
-                ...userLoans.map((loan) => _loanRow(
-                      loan['Lender_Name'] ?? 'Unknown',
-                      loan['Loan_Type'] ?? 'Unknown',
-                      "₹${_formatCurrency((loan['Total_Loan_Amount'] ?? 0).toDouble())}",
-                      "₹${_formatCurrency((loan['Remaining_Loan_Amount'] ?? 0).toDouble())}",
-                      "₹${_formatCurrency((loan['Monthly_Payment'] ?? 0).toDouble())}",
-                    )),
-            ],
+                else if (error != null)
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      error!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                else if (userLoans.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      "No active loans found",
+                      style: TextStyle(
+                        color: Scolor.white,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                else
+                  // Data rows with scrollable content
+                  ...userLoans.map((loan) => _loanRow(
+                        loan['Lender_Name']?.toString() ?? 'Unknown Lender',
+                        loan['Loan_Type']?.toString() ?? 'Unknown Type',
+                        "₹${_formatCurrency((loan['Total_Loan_Amount'] ?? 0).toDouble())}",
+                        "₹${_formatCurrency((loan['Remaining_Loan_Amount'] ?? 0).toDouble())}",
+                        "₹${_formatCurrency((loan['Monthly_Payment'] ?? 0).toDouble())}",
+                      )),
+              ],
+            ),
           ),
         ),
-      );
-    });
+      ],
+    );
   }
 
   Widget _tableHeader(String text) {
@@ -533,10 +505,10 @@ class _InvestState extends State<Invest> {
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 15,
-            color: Colors.black,
+            fontSize: 12,
+            color: Scolor.primary,
           ),
           textAlign: TextAlign.center,
           maxLines: 2,
@@ -549,74 +521,184 @@ class _InvestState extends State<Invest> {
   Widget _loanRow(String lender, String loanType, String totalAmount,
       String remaining, String monthly) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.white24, width: 0.5))),
+        border: Border(
+          bottom: BorderSide(
+            color: Scolor.secondry.withOpacity(0.3),
+            width: 0.5,
+          ),
+        ),
+      ),
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              lender,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: Colors.white,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                lender,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: Scolor.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.left,
+                maxLines: 2,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-              textAlign: TextAlign.left,
             ),
           ),
           Expanded(
-            child: Text(
-              loanType,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Colors.white,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                loanType,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: Scolor.white,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
-            child: Text(
-              totalAmount,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Colors.amber,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                totalAmount,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Scolor.secondry,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
-            child: Text(
-              remaining,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Colors.white,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                remaining,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Scolor.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
-            child: Text(
-              monthly,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Colors.white,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                monthly,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: Scolor.white,
+                ),
+                textAlign: TextAlign.right,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _schemeCard(double height, double width, String heading, String image,
+      bool isGovernment) {
+    final schemes = isGovernment ? recommendedLoans : privateSchemes;
+    return Container(
+      height: height * 0.22,
+      width: width * 0.55,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Scolor.secondry),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              SizedBox(
+                height: height * 0.03,
+                width: height * 0.03,
+                child: Image.asset(image),
+              ),
+              Flexible(
+                child: Text(
+                  heading,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Scolor.secondry,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: height * 0.01),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isLoading)
+                    Center(
+                      child: CircularProgressIndicator(
+                        color: Scolor.secondry,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  else if (error != null)
+                    Text(
+                      "Error loading ${isGovernment ? 'loans' : 'schemes'}",
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )
+                  else if (schemes.isEmpty)
+                    Text(
+                      "No ${isGovernment ? 'loans' : 'schemes'} available",
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Scolor.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )
+                  else
+                    ...schemes.take(4).map((scheme) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Text(
+                            "• ${scheme['name']?.toString() ?? 'Unknown ${isGovernment ? 'Loan' : 'Scheme'}'}",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Scolor.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )),
+                ],
+              ),
             ),
           ),
         ],
@@ -625,33 +707,35 @@ class _InvestState extends State<Invest> {
   }
 }
 
+/// Your existing button widget -- note, unchanged!
 class BottomContainer extends StatelessWidget {
-  final double width;
   final double height;
+  final double width;
   final String heading;
-  const BottomContainer(
-      {required this.width,
-      required this.height,
-      required this.heading,
-      super.key});
+
+  const BottomContainer({
+    Key? key,
+    required this.height,
+    required this.width,
+    required this.heading,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final fontSize = width * 0.038 > 13 ? 13 : width * 0.038;
     return Container(
-      width: width,
-      height: height,
+      height: height * 0.06,
+      width: width * 0.25,
       decoration: BoxDecoration(
         border: Border.all(color: Scolor.secondry),
         borderRadius: BorderRadius.circular(8),
-        color: Scolor.primary,
       ),
       child: Center(
         child: Text(
           heading,
           style: TextStyle(
-           // fontSize: fontSize,
+            color: Scolor.white,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            fontSize: 12,
           ),
         ),
       ),

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shakti/Screens/Start.dart';
+import 'package:shakti/Screens/splash_Screen.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -969,6 +971,24 @@ class _ShaktiProfileScreenState extends State<ShaktiProfileScreen> {
             }).toList(),
           ),
         ),
+        SizedBox(height: 20),
+        Center(
+          child: TextButton.icon(
+            onPressed: () => _logout(context),
+            icon: const Icon(
+              Icons.logout,
+              color: Colors.red, // Make icon red
+            ),
+            label: const Text(
+              'Logout',
+              style:
+                  TextStyle(color: Colors.red), // Make text red too (optional)
+            ),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red, // Optional: consistent color style
+            ),
+          ),
+        )
       ],
     );
   }
@@ -1004,4 +1024,16 @@ class _ShaktiProfileScreenState extends State<ShaktiProfileScreen> {
       ),
     );
   }
+}
+
+Future<void> _logout(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('token'); // Clear the JWT
+
+  // Navigate to SplashScreen (or LoginScreen if preferred)
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (context) => StartScreen()),
+    (route) => false, // Remove all previous routes
+  );
 }

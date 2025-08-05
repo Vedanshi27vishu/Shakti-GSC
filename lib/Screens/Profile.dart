@@ -63,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://65.2.82.85:5000/api/signup/signup1'),
+        Uri.parse('http://65.2.82.85:5000/auth/signup1'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
@@ -176,6 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     buildSectionHeader("Password"),
                     TextField(
+                      cursorColor: Scolor.secondry,
                       controller: passwordController,
                       obscureText: obscurePassword,
                       style: const TextStyle(color: Scolor.white),
@@ -226,11 +227,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     ContinueButton(
                       screenHeight: screenHeight,
-                      screenWidth: screenWidth,
+                      screenWidth: 200,
                       text: isLoading ? "Loading..." : "Continue",
                       onPressed: isLoading ? () {} : submitForm,
                     ),
-                    SizedBox(height: screenHeight * 0.05),
+                    SizedBox(height: screenHeight * 0.02),
                   ],
                 ),
               );

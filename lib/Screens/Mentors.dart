@@ -250,16 +250,19 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
                     border: Border.all(color: Scolor.secondry, width: 1),
                   ),
                   child: TextField(
+                    cursorColor: Scolor.secondry,
                     controller: searchController,
                     onChanged: filterUsers,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Search by name or email...',
                       hintStyle: TextStyle(color: Colors.grey[400]),
-                      prefixIcon: const Icon(Icons.search, color: Scolor.secondry),
+                      prefixIcon:
+                          const Icon(Icons.search, color: Scolor.secondry),
                       suffixIcon: searchQuery.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(Icons.clear, color: Scolor.secondry),
+                              icon: const Icon(Icons.clear,
+                                  color: Scolor.secondry),
                               onPressed: () {
                                 searchController.clear();
                                 filterUsers('');
@@ -291,7 +294,8 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
                   child: isLoading
                       ? const Center(
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Scolor.secondry),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Scolor.secondry),
                           ),
                         )
                       : filteredUsers.isEmpty
@@ -377,7 +381,8 @@ class UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Responsive sizes
-    final double avatarRadius = cardWidth * 0.13 > 36 ? 36 : cardWidth * 0.13; // up to 36px
+    final double avatarRadius =
+        cardWidth * 0.13 > 36 ? 36 : cardWidth * 0.13; // up to 36px
     final double verPad = cardWidth * 0.06;
     final double horPad = cardWidth * 0.07;
     final double nameFont = cardWidth * 0.077 > 19 ? 19 : cardWidth * 0.077;
@@ -385,7 +390,8 @@ class UserCard extends StatelessWidget {
     final double statNumberFont = cardWidth * 0.06;
     final double statLabelFont = cardWidth * 0.036;
     final double buttonFont = cardWidth * 0.048;
-    final double buttonHeight = screenHeight * 0.055 > 46 ? 46 : screenHeight * 0.055;
+    final double buttonHeight =
+        screenHeight * 0.055 > 46 ? 46 : screenHeight * 0.055;
 
     return Container(
       width: cardWidth,
@@ -413,7 +419,9 @@ class UserCard extends StatelessWidget {
                 backgroundColor: Scolor.secondry,
                 radius: avatarRadius,
                 child: Text(
-                  user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?',
+                  user.fullName.isNotEmpty
+                      ? user.fullName[0].toUpperCase()
+                      : '?',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: avatarRadius * 0.95,
@@ -496,7 +504,8 @@ class UserCard extends StatelessWidget {
             height: buttonHeight,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: isFollowing ? Colors.grey[700] : Scolor.secondry,
+                backgroundColor:
+                    isFollowing ? Colors.grey[700] : Scolor.secondry,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(cardWidth * 0.045),
                 ),

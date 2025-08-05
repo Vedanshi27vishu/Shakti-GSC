@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shakti/Screens/AI_chat.dart';
+import 'package:shakti/Screens/BottomNavBar.dart';
+import 'package:shakti/Screens/avatar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Screens/Start.dart';
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/helpers/helper_functions.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -26,13 +29,28 @@ class _SplashScreenState extends State<SplashScreen>
       });
 
     _controller!.forward();
-    _navigateToHome();
+    _navigateToNextScreen();
   }
 
-  _navigateToHome() async {
-    await Future.delayed(Duration(seconds: 3), () {});
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => StartScreen()));
+  Future<void> _navigateToNextScreen() async {
+    await Future.delayed(Duration(seconds: 3));
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? jwt = prefs.getString('token');
+
+    if (jwt != null && jwt.isNotEmpty) {
+      // Navigate to Home if JWT exists
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => BottomNavBarExample()),
+      );
+    } else {
+      // Navigate to Start/Login screen if JWT is null or empty
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => StartScreen()),
+      );
+    }
   }
 
   @override
@@ -43,7 +61,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Use LayoutBuilder for responsive breakpoints
     return Scaffold(
       backgroundColor: Scolor.primary,
       body: LayoutBuilder(
@@ -51,13 +68,12 @@ class _SplashScreenState extends State<SplashScreen>
           double screenWidth = constraints.maxWidth;
           double screenHeight = constraints.maxHeight;
 
-          // --- Set logo and font size by breakpoints ---
           double logoSize;
           double fontSize;
           double spacing;
           if (screenWidth < 600) {
             // Mobile
-            logoSize = screenWidth * 0.55;  // e.g. 220px at 400px width
+            logoSize = screenWidth * 0.55;
             fontSize = screenWidth * 0.10;
             spacing = screenHeight * 0.02;
           } else if (screenWidth < 1000) {
@@ -66,12 +82,11 @@ class _SplashScreenState extends State<SplashScreen>
             fontSize = 48;
             spacing = 30;
           } else {
-            // Laptop/Desktop
+            // Desktop
             logoSize = 400;
             fontSize = 64;
             spacing = 38;
           }
-          // ---------------------------------------------
 
           return FadeTransition(
             opacity: _animation!,
@@ -79,14 +94,12 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
                   Container(
                     height: logoSize,
                     width: logoSize,
                     child: Image.asset('assets/logo.png'),
                   ),
                   SizedBox(height: spacing),
-                  // App Name
                   Text(
                     "Shakti-Nxt",
                     style: TextStyle(

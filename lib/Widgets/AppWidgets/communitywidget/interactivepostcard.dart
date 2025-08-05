@@ -59,112 +59,115 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
-Future<void> _handleLike() async {
-  if (_isLiking || currentUserId == null) return;
+  Future<void> _handleLike() async {
+    if (_isLiking || currentUserId == null) return;
 
-  // Optimistic update - update UI immediately
-  final bool wasLiked = _currentPost.isLikedByCurrentUser(currentUserId!);
-  final List<String> newLikes = List<String>.from(_currentPost.likes);
-  
-  if (wasLiked) {
-    newLikes.remove(currentUserId!);
-  } else {
-    newLikes.add(currentUserId!);
-  }
+    // Optimistic update - update UI immediately
+    final bool wasLiked = _currentPost.isLikedByCurrentUser(currentUserId!);
+    final List<String> newLikes = List<String>.from(_currentPost.likes);
 
-  setState(() {
-    _isLiking = true;
-    _currentPost = _currentPost.copyWith(
-      likes: newLikes,
-      likesCount: newLikes.length,
-    );
-  });
-
-  try {
-    final updatedPost = await PostService.likePost(_currentPost.id);
-    
-    if (updatedPost != null && mounted) {
-      setState(() {
-        _currentPost = updatedPost.copyWith(
-          userFullName: _currentPost.userFullName,
-        );
-      });
-
-      // Notify parent to update the post in the list
-      widget.onPostUpdated?.call(_currentPost);
+    if (wasLiked) {
+      newLikes.remove(currentUserId!);
+    } else {
+      newLikes.add(currentUserId!);
     }
-  } catch (e) {
-    debugPrint('Error liking post: $e');
-    
-    // Revert optimistic update on error
-    if (mounted) {
-      setState(() {
-        _currentPost = _currentPost.copyWith(
-          likes: _currentPost.likes,
-          likesCount: _currentPost.likes.length,
-        );
-      });
-      _showErrorSnackBar('Failed to like post');
-    }
-  } finally {
-    if (mounted) {
-      setState(() {
-        _isLiking = false;
-      });
-    }
-  }
-}
 
-Future<void> _handleComment(String commentText) async {
-  if (_isCommenting || currentUserId == null || commentText.trim().isEmpty) return;
+    setState(() {
+      _isLiking = true;
+      _currentPost = _currentPost.copyWith(
+        likes: newLikes,
+        likesCount: newLikes.length,
+      );
+    });
 
-  setState(() {
-    _isCommenting = true;
-  });
+    try {
+      final updatedPost = await PostService.likePost(_currentPost.id);
 
-  try {
-    final updatedPost = await PostService.commentOnPost(_currentPost.id, commentText.trim());
-    
-    if (mounted) {
-      if (updatedPost != null) {
-        // Use the updated post data from server
+      if (updatedPost != null && mounted) {
         setState(() {
           _currentPost = updatedPost.copyWith(
             userFullName: _currentPost.userFullName,
           );
-          _commentController.clear();
-          _showCommentField = false;
         });
-      } else {
-        // If no updated post returned, just refresh the UI
-        setState(() {
-          _commentController.clear();
-          _showCommentField = false;
-        });
-        // Trigger a refresh from parent component
-        widget.onComment?.call(commentText.trim());
-      }
 
-      // Remove focus from comment field
-      _commentFocusNode.unfocus();
-      
-      // Only call onPostUpdated if we have updated data
-      if (updatedPost != null) {
+        // Notify parent to update the post in the list
         widget.onPostUpdated?.call(_currentPost);
       }
-    }
-  } catch (e) {
-    if (mounted) {
-      _showErrorSnackBar('Failed to add comment: $e');
-    }
-  } finally {
-    if (mounted) {
-      setState(() {
-        _isCommenting = false;
-      });
+    } catch (e) {
+      debugPrint('Error liking post: $e');
+
+      // Revert optimistic update on error
+      if (mounted) {
+        setState(() {
+          _currentPost = _currentPost.copyWith(
+            likes: _currentPost.likes,
+            likesCount: _currentPost.likes.length,
+          );
+        });
+        _showErrorSnackBar('Failed to like post');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLiking = false;
+        });
+      }
     }
   }
-}
+
+  Future<void> _handleComment(String commentText) async {
+    if (_isCommenting || currentUserId == null || commentText.trim().isEmpty)
+      return;
+
+    setState(() {
+      _isCommenting = true;
+    });
+
+    try {
+      final updatedPost =
+          await PostService.commentOnPost(_currentPost.id, commentText.trim());
+
+      if (mounted) {
+        if (updatedPost != null) {
+          // Use the updated post data from server
+          setState(() {
+            _currentPost = updatedPost.copyWith(
+              userFullName: _currentPost.userFullName,
+            );
+            _commentController.clear();
+            _showCommentField = false;
+          });
+        } else {
+          // If no updated post returned, just refresh the UI
+          setState(() {
+            _commentController.clear();
+            _showCommentField = false;
+          });
+          // Trigger a refresh from parent component
+          widget.onComment?.call(commentText.trim());
+        }
+
+        // Remove focus from comment field
+        _commentFocusNode.unfocus();
+
+        // Only call onPostUpdated if we have updated data
+        if (updatedPost != null) {
+          widget.onPostUpdated?.call(_currentPost);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar('Failed to add comment: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCommenting = false;
+        });
+      }
+    }
+  }
+
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -187,7 +190,7 @@ Future<void> _handleComment(String commentText) async {
     setState(() {
       _showCommentField = !_showCommentField;
     });
-    
+
     if (_showCommentField) {
       // Focus the comment field when it's shown
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -241,100 +244,105 @@ Future<void> _handleComment(String commentText) async {
       ],
     );
   }
+
   void _showEditCommentDialog(CommentModel comment) {
-  final TextEditingController editController = TextEditingController(text: comment.text);
-  
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Edit Comment'),
-      content: TextField(
-        controller: editController,
-        decoration: const InputDecoration(
-          hintText: 'Edit your comment...',
-          border: OutlineInputBorder(),
+    final TextEditingController editController =
+        TextEditingController(text: comment.text);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Comment'),
+        content: TextField(
+          cursorColor: Scolor.secondry,
+          controller: editController,
+          decoration: const InputDecoration(
+            hintText: 'Edit your comment...',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 3,
         ),
-        maxLines: 3,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final updatedText = editController.text.trim();
+              if (updatedText.isNotEmpty && comment.id != null) {
+                Navigator.pop(context);
+                await _updateComment(comment.id!, updatedText);
+              }
+            },
+            child: const Text('Update'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            final updatedText = editController.text.trim();
-            if (updatedText.isNotEmpty && comment.id != null) {
-              Navigator.pop(context);
-              await _updateComment(comment.id!, updatedText);
-            }
-          },
-          child: const Text('Update'),
-        ),
-      ],
-    ),
-  );
-}
-
-void _showDeleteCommentDialog(CommentModel comment) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Delete Comment'),
-      content: const Text('Are you sure you want to delete this comment?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            if (comment.id != null) {
-              Navigator.pop(context);
-              await _deleteComment(comment.id!);
-            }
-          },
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-          child: const Text('Delete', style: TextStyle(color: Colors.white)),
-        ),
-      ],
-    ),
-  );
-}
-
-Future<void> _updateComment(String commentId, String updatedText) async {
-  try {
-    final updatedPost = await PostService.updateComment(_currentPost.id, commentId, updatedText);
-    
-    if (updatedPost != null && mounted) {
-      setState(() {
-        _currentPost = updatedPost.copyWith(
-          userFullName: _currentPost.userFullName,
-        );
-      });
-      widget.onPostUpdated?.call(_currentPost);
-    }
-  } catch (e) {
-    _showErrorSnackBar('Failed to update comment: $e');
+    );
   }
-}
 
-Future<void> _deleteComment(String commentId) async {
-  try {
-    final updatedPost = await PostService.deleteComment(_currentPost.id, commentId);
-    
-    if (updatedPost != null && mounted) {
-      setState(() {
-        _currentPost = updatedPost.copyWith(
-          userFullName: _currentPost.userFullName,
-        );
-      });
-      widget.onPostUpdated?.call(_currentPost);
-    }
-  } catch (e) {
-    _showErrorSnackBar('Failed to delete comment: $e');
+  void _showDeleteCommentDialog(CommentModel comment) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Comment'),
+        content: const Text('Are you sure you want to delete this comment?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (comment.id != null) {
+                Navigator.pop(context);
+                await _deleteComment(comment.id!);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
-}
+
+  Future<void> _updateComment(String commentId, String updatedText) async {
+    try {
+      final updatedPost = await PostService.updateComment(
+          _currentPost.id, commentId, updatedText);
+
+      if (updatedPost != null && mounted) {
+        setState(() {
+          _currentPost = updatedPost.copyWith(
+            userFullName: _currentPost.userFullName,
+          );
+        });
+        widget.onPostUpdated?.call(_currentPost);
+      }
+    } catch (e) {
+      _showErrorSnackBar('Failed to update comment: $e');
+    }
+  }
+
+  Future<void> _deleteComment(String commentId) async {
+    try {
+      final updatedPost =
+          await PostService.deleteComment(_currentPost.id, commentId);
+
+      if (updatedPost != null && mounted) {
+        setState(() {
+          _currentPost = updatedPost.copyWith(
+            userFullName: _currentPost.userFullName,
+          );
+        });
+        widget.onPostUpdated?.call(_currentPost);
+      }
+    } catch (e) {
+      _showErrorSnackBar('Failed to delete comment: $e');
+    }
+  }
 
   Widget _buildPostContent() {
     return Text(
@@ -384,7 +392,8 @@ Future<void> _deleteComment(String commentId) async {
                 children: [
                   Icon(Icons.image_not_supported, size: 48, color: Colors.grey),
                   SizedBox(height: 8),
-                  Text('Image failed to load', style: TextStyle(color: Colors.grey)),
+                  Text('Image failed to load',
+                      style: TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
@@ -426,8 +435,9 @@ Future<void> _deleteComment(String commentId) async {
   }
 
   Widget _buildActionBar() {
-    final bool isLiked = currentUserId != null && _currentPost.likes.contains(currentUserId!);
-    
+    final bool isLiked =
+        currentUserId != null && _currentPost.likes.contains(currentUserId!);
+
     // Debug prints
     debugPrint('Current User ID: $currentUserId');
     debugPrint('Post Likes: ${_currentPost.likes}');
@@ -483,7 +493,9 @@ Future<void> _deleteComment(String commentId) async {
             child: Row(
               children: [
                 Icon(
-                  _showCommentField ? Icons.chat_bubble : Icons.chat_bubble_outline,
+                  _showCommentField
+                      ? Icons.chat_bubble
+                      : Icons.chat_bubble_outline,
                   color: _showCommentField ? Scolor.primary : Colors.grey[600],
                   size: 20,
                 ),
@@ -513,6 +525,7 @@ Future<void> _deleteComment(String commentId) async {
         children: [
           Expanded(
             child: TextField(
+              cursorColor: Scolor.secondry,
               controller: _commentController,
               focusNode: _commentFocusNode,
               decoration: InputDecoration(
@@ -558,145 +571,148 @@ Future<void> _deleteComment(String commentId) async {
     );
   }
 
- Widget _buildCommentsList() {
-  if (_currentPost.comments.isEmpty) return const SizedBox.shrink();
+  Widget _buildCommentsList() {
+    if (_currentPost.comments.isEmpty) return const SizedBox.shrink();
 
-  return Padding(
-    padding: const EdgeInsets.only(top: 12),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Comments (${_currentPost.comments.length}):',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
-            fontSize: 12,
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Comments (${_currentPost.comments.length}):',
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+              fontSize: 12,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        ..._currentPost.comments.take(3).map((comment) {
-          final bool isCurrentUserComment = comment.postedBy == currentUserId;
-          
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[200]!),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          comment.text,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                      if (isCurrentUserComment)
-                        PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              _showEditCommentDialog(comment);
-                            } else if (value == 'delete') {
-                              _showDeleteCommentDialog(comment);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit, size: 16),
-                                  SizedBox(width: 8),
-                                  Text('Edit'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete, size: 16, color: Colors.red),
-                                  SizedBox(width: 8),
-                                  Text('Delete', style: TextStyle(color: Colors.red)),
-                                ],
-                              ),
-                            ),
-                          ],
-                          child: Icon(
-                            Icons.more_vert,
-                            size: 16,
-                            color: Colors.grey[600],
+          const SizedBox(height: 8),
+          ..._currentPost.comments.take(3).map((comment) {
+            final bool isCurrentUserComment = comment.postedBy == currentUserId;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            comment.text,
+                            style: const TextStyle(fontSize: 14),
                           ),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        isCurrentUserComment ? 'You' : 'User',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
+                        if (isCurrentUserComment)
+                          PopupMenuButton<String>(
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                _showEditCommentDialog(comment);
+                              } else if (value == 'delete') {
+                                _showDeleteCommentDialog(comment);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit, size: 16),
+                                    SizedBox(width: 8),
+                                    Text('Edit'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete,
+                                        size: 16, color: Colors.red),
+                                    SizedBox(width: 8),
+                                    Text('Delete',
+                                        style: TextStyle(color: Colors.red)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            child: Icon(
+                              Icons.more_vert,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          isCurrentUserComment ? 'You' : 'User',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      Text(
-                        _getCommentTimeAgo(comment.createdAt),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[500],
+                        Text(
+                          _getCommentTimeAgo(comment.createdAt),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[500],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        }).toList(),
-        if (_currentPost.comments.length > 3)
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CommentsScreen(
-                    post: _currentPost,
-                    onPostUpdated: (updatedPost) {
-                      setState(() {
-                        _currentPost = updatedPost;
-                      });
-                      widget.onPostUpdated?.call(updatedPost);
-                    },
+            );
+          }).toList(),
+          if (_currentPost.comments.length > 3)
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CommentsScreen(
+                      post: _currentPost,
+                      onPostUpdated: (updatedPost) {
+                        setState(() {
+                          _currentPost = updatedPost;
+                        });
+                        widget.onPostUpdated?.call(updatedPost);
+                      },
+                    ),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'View all ${_currentPost.comments.length} comments',
+                  style: TextStyle(
+                    color: Scolor.primary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                'View all ${_currentPost.comments.length} comments',
-                style: TextStyle(
-                  color: Scolor.primary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
               ),
             ),
-          ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -749,4 +765,3 @@ Future<void> _deleteComment(String commentId) async {
     super.dispose();
   }
 }
-

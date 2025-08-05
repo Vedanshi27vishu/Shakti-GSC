@@ -23,9 +23,9 @@ class ContinueButton extends StatelessWidget {
 
     if (screenWidth < 600) {
       // Mobile
-      buttonHeight = screenHeight * 0.6;
-      fontSize = screenWidth * 0.09;
-    } else if (screenWidth < 1000) {
+      buttonHeight = screenWidth * 0.2;
+      fontSize = screenWidth * 0.08;
+    } else if (screenWidth > 600 && screenWidth < 1000) {
       // Tablet
       buttonHeight = 65;
       fontSize = 25;

@@ -25,13 +25,12 @@ class _BusinessDetailsState extends State<BusinessDetails> {
   String? selectedBusinessSector;
   final List<String> businessSectors = [
     'Beauty',
-    'Dairy Budget',
+    'Dairy',
     'Healthcare',
     'Laundry',
     'Manufacturing',
-    'Monthly Revenue',
     'Restaurant',
-    'Retail Budget',
+    'Retails',
     'Travel',
   ];
 
@@ -82,7 +81,7 @@ class _BusinessDetailsState extends State<BusinessDetails> {
             "Session ID not found. Please restart the signup process.");
       }
 
-      final url = Uri.parse("http://65.2.82.85:5000/api/signup/signup3");
+      final url = Uri.parse("http://65.2.82.85:5000/auth/signup3");
 
       final response = await http.post(
         url,
@@ -361,11 +360,11 @@ class _BusinessDetailsState extends State<BusinessDetails> {
               // Continue Button
               ContinueButton(
                   screenHeight: screenHeight,
-                  screenWidth: screenWidth,
-                  text: "Continue",
+                  screenWidth: 200,
+                  text: "Signup",
                   onPressed: submitBusinessDetails),
 
-              SizedBox(height: screenHeight * 0.1),
+              SizedBox(height: screenHeight * 0.01),
             ],
           ),
         ),

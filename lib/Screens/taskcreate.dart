@@ -36,12 +36,12 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
               surface: Scolor.primary,
               onSurface: Scolor.white,
             ),
-     dialogBackgroundColor: Scolor.primary,
-dialogTheme: const DialogThemeData(
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(12)),
-  ),
-),
+            dialogTheme: DialogThemeData(
+              backgroundColor: Scolor.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
           child: child!,
         );
@@ -62,7 +62,9 @@ dialogTheme: const DialogThemeData(
   }
 
   Future<void> _createTask() async {
-    if (_formKey.currentState!.validate() && _startDate != null && _endDate != null) {
+    if (_formKey.currentState!.validate() &&
+        _startDate != null &&
+        _endDate != null) {
       final url = Uri.parse('http://65.2.82.85:5000/tasks/create');
 
       final prefs = await SharedPreferences.getInstance();
@@ -70,7 +72,8 @@ dialogTheme: const DialogThemeData(
 
       if (token == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("🔐 Token not found. Please login again.")),
+          const SnackBar(
+              content: Text("🔐 Token not found. Please login again.")),
         );
         return;
       }
@@ -166,10 +169,12 @@ dialogTheme: const DialogThemeData(
                         labelFontSize: labelFontSize,
                         maxLines: 3),
                     const SizedBox(height: 16),
-                    buildDatePicker("Start Date", _startDate, () => _pickDate(context, true),
+                    buildDatePicker("Start Date", _startDate,
+                        () => _pickDate(context, true),
                         fontSize: inputFontSize, labelFontSize: labelFontSize),
                     const SizedBox(height: 16),
-                    buildDatePicker("End Date", _endDate, () => _pickDate(context, false),
+                    buildDatePicker(
+                        "End Date", _endDate, () => _pickDate(context, false),
                         fontSize: inputFontSize, labelFontSize: labelFontSize),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
@@ -179,18 +184,22 @@ dialogTheme: const DialogThemeData(
                         filled: true,
                         fillColor: const Color(0xFF1E1E2F),
                         labelText: 'Priority',
-                        labelStyle: TextStyle(color: Colors.white, fontSize: labelFontSize),
+                        labelStyle: TextStyle(
+                            color: Colors.white, fontSize: labelFontSize),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 16),
                       ),
-                      style: TextStyle(color: Colors.white, fontSize: inputFontSize),
+                      style: TextStyle(
+                          color: Colors.white, fontSize: inputFontSize),
                       items: ['Low', 'Medium', 'High']
                           .map(
                             (level) => DropdownMenuItem(
                               value: level,
-                              child: Text(level, style: const TextStyle(color: Colors.white)),
+                              child: Text(level,
+                                  style: const TextStyle(color: Colors.white)),
                             ),
                           )
                           .toList(),
@@ -206,7 +215,8 @@ dialogTheme: const DialogThemeData(
                       child: ElevatedButton(
                         onPressed: _createTask,
                         child: Text('Create Task',
-                            style: TextStyle(fontSize: inputFontSize, color: Colors.black)),
+                            style: TextStyle(
+                                fontSize: inputFontSize, color: Colors.black)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.yellow.shade700,
                           shape: RoundedRectangleBorder(
@@ -231,14 +241,16 @@ dialogTheme: const DialogThemeData(
       controller: controller,
       style: TextStyle(color: Colors.white, fontSize: fontSize),
       maxLines: maxLines,
-      validator: (val) => val == null || val.trim().isEmpty ? '$label is required' : null,
+      validator: (val) =>
+          val == null || val.trim().isEmpty ? '$label is required' : null,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.white, fontSize: labelFontSize),
         filled: true,
         fillColor: const Color(0xFF1E1E2F),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       ),
     );
   }
@@ -261,7 +273,8 @@ dialogTheme: const DialogThemeData(
                 style: TextStyle(color: Colors.white, fontSize: fontSize),
               ),
             ),
-            Icon(Icons.calendar_today, color: Colors.yellow.shade700, size: fontSize + 6),
+            Icon(Icons.calendar_today,
+                color: Colors.yellow.shade700, size: fontSize + 6),
           ],
         ),
       ),

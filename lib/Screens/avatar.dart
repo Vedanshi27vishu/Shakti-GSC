@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/AI.dart';
 import 'package:shakti/Screens/ExpertsInsights.dart';
 import 'package:shakti/Screens/FinancialRecords.dart';
+import 'package:shakti/Screens/Flowchart.dart';
 import 'package:shakti/Screens/YourBudget.dart';
 import 'package:shakti/Screens/YourFeedback.dart';
 import 'package:shakti/Screens/YourProgress.dart';
@@ -210,7 +211,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
             } else {
               // Desktop/Laptop
               titleFontSize = 28;
-              avatarRadius = 35;
+              avatarRadius = 25;
               horizontalPad = 24;
             }
 
@@ -220,7 +221,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Hi, Entrepreneur!',
+                    'Hi,!',
                     style: TextStyle(
                       color: Scolor.white,
                       fontSize: titleFontSize,
@@ -359,7 +360,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              FinancialLinkInsights()),
+                                              FlowChartScreen()),
                                     );
                                   },
                                 ),

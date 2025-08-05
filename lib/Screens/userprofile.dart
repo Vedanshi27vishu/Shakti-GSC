@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/userfollowers.dart';
 import 'package:shakti/Screens/userfollowing.dart';
+import 'package:shakti/Utils/constants/colors.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -136,7 +137,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
     return Scaffold(
       backgroundColor: darkBlue,
       appBar: AppBar(
-        backgroundColor: darkBlue,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Scolor.secondry,
         elevation: 0,
         title: Text(
           userName,
@@ -312,7 +314,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                     ),
                   ),
                 ],
-                if (businessSector.isNotEmpty || businessLocation.isNotEmpty) ...[
+                if (businessSector.isNotEmpty ||
+                    businessLocation.isNotEmpty) ...[
                   SizedBox(height: 10),
                   Row(
                     children: [
@@ -327,13 +330,15 @@ class _ProfileScreenState extends State<UserProfileScreen>
                           ),
                         ),
                       ],
-                      if (businessSector.isNotEmpty && businessLocation.isNotEmpty)
+                      if (businessSector.isNotEmpty &&
+                          businessLocation.isNotEmpty)
                         Text(
                           ' • ',
                           style: TextStyle(color: Colors.grey[400]),
                         ),
                       if (businessLocation.isNotEmpty) ...[
-                        Icon(Icons.location_on, color: Colors.grey[400], size: 16),
+                        Icon(Icons.location_on,
+                            color: Colors.grey[400], size: 16),
                         SizedBox(width: 5),
                         Text(
                           businessLocation,
@@ -353,29 +358,29 @@ class _ProfileScreenState extends State<UserProfileScreen>
           SizedBox(height: 20),
 
           // Action Buttons
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionButton(
-                  'Edit Profile',
-                  Icons.edit,
-                  () {
-                    // Add edit profile functionality
-                  },
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: _buildActionButton(
-                  'Share Profile',
-                  Icons.share,
-                  () {
-                    // Add share functionality
-                  },
-                ),
-              ),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     Expanded(
+          //       child: _buildActionButton(
+          //         'Edit Profile',
+          //         Icons.edit,
+          //         () {
+          //           // Add edit profile functionality
+          //         },
+          //       ),
+          //     ),
+          //     SizedBox(width: 10),
+          //     Expanded(
+          //       child: _buildActionButton(
+          //         'Share Profile',
+          //         Icons.share,
+          //         () {
+          //           // Add share functionality
+          //         },
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );
@@ -404,7 +409,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
     );
   }
 
-  Widget _buildActionButton(String text, IconData icon, VoidCallback onPressed) {
+  Widget _buildActionButton(
+      String text, IconData icon, VoidCallback onPressed) {
     return SizedBox(
       height: 35,
       child: ElevatedButton.icon(
@@ -528,8 +534,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                           color: lightBlue,
                           child: Center(
                             child: CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(yellow),
+                              valueColor: AlwaysStoppedAnimation<Color>(yellow),
                               value: loadingProgress.expectedTotalBytes != null
                                   ? loadingProgress.cumulativeBytesLoaded /
                                       loadingProgress.expectedTotalBytes!
@@ -576,8 +581,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                       if (post['likes'] != null &&
                           (post['likes'] as List).isNotEmpty)
                         Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 2),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(10),
@@ -599,8 +604,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                       if (post['comments'] != null &&
                           (post['comments'] as List).isNotEmpty)
                         Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 2),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(10),
@@ -668,8 +673,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
           ),
           child: Container(
             padding: EdgeInsets.all(20),
-            constraints:
-                BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -681,7 +686,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                       backgroundColor: lightBlue,
                       child: Text(
                         userName.isNotEmpty ? userName[0].toUpperCase() : '?',
-                        style: TextStyle(color: yellow, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: yellow, fontWeight: FontWeight.bold),
                       ),
                     ),
                     SizedBox(width: 10),
@@ -700,7 +706,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                               (post['interestTags'] as List).isNotEmpty)
                             Text(
                               (post['interestTags'] as List).join(', '),
-                              style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                              style: TextStyle(
+                                  color: Colors.grey[400], fontSize: 12),
                             ),
                         ],
                       ),
@@ -710,11 +717,13 @@ class _ProfileScreenState extends State<UserProfileScreen>
                 SizedBox(height: 15),
 
                 // Post Image or Content
-                if (post['mediaUrl'] != null && post['mediaUrl'].toString().isNotEmpty)
+                if (post['mediaUrl'] != null &&
+                    post['mediaUrl'].toString().isNotEmpty)
                   Container(
                     height: 200,
                     width: double.infinity,
-                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(10)),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.network(
@@ -723,7 +732,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             color: lightBlue,
-                            child: Icon(Icons.broken_image, color: yellow, size: 60),
+                            child: Icon(Icons.broken_image,
+                                color: yellow, size: 60),
                           );
                         },
                       ),

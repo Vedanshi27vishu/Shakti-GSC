@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/BottomNavBar.dart';
 import 'package:shakti/Screens/Profile.dart';
+import 'package:shakti/Screens/forgetpassword.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/Continue.dart';
 import 'package:shakti/Widgets/AppWidgets/InputField.dart';
@@ -202,6 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: buildSubSection("Password"),
                           ),
                           TextField(
+                            cursorColor: Scolor.secondry,
                             controller: passwordController,
                             obscureText: obscurePassword,
                             style: const TextStyle(color: Scolor.white),
@@ -241,8 +243,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? const CircularProgressIndicator(
                                   color: Scolor.secondry)
                               : ContinueButton(
-                                  screenHeight: 60, // no need to use .h here
-                                  screenWidth: 200, // no need to use .h here
+                                  screenHeight: 500,
+                                  screenWidth: 200,
                                   text: "Log in",
                                   onPressed: loginUser,
                                 ),
@@ -257,11 +259,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
-                                "Forgot password?",
-                                style: TextStyle(
-                                  color: Scolor.secondry,
-                                  fontWeight: FontWeight.bold,
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ForgotPasswordScreen()),
+                                  );
+                                },
+                                child: Text(
+                                  "Forgot password?",
+                                  style: TextStyle(
+                                    color: Scolor.secondry,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:shakti/Screens/BottomNavBar.dart';
-import 'package:shakti/Screens/CommunityHome.dart';
-import 'package:shakti/Screens/avatar.dart';
+
 import 'package:shakti/Screens/splash_Screen.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 
@@ -19,7 +17,7 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           theme: ThemeData(scaffoldBackgroundColor: Scolor.primary),
           debugShowCheckedModeBanner: false,
-         home:  SplashScreen(),
+          home: SplashScreen(),
           //home:CommunityHomeScreen(),
         );
       },

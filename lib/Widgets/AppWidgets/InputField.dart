@@ -8,7 +8,7 @@ class InputField extends StatelessWidget {
   const InputField({
     super.key,
     required this.label,
-    required this.controller, 
+    required this.controller,
   });
 
   @override
@@ -28,6 +28,7 @@ class InputField extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           TextField(
+            cursorColor: Scolor.secondry,
             controller: controller,
             style: const TextStyle(color: Scolor.white),
             decoration: InputDecoration(
@@ -35,15 +36,18 @@ class InputField extends StatelessWidget {
               fillColor: Scolor.primary, // Background color
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Scolor.secondry, width: 1), // Default border
+                borderSide: const BorderSide(
+                    color: Scolor.secondry, width: 1), // Default border
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Scolor.white, width: 3.5), // Focused border
+                borderSide: const BorderSide(
+                    color: Scolor.white, width: 3.5), // Focused border
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.red, width: 2), // Error border
+                borderSide: const BorderSide(
+                    color: Colors.red, width: 2), // Error border
               ),
               hintText: "Enter $label",
               hintStyle: TextStyle(color: Scolor.white.withOpacity(0.5)),

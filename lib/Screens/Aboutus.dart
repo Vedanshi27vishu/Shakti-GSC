@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shakti/Utils/constants/colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutUsScreen extends StatelessWidget {
   const AboutUsScreen({super.key});
@@ -200,18 +202,78 @@ class AboutUsScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 8.h),
-                        Text(
-                          "To empower businesses with AI-driven insights and tools that simplify complex decisions and accelerate growth in the digital age (AI based SHARK TANK). For more informtion about code base visit our GitHub repository.For Frontend(https://github.com/aikansh008/Shakti-Nxt) ",
-                          style: TextStyle(
-                            color: Scolor.light.withOpacity(0.8),
-                            fontSize: 14.sp.clamp(12, 16),
-                            height: 1.5,
-                          ),
+
+                        // RichText for clickable link
+                        RichText(
                           textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: Scolor.light.withOpacity(0.8),
+                              fontSize: 14.sp.clamp(12, 16),
+                              height: 1.5,
+                            ),
+                            children: [
+                              const TextSpan(
+                                text:
+                                    "To empower businesses with AI-driven insights and tools that simplify complex decisions and accelerate growth in the digital age (AI based SHARK TANK). For more information about code base visit our GitHub repository: ",
+                              ),
+                              TextSpan(
+                                text: "Frontend",
+                                style: const TextStyle(
+                                  color: Colors.blueAccent,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    const url =
+                                        "https://github.com/aikansh008/Shakti-Nxt";
+                                    if (await canLaunchUrl(Uri.parse(url))) {
+                                      await launchUrl(Uri.parse(url),
+                                          mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                              ),
+                              const TextSpan(text: " and "),
+                              TextSpan(
+                                text: "Backend",
+                                style: const TextStyle(
+                                  color: Colors.blueAccent,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    const url =
+                                        "https://github.com/aikansh008/Shakti-Backend";
+                                    if (await canLaunchUrl(Uri.parse(url))) {
+                                      await launchUrl(Uri.parse(url),
+                                          mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                              ),
+                              const TextSpan(text: ". "),
+                              TextSpan(
+                                text: "APK",
+                                style: const TextStyle(
+                                  color: Colors.blueAccent,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    const url =
+                                        "https://drive.google.com/drive/u/0/folders/1Bd8dH0U6-gzoOZg-YAeIxSOm208epLlc";
+                                    if (await canLaunchUrl(Uri.parse(url))) {
+                                      await launchUrl(Uri.parse(url),
+                                          mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
+
                   SizedBox(height: 40.h),
                 ],
               ),

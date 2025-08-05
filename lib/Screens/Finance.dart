@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:shakti/Screens/AI.dart';
 import 'package:shakti/Screens/AI_chat.dart';
 import 'package:shakti/Screens/BusinessTracker.dart';
 import 'package:shakti/Screens/taskcreate.dart';
@@ -175,7 +178,7 @@ class _FinanceState extends State<Finance> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Hi, Entrepreneur!",
+                "${getGreeting()}",
                 style: TextStyle(
                   fontSize: height * 0.04,
                   fontWeight: FontWeight.w600,
@@ -184,7 +187,7 @@ class _FinanceState extends State<Finance> {
               ),
               SizedBox(height: height * 0.005),
               Text(
-                "Your Business Score is 74/100",
+                "Your Business Score is 51/100",
                 style: TextStyle(
                   fontSize: height * 0.02,
                   color: Scolor.secondry,
@@ -195,10 +198,10 @@ class _FinanceState extends State<Finance> {
               /// *Disha AI Assistant Card*
               GestureDetector(
                 onTap: () {
-                  Navigator.pushReplacement(
+                  Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const AIChatScreen(),
+                        builder: (context) => BusinessAdvicePage(),
                       ));
                 },
                 child: Container(
@@ -252,7 +255,7 @@ class _FinanceState extends State<Finance> {
 
               SizedBox(height: height * 0.03),
 
-              /// *Suggestions Row* - Updated to use API data
+              /// *Suggestions Row* - Revenue and Customers
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -260,19 +263,19 @@ class _FinanceState extends State<Finance> {
                     child: SuggestionContainer(
                       image: "assets/images/rupees.png",
                       heading: "Monthly Revenue",
-                      suggestion1: getFormattedAmount(), // Using API data
-                      suggestion2: getPercentageChange(), // Using API data
+                      suggestion1: getFormattedAmount(),
+                      suggestion2: getPercentageChange(),
                       height: height,
                       width: width,
                     ),
                   ),
                   SizedBox(width: width * 0.04),
                   Expanded(
-                    child: SuggestionContainer(
+                    child: CustomerContainer(
                       image: "assets/images/yellowcommunity.png",
                       heading: "Customers",
-                      suggestion1: "148",
-                      suggestion2: "8 new this week",
+                      customerCount: "148",
+                      customerChange: "8 new this week",
                       height: height,
                       width: width,
                     ),
@@ -374,75 +377,120 @@ class _FinanceState extends State<Finance> {
                 ),
               ),
               SizedBox(height: height * 0.03),
-              Container(
-                height: height * 0.13,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Scolor.secondry,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      ComparativeTrackerScreen()));
-                        },
-                        child: Text(
-                          "Learning Progress",
-                          style: TextStyle(
-                              fontSize: ESizes.fontSizeSm,
-                              color: Scolor.white,
-                              fontWeight: FontWeight.w500),
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(
+                          sigmaX: 5, sigmaY: 5), // blur strength
+                      child: Container(
+                        height: height * 0.13,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5), // dark blur
+                          border: Border.all(color: Scolor.secondry),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Opacity(
+                            opacity: 0.4, // content looks faded under blur
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ComparativeTrackerScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    "Learning Progress",
+                                    style: TextStyle(
+                                      fontSize: ESizes.fontSizeSm,
+                                      color: Scolor.white,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: height * 0.01),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: height * 0.03,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              Scolor.secondry.withOpacity(0.3),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            "FINANCIAL PLANNING",
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: Scolor.white,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "74%",
+                                      style: TextStyle(
+                                        fontSize: ESizes.fontSizeSm,
+                                        color: Scolor.white,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: height * 0.02),
+                                LinearProgressIndicator(
+                                  value: 0.74,
+                                  minHeight: height * 0.008,
+                                  backgroundColor: Colors.grey.shade700,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Scolor.secondry),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                      SizedBox(height: height * 0.01),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
-                              height: height * 0.03,
-                              width: width * 0.4,
-                              decoration: BoxDecoration(
-                                color: Scolor.secondry.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Center(
-                                  child: Text("FINANCIAL PLANNING",
-                                      style: TextStyle(
-                                          fontSize: 10,
-                                          color: Scolor.white,
-                                          fontWeight: FontWeight.w500)))),
+                          Icon(Icons.lock, color: Colors.white, size: 30),
+                          SizedBox(height: 4),
                           Text(
-                            "74%",
+                            'Premium Feature',
                             style: TextStyle(
-                                fontSize: ESizes.fontSizeSm,
-                                color: Scolor.white,
-                                fontWeight: FontWeight.w500),
-                          )
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: ESizes.fontSizeSm,
+                            ),
+                          ),
                         ],
                       ),
-                      SizedBox(height: height * 0.02),
-                      LinearProgressIndicator(
-                        value: 0.74, // 74% progress
-                        minHeight: height * 0.008, // Adjust height as needed
-                        backgroundColor:
-                            Colors.grey.shade700, // Background color
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Scolor.secondry), // Progress color
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              )
+                ],
+              ),
             ],
           ),
         ),
@@ -519,6 +567,105 @@ class SuggestionContainer extends StatelessWidget {
   }
 }
 
+/// *Customer Card Component*
+class CustomerContainer extends StatelessWidget {
+  final String image;
+  final String heading;
+  final String customerCount;
+  final String customerChange;
+  final double height;
+  final double width;
+
+  const CustomerContainer({
+    required this.image,
+    required this.heading,
+    required this.customerCount,
+    required this.customerChange,
+    required this.height,
+    required this.width,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Main card
+        Container(
+          width: width * 0.6,
+          padding: EdgeInsets.all(width * 0.03),
+          decoration: BoxDecoration(
+            color: Scolor.primary,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Scolor.secondry, width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: height * 0.04,
+                width: height * 0.04,
+                child: Image.asset(image),
+              ),
+              SizedBox(height: height * 0.01),
+              Text(
+                heading,
+                style: TextStyle(
+                  color: Scolor.secondry,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: height * 0.008),
+              Text(
+                customerCount,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: height * 0.018,
+                ),
+              ),
+              SizedBox(height: height * 0.008),
+              Text(
+                customerChange,
+                style: TextStyle(
+                  color: const Color(0xFF41836B),
+                  fontSize: height * 0.016,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Premium overlay
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.lock, color: Colors.white, size: height * 0.03),
+                  SizedBox(height: 4),
+                  Text(
+                    'Premium Feature',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: height * 0.016,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// *Task Row Component*
 class TaskRow extends StatelessWidget {
   final String icon;
@@ -569,4 +716,20 @@ class TaskRow extends StatelessWidget {
       ],
     );
   }
+}
+
+String getGreeting() {
+  final hour = getIndianTime().hour;
+
+  if (hour < 12) {
+    return 'Good Morning,';
+  } else if (hour < 17) {
+    return 'Good Afternoon,';
+  } else {
+    return 'Good Evening,';
+  }
+}
+
+DateTime getIndianTime() {
+  return DateTime.now().toUtc().add(Duration(hours: 5, minutes: 30));
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/chat.dart';
+import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -20,31 +21,18 @@ class _UsersListScreenState extends State<UsersListScreen> {
     fetchUsers();
   }
 
-  @override
-  void dispose() {
-    // Cancel any ongoing operations here if needed
-    super.dispose();
-  }
-
   Future<void> fetchUsers() async {
     try {
-      // Check if widget is still mounted before starting
-      if (!mounted) return;
-
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString("token");
 
       if (token == null) {
-        if (!mounted) return;
         setState(() {
           errorMessage = 'Authentication token not found. Please login again.';
           isLoading = false;
         });
         return;
       }
-
-      // Check mounted state before making network request
-      if (!mounted) return;
 
       final response = await http.get(
         Uri.parse('http://65.2.82.85:5000/api/follow/followers_following'),
@@ -53,9 +41,6 @@ class _UsersListScreenState extends State<UsersListScreen> {
           'Authorization': 'Bearer $token',
         },
       );
-
-      // Always check mounted state after async operations
-      if (!mounted) return;
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -77,30 +62,22 @@ class _UsersListScreenState extends State<UsersListScreen> {
           }
         }
 
-        // Final check before setState
-        if (!mounted) return;
-
         setState(() {
           users = allUsers;
           isLoading = false;
-          errorMessage = ''; // Clear any previous errors
         });
       } else if (response.statusCode == 401) {
-        if (!mounted) return;
         setState(() {
           errorMessage = 'Authentication failed. Please login again.';
           isLoading = false;
         });
       } else {
-        if (!mounted) return;
         setState(() {
           errorMessage = 'Failed to load users (${response.statusCode})';
           isLoading = false;
         });
       }
     } catch (e) {
-      // Always check mounted state in catch block
-      if (!mounted) return;
       setState(() {
         errorMessage = 'Error: $e';
         isLoading = false;
@@ -109,43 +86,26 @@ class _UsersListScreenState extends State<UsersListScreen> {
   }
 
   void navigateToChat(String userId, String fullName) {
-    // Check if widget is still mounted before navigation
-    if (!mounted) return;
-
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => ChatScreen(
-                recipientUserId: userId,
-                recipientName: fullName,
-              )),
+        builder: (context) =>
+            ChatScreen(recipientUserId: userId, recipientName: fullName),
+      ),
     );
-  }
-
-  // Safe setState wrapper
-  void safeSetState(VoidCallback fn) {
-    if (mounted) {
-      setState(fn);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text('Users'),
-        backgroundColor: const Color(0xFF1E3A8A), // Dark blue
-        foregroundColor: Colors.white,
-        elevation: 2,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue[50]!, Colors.white],
-          ),
-        ),
+        decoration: BoxDecoration(color: Scolor.primary),
         child: isLoading
             ? Center(
                 child: Column(
@@ -179,8 +139,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
                         SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            if (!mounted) return;
-                            safeSetState(() {
+                            setState(() {
                               isLoading = true;
                               errorMessage = '';
                             });
@@ -188,8 +147,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
                           },
                           child: Text('Retry'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color(0xFF1E3A8A), // Dark blue
+                            backgroundColor: Colors.blue[600],
                             foregroundColor: Colors.white,
                           ),
                         ),
@@ -230,47 +188,52 @@ class _UsersListScreenState extends State<UsersListScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: ListTile(
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 8),
-                                  leading: CircleAvatar(
-                                    radius: 25,
-                                    backgroundColor:
-                                        const Color(0xFFFBBF24), // Yellow
-                                    child: Text(
-                                      user.fullName.isNotEmpty
-                                          ? user.fullName[0].toUpperCase()
-                                          : 'U',
-                                      style: TextStyle(
-                                        color: const Color(
-                                            0xFF1E3A8A), // Dark blue
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.yellow[400]!,
+                                        Colors.yellow[600]!
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 8),
+                                    leading: CircleAvatar(
+                                      radius: 25,
+                                      backgroundColor: Scolor.primary,
+                                      child: Text(
+                                        user.fullName.isNotEmpty
+                                            ? user.fullName[0].toUpperCase()
+                                            : 'U',
+                                        style: TextStyle(
+                                          color: Scolor.secondry,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  title: Text(
-                                    user.fullName,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                      color: Colors.grey[800],
+                                    title: Text(
+                                      user.fullName,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                          color: Scolor
+                                              .primary // contrast color for gradient
+                                          ),
                                     ),
-                                  ),
-                                  subtitle: Text(
-                                    'ID: ${user.userId}',
-                                    style: TextStyle(
-                                      color: Colors.grey[500],
-                                      fontSize: 12,
+                                    trailing: Icon(
+                                      Icons.chat_bubble_outline,
+                                      color: Scolor.primary,
+                                      size: 20,
                                     ),
+                                    onTap: () => navigateToChat(
+                                        user.userId, user.fullName),
                                   ),
-                                  trailing: Icon(
-                                    Icons.chat_bubble_outline,
-                                    color: const Color(0xFF1E3A8A), // Dark blue
-                                    size: 20,
-                                  ),
-                                  onTap: () => navigateToChat(
-                                      user.userId, user.fullName),
                                 ),
                               ),
                             );

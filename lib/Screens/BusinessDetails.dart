@@ -1,14 +1,16 @@
 import 'dart:convert';
+
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shakti/Screens/Success.dart';
+import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/Continue.dart';
 import 'package:shakti/Widgets/AppWidgets/InputField.dart';
 import 'package:shakti/Widgets/AppWidgets/ThreeCircle.dart';
 import 'package:shakti/Widgets/AppWidgets/UnderlineHeading.dart';
-import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/helpers/helper_functions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BusinessDetails extends StatefulWidget {
   const BusinessDetails({super.key});
@@ -20,8 +22,18 @@ class BusinessDetails extends StatefulWidget {
 class _BusinessDetailsState extends State<BusinessDetails> {
   // controller for ideaDetails
   final TextEditingController BusinessNameController = TextEditingController();
-  final TextEditingController BusinessSectorController =
-      TextEditingController();
+  String? selectedBusinessSector;
+  final List<String> businessSectors = [
+    'Beauty',
+    'Dairy',
+    'Healthcare',
+    'Laundry',
+    'Manufacturing',
+    'Restaurant',
+    'Retails',
+    'Travel',
+  ];
+
   final TextEditingController BusinessLocationController =
       TextEditingController();
   final TextEditingController BusinessCityController = TextEditingController();
@@ -69,7 +81,7 @@ class _BusinessDetailsState extends State<BusinessDetails> {
             "Session ID not found. Please restart the signup process.");
       }
 
-      final url = Uri.parse("http://65.2.82.85:5000/api/signup/signup3");
+      final url = Uri.parse("http://65.2.82.85:5000/auth/signup3");
 
       final response = await http.post(
         url,
@@ -80,7 +92,7 @@ class _BusinessDetailsState extends State<BusinessDetails> {
           "sessionId": sessionId,
           "ideaDetails": {
             "Business_Name": BusinessNameController.text,
-            "Business_Sector": BusinessSectorController.text,
+            "Business_Sector": selectedBusinessSector?.toLowerCase() ?? "",
             "Business_City": BusinessCityController.text,
             "Buisness_Location":
                 BusinessLocationController.text, // typo kept to match backend
@@ -166,9 +178,83 @@ class _BusinessDetailsState extends State<BusinessDetails> {
               buildSectionHeader("Idea Details"),
               InputField(
                   label: "Business Name", controller: BusinessNameController),
-              InputField(
-                  label: "Business Sector",
-                  controller: BusinessSectorController),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Business Sector",
+                      style: TextStyle(
+                        color: Scolor.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    DropdownSearch<String>(
+                      items: businessSectors,
+                      selectedItem: selectedBusinessSector,
+                      dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          filled: true,
+                          fillColor: Scolor.primary,
+                          hintText: "Enter Business Sector",
+                          hintStyle:
+                              TextStyle(color: Scolor.white.withOpacity(0.5)),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                                color: Scolor.secondry, width: 1),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                                color: Scolor.white, width: 3.5),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Colors.red, width: 2),
+                          ),
+                        ),
+                      ),
+                      popupProps: const PopupProps.menu(
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          style: TextStyle(color: Colors.black),
+                          decoration: InputDecoration(
+                            hintText: "Search sector...",
+                            hintStyle: TextStyle(color: Colors.white70),
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Scolor.white, width: 2),
+                            ),
+                          ),
+                        ),
+                      ),
+                      dropdownButtonProps: const DropdownButtonProps(
+                          //  iconEnabledColor: Colors.white,
+                          ),
+                      dropdownBuilder: (context, selectedItem) {
+                        return Text(
+                          selectedItem ?? "",
+                          style: const TextStyle(color: Colors.white),
+                        );
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          selectedBusinessSector = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
               InputField(
                   label: "Business Location",
                   controller: BusinessLocationController),
@@ -274,11 +360,11 @@ class _BusinessDetailsState extends State<BusinessDetails> {
               // Continue Button
               ContinueButton(
                   screenHeight: screenHeight,
-                  screenWidth: screenWidth,
-                  text: "Continue",
+                  screenWidth: 200,
+                  text: "Signup",
                   onPressed: submitBusinessDetails),
 
-              SizedBox(height: screenHeight * 0.1),
+              SizedBox(height: screenHeight * 0.01),
             ],
           ),
         ),

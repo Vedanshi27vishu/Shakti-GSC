@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FollowersPage extends StatefulWidget {
-  const FollowersPage({Key? key}) : super(key: key);
+  const FollowersPage({super.key});
 
   @override
   _FollowersPageState createState() => _FollowersPageState();
@@ -256,7 +256,7 @@ class _FollowersPageState extends State<FollowersPage> {
 class FollowerCard extends StatelessWidget {
   final Follower follower;
 
-  const FollowerCard({Key? key, required this.follower}) : super(key: key);
+  const FollowerCard({super.key, required this.follower});
 
   @override
   Widget build(BuildContext context) {

@@ -10,11 +10,14 @@ class ScreenHeadings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Text(
+    final screenWidth = MediaQuery.of(context).size.width;
+    final titleFontSize = screenWidth < 600 ? 18.0 : (screenWidth < 1000 ? 20.0 : 22.0);
+
+    return Text(
       text,
       style: TextStyle(
         color: Colors.white,
-        fontSize: 25,
+        fontSize: titleFontSize + 4, // e.g. 22, 24, 26
         fontWeight: FontWeight.bold,
       ),
     );

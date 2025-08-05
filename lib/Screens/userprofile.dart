@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/userfollowers.dart';
 import 'package:shakti/Screens/userfollowing.dart';
+import 'package:shakti/Utils/constants/colors.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -56,7 +57,6 @@ class _ProfileScreenState extends State<UserProfileScreen>
         throw Exception('No auth token found');
       }
 
-      // Fetch user profile data
       final response = await http.get(
         Uri.parse('http://65.2.82.85:5000/profile/details'),
         headers: {
@@ -90,7 +90,6 @@ class _ProfileScreenState extends State<UserProfileScreen>
         userName = "Error loading profile";
       });
 
-      // Show error dialog
       if (mounted) {
         showDialog(
           context: context,
@@ -124,10 +123,22 @@ class _ProfileScreenState extends State<UserProfileScreen>
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
+    // <-- Added responsive width logic here
+    double contentMaxWidth;
+    if (screenWidth < 600) {
+      contentMaxWidth = screenWidth; // Phone: full width
+    } else if (screenWidth < 1000) {
+      contentMaxWidth = 700; // Tablet: max width 700
+    } else {
+      contentMaxWidth = 900; // Laptop/Desktop: max width 900
+    }
+    // -->
+
     return Scaffold(
       backgroundColor: darkBlue,
       appBar: AppBar(
-        backgroundColor: darkBlue,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Scolor.secondry,
         elevation: 0,
         title: Text(
           userName,
@@ -159,18 +170,34 @@ class _ProfileScreenState extends State<UserProfileScreen>
               child: CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
-                    child: _buildProfileHeader(screenWidth, screenHeight),
+                    child: Center(
+                      // <-- constrained container width for profile header
+                      child: Container(
+                        width: contentMaxWidth,
+                        child: _buildProfileHeader(screenWidth, screenHeight),
+                      ),
+                    ),
                   ),
                   SliverToBoxAdapter(
-                    child: _buildTabBar(),
+                    child: Center(
+                      child: Container(
+                        width: contentMaxWidth,
+                        child: _buildTabBar(),
+                      ),
+                    ),
                   ),
                   SliverFillRemaining(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildPostsGrid(),
-                        _buildTaggedPosts(),
-                      ],
+                    child: Center(
+                      child: Container(
+                        width: contentMaxWidth,
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildPostsGrid(),
+                            _buildTaggedPosts(),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -331,29 +358,29 @@ class _ProfileScreenState extends State<UserProfileScreen>
           SizedBox(height: 20),
 
           // Action Buttons
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionButton(
-                  'Edit Profile',
-                  Icons.edit,
-                  () {
-                    // Add edit profile functionality
-                  },
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: _buildActionButton(
-                  'Share Profile',
-                  Icons.share,
-                  () {
-                    // Add share functionality
-                  },
-                ),
-              ),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     Expanded(
+          //       child: _buildActionButton(
+          //         'Edit Profile',
+          //         Icons.edit,
+          //         () {
+          //           // Add edit profile functionality
+          //         },
+          //       ),
+          //     ),
+          //     SizedBox(width: 10),
+          //     Expanded(
+          //       child: _buildActionButton(
+          //         'Share Profile',
+          //         Icons.share,
+          //         () {
+          //           // Add share functionality
+          //         },
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );
@@ -384,7 +411,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
 
   Widget _buildActionButton(
       String text, IconData icon, VoidCallback onPressed) {
-    return Container(
+    return SizedBox(
       height: 35,
       child: ElevatedButton.icon(
         onPressed: onPressed,
@@ -439,11 +466,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.camera_alt_outlined,
-              size: 80,
-              color: Colors.grey[600],
-            ),
+            Icon(Icons.camera_alt_outlined, size: 80, color: Colors.grey[600]),
             SizedBox(height: 20),
             Text(
               'No posts yet',
@@ -616,11 +639,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.person_pin_outlined,
-            size: 80,
-            color: Colors.grey[600],
-          ),
+          Icon(Icons.person_pin_outlined, size: 80, color: Colors.grey[600]),
           SizedBox(height: 20),
           Text(
             'No tagged posts',
@@ -688,9 +707,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                             Text(
                               (post['interestTags'] as List).join(', '),
                               style: TextStyle(
-                                color: Colors.grey[400],
-                                fontSize: 12,
-                              ),
+                                  color: Colors.grey[400], fontSize: 12),
                             ),
                         ],
                       ),
@@ -705,9 +722,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                   Container(
                     height: 200,
                     width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(10)),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.network(
@@ -716,11 +732,8 @@ class _ProfileScreenState extends State<UserProfileScreen>
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             color: lightBlue,
-                            child: Icon(
-                              Icons.broken_image,
-                              color: yellow,
-                              size: 60,
-                            ),
+                            child: Icon(Icons.broken_image,
+                                color: yellow, size: 60),
                           );
                         },
                       ),
@@ -735,14 +748,9 @@ class _ProfileScreenState extends State<UserProfileScreen>
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
-                      child: Icon(
-                        Icons.text_fields,
-                        color: yellow,
-                        size: 40,
-                      ),
+                      child: Icon(Icons.text_fields, color: yellow, size: 40),
                     ),
                   ),
-
                 SizedBox(height: 15),
 
                 // Post Content
@@ -750,10 +758,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                   alignment: Alignment.centerLeft,
                   child: Text(
                     post['content'] ?? 'No content',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
 
@@ -795,10 +800,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
                 // Close button
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Close',
-                    style: TextStyle(color: yellow),
-                  ),
+                  child: Text('Close', style: TextStyle(color: yellow)),
                 ),
               ],
             ),

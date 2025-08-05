@@ -1,18 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:mime/mime.dart';
 //import 'package:path/path.dart' as path;
 import 'package:http_parser/http_parser.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mime/mime.dart';
 import 'package:shakti/Screens/BottomNavBar.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/CommunityPostAppBar.dart';
 import 'package:shakti/Widgets/AppWidgets/ScreenHeadings.dart';
 import 'package:shakti/Widgets/AppWidgets/YellowLine.dart';
 import 'package:shakti/helpers/helper_functions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -129,8 +130,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() => selectedImage = File(pickedFile.path));
     }
@@ -140,132 +140,138 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Widget build(BuildContext context) {
     double screenWidth = THelperFunctions.screenWidth(context);
     double screenHeight = THelperFunctions.screenHeight(context);
+
+    // --- Added this for responsive width as in login page ---
+    double contentMaxWidth;
+    if (screenWidth < 600) {
+      contentMaxWidth = screenWidth; // Mobile: full width
+    } else if (screenWidth < 1000) {
+      contentMaxWidth = 700; // Tablet: capped at 700 px
+    } else {
+      contentMaxWidth = 900; // Laptop/Desktop: capped at 900 px
+    }
+    // --------------------------------------------------------
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Scolor.primary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Scolor.secondry),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => BottomNavBarExample()),
-            );
-          },
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomTopBar3(),
-              SizedBox(height: screenHeight * 0.015),
-              Center(child: ScreenHeadings(text: "Create New Post")),
-              SizedBox(height: screenHeight * 0.005),
-              const Text(
-                "Add the main post details here. They'll be connected to the layout and take on the layout design.",
-                style: TextStyle(color: Colors.grey, fontSize: 13),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: screenHeight * 0.02),
-              const Text("Post Content",
-                  style: TextStyle(color: Colors.white, fontSize: 14)),
-              TextField(
-                controller: contentController,
-                maxLength: 300,
-                maxLines: 3,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white10,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Scolor.secondry, width: 2),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Scolor.secondry, width: 2),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.amber, width: 3),
-                  ),
-                  counterStyle: const TextStyle(color: Colors.white70),
+      // appBar: AppBar(
+      //   backgroundColor: Scolor.primary,
+      //   elevation: 0,
+      //   leading: IconButton(
+      //     icon: const Icon(Icons.arrow_back, color: Scolor.secondry),
+      //     onPressed: () {
+      //       Navigator.push(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => BottomNavBarExample()),
+      //       );
+      //     },
+      //   ),
+      // ),
+      body: Center(
+        child: Container(
+          width: contentMaxWidth,     // Applying the responsive width here
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              //  CustomTopBar3(),
+                SizedBox(height: screenHeight * 0.015),
+                Center(child: ScreenHeadings(text: "Create New Post")),
+                SizedBox(height: screenHeight * 0.005),
+                const Text(
+                  "Add the main post details here. They'll be connected to the layout and take on the layout design.",
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const Text("Interest Tags (comma-separated)",
-                  style: TextStyle(color: Colors.white, fontSize: 14)),
-              TextField(
-                controller: tagsController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white10,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Scolor.secondry, width: 2),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.amber, width: 3),
-                  ),
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.02),
-              Center(
-                child: GestureDetector(
-                  onTap: pickImage,
-                  child: Container(
-                    width: screenWidth * 0.3,
-                    height: screenWidth * 0.3,
-                    decoration: BoxDecoration(
-                      color: Colors.white10,
-                      borderRadius: BorderRadius.circular(12),
+                SizedBox(height: screenHeight * 0.02),
+                const Text("Post Content", style: TextStyle(color: Colors.white, fontSize: 14)),
+                TextField(
+                  controller: contentController,
+                  maxLength: 300,
+                  maxLines: 3,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white10,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Scolor.secondry, width: 2),
                     ),
-                    child: selectedImage == null
-                        ? const Icon(Icons.add_a_photo,
-                            color: Colors.white, size: 40)
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child:
-                                Image.file(selectedImage!, fit: BoxFit.cover),
-                          ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Scolor.secondry, width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.amber, width: 3),
+                    ),
+                    counterStyle: const TextStyle(color: Colors.white70),
                   ),
                 ),
-              ),
-              SizedBox(height: screenHeight * 0.03),
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Scolor.secondry,
-                    shape: RoundedRectangleBorder(
+                const Text("Interest Tags (comma-separated)", style: TextStyle(color: Colors.white, fontSize: 14)),
+                TextField(
+                  controller: tagsController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white10,
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Scolor.secondry, width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.amber, width: 3),
+                    ),
                   ),
-                  onPressed: isUploading ? null : createPost,
-                  child: isUploading
-                      ? const CircularProgressIndicator(color: Colors.black)
-                      : const Text("Submit Post",
-                          style: TextStyle(color: Colors.black)),
                 ),
-              ),
-              SizedBox(height: screenHeight * 0.02),
-              Yellowline(screenWidth: screenWidth),
-              SizedBox(height: screenHeight * 0.02),
-              const Text("Previous Posts",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold)),
-            ],
+                SizedBox(height: screenHeight * 0.02),
+                Center(
+                  child: GestureDetector(
+                    onTap: pickImage,
+                    child: Container(
+                      width: screenWidth * 0.3,
+                      height: screenWidth * 0.3,
+                      decoration: BoxDecoration(
+                        color: Colors.white10,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: selectedImage == null
+                          ? const Icon(Icons.add_a_photo, color: Colors.white, size: 40)
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(selectedImage!, fit: BoxFit.cover),
+                            ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.03),
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Scolor.secondry,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: isUploading ? null : createPost,
+                    child: isUploading
+                        ? const CircularProgressIndicator(color: Colors.black)
+                        : const Text("Submit Post", style: TextStyle(color: Colors.black)),
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                Yellowline(screenWidth: screenWidth),
+                SizedBox(height: screenHeight * 0.02),
+                const Text(
+                  "Previous Posts",
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -116,7 +116,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
 
-      final response = await http.post(
+      final response = await http.get(
         Uri.parse(
           'http://65.2.82.85:5000/api/business/insights',
         ),
@@ -676,9 +676,15 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
     final insightValues = insights?.values.toList() ?? [];
 
     final formattedInsightData = List.generate(insightValues.length, (index) {
+      final value = insightValues[index];
+      // If the value is a Map, extract the 'description' or convert to string
+      String description = value is Map && value.containsKey('description')
+          ? value['description'].toString()
+          : value.toString();
+
       return {
         'title': 'Insight ${index + 1}',
-        'description': insightValues[index],
+        'description': description,
       };
     });
 
@@ -698,17 +704,23 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
         children: [
           _buildFeatureItem(
             Icons.info_outline,
-            insightValues.isNotEmpty ? insightValues[0] : 'Loading...',
+            formattedInsightData.isNotEmpty
+                ? formattedInsightData[0]['description'] ?? 'Loading...'
+                : 'Loading...',
           ),
           const SizedBox(height: 12),
           _buildFeatureItem(
             Icons.trending_up,
-            insightValues.length > 1 ? insightValues[1] : 'Loading...',
+            formattedInsightData.length > 1
+                ? formattedInsightData[1]['description'] ?? 'Loading...'
+                : 'Loading...',
           ),
           const SizedBox(height: 12),
           _buildFeatureItem(
             Icons.school_outlined,
-            insightValues.length > 2 ? insightValues[2] : 'Loading...',
+            formattedInsightData.length > 2
+                ? formattedInsightData[2]['description'] ?? 'Loading...'
+                : 'Loading...',
           ),
         ],
       ),

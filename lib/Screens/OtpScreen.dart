@@ -152,7 +152,7 @@ class _OTPScreenState extends State<OTPScreen> {
     double screenWidth = THelperFunctions.screenWidth(context);
     double screenHeight = THelperFunctions.screenHeight(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF1E3A5F),
+      backgroundColor: Scolor.primary,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -161,28 +161,13 @@ class _OTPScreenState extends State<OTPScreen> {
               const SizedBox(height: 40),
               // Logo
               CircleAvatar(
-                radius: 40,
+                radius: MediaQuery.of(context).size.width * 0.15,
                 backgroundColor: Colors.transparent,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border:
-                        Border.all(color: const Color(0xFFFFC107), width: 2),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Shakti',
-                    style: TextStyle(
-                      color: Color(0xFFFFC107),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
+                backgroundImage: const AssetImage('assets/logo.png'),
               ),
               const SizedBox(height: 16),
               const Text(
-                'Shakti',
+                'Shakti-Nxt',
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -212,6 +197,7 @@ class _OTPScreenState extends State<OTPScreen> {
                     ),
                     const SizedBox(height: 32),
                     OtpTextField(
+                      cursorColor: Scolor.secondry,
                       alignment: Alignment.center,
                       fieldHeight: screenHeight * 0.09,
                       fieldWidth: screenWidth * 0.09,

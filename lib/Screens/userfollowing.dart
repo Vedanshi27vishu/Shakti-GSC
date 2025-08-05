@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FollowingPage extends StatefulWidget {
-  const FollowingPage({Key? key}) : super(key: key);
+  const FollowingPage({super.key});
 
   @override
   _FollowingPageState createState() => _FollowingPageState();
@@ -331,10 +331,10 @@ class FollowingCard extends StatelessWidget {
   final VoidCallback onToggleFollow;
 
   const FollowingCard({
-    Key? key,
+    super.key,
     required this.following,
     required this.onToggleFollow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

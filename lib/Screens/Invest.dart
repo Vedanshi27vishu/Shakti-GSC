@@ -1,15 +1,17 @@
+import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shakti/Screens/InvestScreen.dart';
 import 'package:shakti/Screens/InvestmentGroup.dart';
 import 'package:shakti/Screens/government.dart';
 import 'package:shakti/Screens/tracker.dart';
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/helpers/helper_functions.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:shakti/Utils/constants/sizes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Invest extends StatefulWidget {
+  const Invest({super.key});
   @override
   State<Invest> createState() => _InvestState();
 }
@@ -37,7 +39,7 @@ class _InvestState extends State<Invest> {
       fetchUserLoans(),
     ]);
     if (!mounted) return;
-    setState(() {}); // trigger general UI update if needed
+    setState(() {});
   }
 
   String _formatCurrency(double amount) {
@@ -63,22 +65,15 @@ class _InvestState extends State<Invest> {
       isLoading = true;
       error = null;
     });
-
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('token');
+      final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
-
       final url = Uri.parse('http://65.2.82.85:5000/filter-loans');
-
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
+      final response = await http.post(url, headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (!mounted) return;
@@ -94,27 +89,20 @@ class _InvestState extends State<Invest> {
         error = 'Error fetching recommended loans: $e';
       });
     } finally {
-      if (!mounted) return;
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   Future<void> fetchPrivateSchemes() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('token');
+      final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
-
       final url = Uri.parse('http://65.2.82.85:5000/private-schemes');
-
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
+      final response = await http.post(url, headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (!mounted) return;
@@ -136,19 +124,13 @@ class _InvestState extends State<Invest> {
   Future<void> fetchUserLoans() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('token');
+      final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
-
       final url = Uri.parse('http://65.2.82.85:5000/api/financial/loans');
-
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (!mounted) return;
@@ -172,8 +154,8 @@ class _InvestState extends State<Invest> {
 
   @override
   Widget build(BuildContext context) {
-    double height = THelperFunctions.screenHeight(context);
-    double width = THelperFunctions.screenWidth(context);
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: Padding(
@@ -297,39 +279,21 @@ class _InvestState extends State<Invest> {
 
                 SizedBox(height: height * 0.05),
 
-                // Bottom Navigation Buttons
+                // Bottom Navigation Buttons with Premium Overlay
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => InvestmentScreen(),
-                          ),
-                        );
-                      },
-                      child: BottomContainer(
-                        height: height,
-                        width: width,
-                        heading: "INVEST",
-                      ),
+                    _premiumButton(
+                      context: context,
+                      heading: "INVEST",
+                      width: width,
+                      height: height,
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => InvestmentGroupsScreen(),
-                          ),
-                        );
-                      },
-                      child: BottomContainer(
-                        height: height,
-                        width: width,
-                        heading: "GROUPS",
-                      ),
+                    _premiumButton(
+                      context: context,
+                      heading: "GROUPS",
+                      width: width,
+                      height: height,
                     ),
                     GestureDetector(
                       onTap: () {
@@ -353,6 +317,52 @@ class _InvestState extends State<Invest> {
           ),
         ),
       ),
+    );
+  }
+
+  // Bottom premium overlay button
+  Widget _premiumButton({
+    required BuildContext context,
+    required String heading,
+    required double width,
+    required double height,
+  }) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        BottomContainer(
+          height: height,
+          width: width,
+          heading: heading,
+        ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(
+              height: height * 0.06,
+              width: width * 0.25,
+              color: Colors.black.withOpacity(0.3),
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock, color: Colors.white, size: 20),
+                  SizedBox(height: 2),
+                  Text(
+                    'Premium Feature',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -431,7 +441,7 @@ class _InvestState extends State<Invest> {
                     children: [
                       _tableHeader("Lender"),
                       _tableHeader("Type"),
-                      _tableHeader("Total Amount"), // New column
+                      _tableHeader("Total Amount"),
                       _tableHeader("Remaining"),
                       _tableHeader("Monthly"),
                     ],
@@ -477,7 +487,7 @@ class _InvestState extends State<Invest> {
                   ...userLoans.map((loan) => _loanRow(
                         loan['Lender_Name']?.toString() ?? 'Unknown Lender',
                         loan['Loan_Type']?.toString() ?? 'Unknown Type',
-                        "₹${_formatCurrency((loan['Total_Loan_Amount'] ?? 0).toDouble())}", // New total amount
+                        "₹${_formatCurrency((loan['Total_Loan_Amount'] ?? 0).toDouble())}",
                         "₹${_formatCurrency((loan['Remaining_Loan_Amount'] ?? 0).toDouble())}",
                         "₹${_formatCurrency((loan['Monthly_Payment'] ?? 0).toDouble())}",
                       )),
@@ -558,11 +568,10 @@ class _InvestState extends State<Invest> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                totalAmount, // New total amount column
+                totalAmount,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Scolor
-                      .secondry, // Different color to distinguish from remaining
+                  color: Scolor.secondry,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
@@ -611,7 +620,6 @@ class _InvestState extends State<Invest> {
   Widget _schemeCard(double height, double width, String heading, String image,
       bool isGovernment) {
     final schemes = isGovernment ? recommendedLoans : privateSchemes;
-
     return Container(
       height: height * 0.22,
       width: width * 0.55,
@@ -699,7 +707,7 @@ class _InvestState extends State<Invest> {
   }
 }
 
-// Assuming BottomContainer is defined elsewhere, here's a basic implementation
+/// Your existing button widget -- note, unchanged!
 class BottomContainer extends StatelessWidget {
   final double height;
   final double width;

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shakti/Utils/constants/colors.dart' show Scolor;
+
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
 
@@ -274,6 +276,7 @@ That's it! 🚀''';
               children: [
                 Expanded(
                   child: TextField(
+                    cursorColor: Scolor.secondry,
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: 'Type in any language...',

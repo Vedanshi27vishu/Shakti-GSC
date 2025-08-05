@@ -1,6 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shakti/Screens/BottomNavBar.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shakti/Widgets/AppWidgets/CommunityMentorAppBar.dart';
@@ -38,12 +38,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
   Future<void> fetchUsers() async {
     try {
       final authToken = await _getAuthToken();
-
-      if (authToken == null) {
-        throw Exception('No auth token found');
-      }
-
-      // Updated to use localhost API for followers/following counts
+      if (authToken == null) throw Exception('No auth token found');
       final response = await http.get(
         Uri.parse('http://65.2.82.85:5000/user/all-users'),
         headers: {
@@ -51,7 +46,6 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
           'Content-Type': 'application/json',
         },
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -65,8 +59,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
         throw Exception('Failed to load users');
       }
     } catch (e) {
-      if (!mounted) return; // skip if widget is disposed
-
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
@@ -77,11 +70,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
   Future<void> fetchFollowingUsers() async {
     try {
       final authToken = await _getAuthToken();
-
-      if (authToken == null) {
-        throw Exception('No auth token found');
-      }
-
+      if (authToken == null) throw Exception('No auth token found');
       final response = await http.get(
         Uri.parse('http://65.2.82.85:5000/api/follow/followers-following'),
         headers: {
@@ -89,7 +78,6 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
           'Content-Type': 'application/json',
         },
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -106,11 +94,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
   Future<void> followUser(String userId) async {
     try {
       final authToken = await _getAuthToken();
-
-      if (authToken == null) {
-        throw Exception('No auth token found');
-      }
-
+      if (authToken == null) throw Exception('No auth token found');
       final response = await http.put(
         Uri.parse('http://65.2.82.85:5000/api/follow/F/$userId'),
         headers: {
@@ -118,17 +102,14 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
           'Content-Type': 'application/json',
         },
       );
-
       if (response.statusCode == 200) {
         setState(() {
           followingIds.add(userId);
-          // Update the user's follower count locally
           final userIndex = allUsers.indexWhere((user) => user.id == userId);
           if (userIndex != -1) {
             allUsers[userIndex] = allUsers[userIndex].copyWith(
               followersCount: allUsers[userIndex].followersCount + 1,
             );
-            // Update filtered users as well
             final filteredIndex =
                 filteredUsers.indexWhere((user) => user.id == userId);
             if (filteredIndex != -1) {
@@ -151,11 +132,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
   Future<void> unfollowUser(String userId) async {
     try {
       final authToken = await _getAuthToken();
-
-      if (authToken == null) {
-        throw Exception('No auth token found');
-      }
-
+      if (authToken == null) throw Exception('No auth token found');
       final response = await http.put(
         Uri.parse('http://65.2.82.85:5000/api/follow/U/$userId'),
         headers: {
@@ -163,17 +140,14 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
           'Content-Type': 'application/json',
         },
       );
-
       if (response.statusCode == 200) {
         setState(() {
           followingIds.remove(userId);
-          // Update the user's follower count locally
           final userIndex = allUsers.indexWhere((user) => user.id == userId);
           if (userIndex != -1) {
             allUsers[userIndex] = allUsers[userIndex].copyWith(
               followersCount: allUsers[userIndex].followersCount - 1,
             );
-            // Update filtered users as well
             final filteredIndex =
                 filteredUsers.indexWhere((user) => user.id == userId);
             if (filteredIndex != -1) {
@@ -238,143 +212,150 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
     double screenWidth = THelperFunctions.screenWidth(context);
     double screenHeight = THelperFunctions.screenHeight(context);
 
+    // Responsive padding and card width
+    double contentMaxWidth;
+    if (screenWidth < 600) {
+      contentMaxWidth = screenWidth;
+    } else if (screenWidth < 1000) {
+      contentMaxWidth = 700;
+    } else {
+      contentMaxWidth = 900;
+    }
+    // Card width -- always centered and maxes out for large screens
+    double cardWidth = contentMaxWidth < 420
+        ? contentMaxWidth
+        : (contentMaxWidth > 520 ? 520 : contentMaxWidth);
+
     return Scaffold(
       backgroundColor: Scolor.primary,
-      appBar: AppBar(
-        backgroundColor: Scolor.primary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Scolor.secondry),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => BottomNavBarExample()),
-            );
-          },
-        ),
-      ),
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.04,
           vertical: screenHeight * 0.02,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const CustomTopBar2(),
-            SizedBox(height: screenHeight * 0.015),
-            Center(child: ScreenHeadings(text: "Connect with Users")),
-            SizedBox(height: screenHeight * 0.02),
-
-            // Search Bar
-            Container(
-              decoration: BoxDecoration(
-                color: Scolor.primary,
-                borderRadius: BorderRadius.circular(screenWidth * 0.03),
-                border: Border.all(color: Scolor.secondry, width: 1),
-              ),
-              child: TextField(
-                controller: searchController,
-                onChanged: filterUsers,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Search by name or email...',
-                  hintStyle: TextStyle(color: Colors.grey[400]),
-                  prefixIcon: const Icon(Icons.search, color: Scolor.secondry),
-                  suffixIcon: searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, color: Scolor.secondry),
-                          onPressed: () {
-                            searchController.clear();
-                            filterUsers('');
-                          },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.04,
-                    vertical: screenHeight * 0.02,
+        child: Center(
+          child: Container(
+            width: contentMaxWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: screenHeight * 0.015),
+                Center(child: ScreenHeadings(text: "Connect with Users")),
+                SizedBox(height: screenHeight * 0.02),
+                // Search Bar
+                Container(
+                  decoration: BoxDecoration(
+                    color: Scolor.primary,
+                    borderRadius: BorderRadius.circular(cardWidth * 0.07),
+                    border: Border.all(color: Scolor.secondry, width: 1),
+                  ),
+                  child: TextField(
+                    cursorColor: Scolor.secondry,
+                    controller: searchController,
+                    onChanged: filterUsers,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Search by name or email...',
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      prefixIcon:
+                          const Icon(Icons.search, color: Scolor.secondry),
+                      suffixIcon: searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear,
+                                  color: Scolor.secondry),
+                              onPressed: () {
+                                searchController.clear();
+                                filterUsers('');
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: cardWidth * 0.06,
+                        vertical: screenHeight * 0.018,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-
-            SizedBox(height: screenHeight * 0.02),
-
-            // Users Count
-            Padding(
-              padding: EdgeInsets.only(bottom: screenHeight * 0.01),
-              child: Text(
-                '${filteredUsers.length} users found',
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: screenWidth * 0.035,
+                SizedBox(height: screenHeight * 0.02),
+                // Users Count
+                Padding(
+                  padding: EdgeInsets.only(bottom: screenHeight * 0.008),
+                  child: Text(
+                    '${filteredUsers.length} users found',
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: cardWidth * 0.038,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-
-            // Users List
-            Expanded(
-              child: isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Scolor.secondry),
-                      ),
-                    )
-                  : filteredUsers.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.search_off,
-                                size: screenWidth * 0.2,
-                                color: Colors.grey[600],
-                              ),
-                              SizedBox(height: screenHeight * 0.02),
-                              Text(
-                                searchQuery.isEmpty
-                                    ? 'No users available'
-                                    : 'No users match your search',
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: screenWidth * 0.04,
-                                ),
-                              ),
-                            ],
+                // Users List
+                Expanded(
+                  child: isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Scolor.secondry),
                           ),
                         )
-                      : RefreshIndicator(
-                          onRefresh: () async {
-                            await fetchUsers();
-                            await fetchFollowingUsers();
-                          },
-                          child: ListView.builder(
-                            itemCount: filteredUsers.length,
-                            itemBuilder: (context, index) {
-                              final user = filteredUsers[index];
-                              final isFollowing =
-                                  followingIds.contains(user.id);
-
-                              return UserCard(
-                                user: user,
-                                isFollowing: isFollowing,
-                                onFollowToggle: () {
-                                  if (isFollowing) {
-                                    unfollowUser(user.id);
-                                  } else {
-                                    followUser(user.id);
-                                  }
+                      : filteredUsers.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.search_off,
+                                    size: cardWidth * 0.4,
+                                    color: Colors.grey[600],
+                                  ),
+                                  SizedBox(height: screenHeight * 0.03),
+                                  Text(
+                                    searchQuery.isEmpty
+                                        ? 'No users available'
+                                        : 'No users match your search',
+                                    style: TextStyle(
+                                      color: Colors.grey[400],
+                                      fontSize: cardWidth * 0.045,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : RefreshIndicator(
+                              onRefresh: () async {
+                                await fetchUsers();
+                                await fetchFollowingUsers();
+                              },
+                              child: ListView.builder(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: screenHeight * 0.012),
+                                itemCount: filteredUsers.length,
+                                itemBuilder: (context, index) {
+                                  final user = filteredUsers[index];
+                                  final isFollowing =
+                                      followingIds.contains(user.id);
+                                  return Center(
+                                    child: UserCard(
+                                      user: user,
+                                      isFollowing: isFollowing,
+                                      onFollowToggle: () {
+                                        if (isFollowing) {
+                                          unfollowUser(user.id);
+                                        } else {
+                                          followUser(user.id);
+                                        }
+                                      },
+                                      cardWidth: cardWidth,
+                                      screenHeight: screenHeight,
+                                    ),
+                                  );
                                 },
-                                screenWidth: screenWidth,
-                                screenHeight: screenHeight,
-                              );
-                            },
-                          ),
-                        ),
+                              ),
+                            ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -385,7 +366,7 @@ class UserCard extends StatelessWidget {
   final UserModel user;
   final bool isFollowing;
   final VoidCallback onFollowToggle;
-  final double screenWidth;
+  final double cardWidth; // Responsive card width, not whole screen
   final double screenHeight;
 
   const UserCard({
@@ -393,19 +374,41 @@ class UserCard extends StatelessWidget {
     required this.user,
     required this.isFollowing,
     required this.onFollowToggle,
-    required this.screenWidth,
+    required this.cardWidth,
     required this.screenHeight,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Responsive sizes
+    final double avatarRadius =
+        cardWidth * 0.13 > 36 ? 36 : cardWidth * 0.13; // up to 36px
+    final double verPad = cardWidth * 0.06;
+    final double horPad = cardWidth * 0.07;
+    final double nameFont = cardWidth * 0.077 > 19 ? 19 : cardWidth * 0.077;
+    final double subFont = cardWidth * 0.055 > 16 ? 16 : cardWidth * 0.055;
+    final double statNumberFont = cardWidth * 0.06;
+    final double statLabelFont = cardWidth * 0.036;
+    final double buttonFont = cardWidth * 0.048;
+    final double buttonHeight =
+        screenHeight * 0.055 > 46 ? 46 : screenHeight * 0.055;
+
     return Container(
-      margin: EdgeInsets.only(bottom: screenHeight * 0.015),
-      padding: EdgeInsets.all(screenWidth * 0.04),
+      width: cardWidth,
+      margin: EdgeInsets.only(bottom: screenHeight * 0.017),
+      padding: EdgeInsets.symmetric(horizontal: horPad, vertical: verPad * 0.5),
       decoration: BoxDecoration(
         color: Scolor.primary,
-        borderRadius: BorderRadius.circular(screenWidth * 0.03),
+        borderRadius: BorderRadius.circular(cardWidth * 0.07),
         border: Border.all(color: Scolor.secondry, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Scolor.secondry.withOpacity(0.07),
+            spreadRadius: 1,
+            blurRadius: 16,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,19 +417,19 @@ class UserCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 backgroundColor: Scolor.secondry,
-                radius: screenWidth * 0.06,
+                radius: avatarRadius,
                 child: Text(
                   user.fullName.isNotEmpty
                       ? user.fullName[0].toUpperCase()
                       : '?',
                   style: TextStyle(
                     color: Colors.black,
-                    fontSize: screenWidth * 0.05,
+                    fontSize: avatarRadius * 0.95,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              SizedBox(width: screenWidth * 0.03),
+              SizedBox(width: horPad * 0.55),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -434,18 +437,18 @@ class UserCard extends StatelessWidget {
                     Text(
                       user.fullName,
                       style: TextStyle(
-                        fontSize: screenWidth * 0.045,
+                        fontSize: nameFont,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: screenHeight * 0.005),
+                    SizedBox(height: verPad * 0.15),
                     Text(
                       user.email,
                       style: TextStyle(
-                        fontSize: screenWidth * 0.035,
+                        fontSize: subFont,
                         color: Colors.grey[400],
                       ),
                       maxLines: 1,
@@ -456,68 +459,69 @@ class UserCard extends StatelessWidget {
               ),
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.03,
-                  vertical: screenHeight * 0.005,
+                  horizontal: horPad * 0.6,
+                  vertical: verPad * 0.18,
                 ),
                 decoration: BoxDecoration(
                   color: isFollowing ? Colors.grey[700] : Scolor.secondry,
-                  borderRadius: BorderRadius.circular(screenWidth * 0.05),
+                  borderRadius: BorderRadius.circular(28),
                 ),
                 child: Text(
                   isFollowing ? 'Following' : 'Follow',
                   style: TextStyle(
-                    fontSize: screenWidth * 0.03,
+                    fontSize: cardWidth * 0.038,
                     fontWeight: FontWeight.w600,
                     color: isFollowing ? Colors.white : Colors.black,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
             ],
           ),
-
-          // Followers and Following Count Row
-          SizedBox(height: screenHeight * 0.01),
+          SizedBox(height: verPad * 0.18),
           Row(
             children: [
               _buildStatItem(
                 icon: Icons.people,
                 count: user.followersCount,
                 label: 'Followers',
-                screenWidth: screenWidth,
+                numberFont: statNumberFont,
+                labelFont: statLabelFont,
               ),
-              SizedBox(width: screenWidth * 0.06),
+              SizedBox(width: cardWidth * 0.15),
               _buildStatItem(
                 icon: Icons.person_add,
                 count: user.followingCount,
                 label: 'Following',
-                screenWidth: screenWidth,
+                numberFont: statNumberFont,
+                labelFont: statLabelFont,
               ),
             ],
           ),
-
-          SizedBox(height: screenHeight * 0.015),
+          SizedBox(height: verPad * 0.35),
           SizedBox(
             width: double.infinity,
+            height: buttonHeight,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     isFollowing ? Colors.grey[700] : Scolor.secondry,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                  borderRadius: BorderRadius.circular(cardWidth * 0.045),
                 ),
-                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.018),
+                padding: EdgeInsets.symmetric(vertical: verPad * 0.27),
               ),
               onPressed: onFollowToggle,
               icon: Icon(
                 isFollowing ? Icons.person_remove : Icons.person_add,
                 color: isFollowing ? Colors.white : Colors.black,
-                size: screenWidth * 0.05,
+                size: cardWidth * 0.08,
               ),
               label: Text(
                 isFollowing ? "Unfollow" : "Follow",
                 style: TextStyle(
                   color: isFollowing ? Colors.white : Colors.black,
-                  fontSize: screenWidth * 0.045,
+                  fontSize: buttonFont,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -532,23 +536,24 @@ class UserCard extends StatelessWidget {
     required IconData icon,
     required int count,
     required String label,
-    required double screenWidth,
+    required double numberFont,
+    required double labelFont,
   }) {
     return Row(
       children: [
         Icon(
           icon,
           color: Scolor.secondry,
-          size: screenWidth * 0.04,
+          size: numberFont,
         ),
-        SizedBox(width: screenWidth * 0.015),
+        SizedBox(width: numberFont * 0.37),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               count.toString(),
               style: TextStyle(
-                fontSize: screenWidth * 0.038,
+                fontSize: numberFont,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -556,7 +561,7 @@ class UserCard extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: screenWidth * 0.03,
+                fontSize: labelFont,
                 color: Colors.grey[400],
               ),
             ),
@@ -592,7 +597,6 @@ class UserModel {
     );
   }
 
-  // copyWith method for updating follower count locally
   UserModel copyWith({
     String? id,
     String? fullName,

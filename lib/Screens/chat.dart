@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
+import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:url_launcher/url_launcher.dart';
@@ -686,7 +687,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       final token = prefs.getString('token');
 
       if (token == null) {
-        safeSetState(() => _status = "⚠ Token missing");
+        safeSetState(() => _status = "⚠️ Token missing");
         return;
       }
 
@@ -1131,7 +1132,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   Text(
                     _formatTimestamp(timestamp),
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Colors.white,
                       fontSize: 12,
                     ),
                   ),
@@ -1441,7 +1442,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               ],
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: ['❤', '👍', '😂', '😮', '😢'].map((emoji) {
+                children: ['❤️', '👍', '😂', '😮', '😢'].map((emoji) {
                   return GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
@@ -1502,7 +1503,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.close, color: Colors.grey[600]),
+            icon: Icon(Icons.close, color: Colors.white),
             onPressed: _clearReply,
           ),
         ],
@@ -1623,21 +1624,33 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final isConnected = _status?.startsWith("✅") ?? false;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Determine max width of main content based on screen size
+    double contentMaxWidth;
+    if (screenWidth < 600) {
+      contentMaxWidth = screenWidth; // Phones — full width
+    } else if (screenWidth < 1000) {
+      contentMaxWidth = 700; // Tablets — max width 700
+    } else {
+      contentMaxWidth = 900; // Laptops/Desktops — max width 900
+    }
 
     return Scaffold(
-        backgroundColor: backgroundColor,
+        backgroundColor: Scolor.primary,
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: primaryColor,
+          backgroundColor: Scolor.secondry,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: Scolor.primary),
             onPressed: () => Navigator.pop(context),
           ),
           title: Row(
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: secondaryColor,
+                backgroundColor: Scolor.primary,
                 backgroundImage: widget.recipientAvatar != null
                     ? NetworkImage(widget.recipientAvatar!)
                     : null,
@@ -1645,7 +1658,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     ? Text(
                         widget.recipientName[0].toUpperCase(),
                         style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                            color: Scolor.secondry,
+                            fontWeight: FontWeight.bold),
                       )
                     : null,
               ),
@@ -1657,148 +1671,143 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     Text(
                       widget.recipientName,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Scolor.primary,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Text(
-                      _isOnline ? 'Online' : 'Offline',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
+                    // Text(
+                    //   _isOnline ? 'Online' : 'Offline',
+                    //   style: const TextStyle(
+                    //     color: Colors.white70,
+                    //     fontSize: 12,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
             ],
           ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.more_vert, color: Colors.white),
-              onPressed: () {
-                // Show more options
-              },
-            ),
-          ],
+          // actions: [
+          //   IconButton(
+          //     icon: const Icon(Icons.more_vert, color: Colors.white),
+          //     onPressed: () {
+          //       // Show more options
+          //     },
+          //   ),
+          // ],
         ),
-        body: Column(
-          children: [
-            // Status bar
-            if (_status != null)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                color: isConnected ? Colors.green[100] : Colors.red[100],
-                child: Text(
-                  _status!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: isConnected ? Colors.green[800] : Colors.red[800],
-                    fontSize: 12,
+        body: Center(
+          child: Container(
+            width: contentMaxWidth,
+            child: Column(
+              children: [
+                // Status bar
+                // if (_status != null)
+                //   Container(
+                //     width: double.infinity,
+                //     padding: const EdgeInsets.symmetric(vertical: 8),
+                //     color: isConnected ? Colors.green[100] : Colors.red[100],
+                //     child: Text(
+                //       _status!,
+                //       textAlign: TextAlign.center,
+                //       style: TextStyle(
+                //         color:
+                //             isConnected ? Colors.green[800] : Colors.red[800],
+                //         fontSize: 12,
+                //       ),
+                //     ),
+                //   ),
+
+                // Messages list
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: _messages.length + (_isTyping ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == _messages.length && _isTyping) {
+                        return _buildTypingIndicator();
+                      }
+                      return buildMessageBubble(_messages[index]);
+                    },
                   ),
                 ),
-              ),
 
-            // Messages list
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: _messages.length + (_isTyping ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _messages.length && _isTyping) {
-                    return _buildTypingIndicator();
-                  }
-                  return buildMessageBubble(_messages[index]);
-                },
-              ),
-            ),
+                // Reply widget
+                _buildReplyWidget(),
 
-            // Reply widget
-            _buildReplyWidget(),
+                // Edit widget
+                _buildEditWidget(),
 
-            // Edit widget
-            _buildEditWidget(),
-
-            // Input area
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.attach_file, color: primaryColor),
-                      onPressed: () => _uploadFileFromPicker('file'),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.image, color: primaryColor),
-                      onPressed: () => _uploadFileFromPicker('image'),
-                    ),
-                    Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        decoration: InputDecoration(
-                          hintText: 'Type a message...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide.none,
+                // Input area
+                SafeArea(
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.attach_file, color: Scolor.secondry),
+                        onPressed: () => _uploadFileFromPicker('file'),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.image, color: Scolor.secondry),
+                        onPressed: () => _uploadFileFromPicker('image'),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: _messageController,
+                          decoration: InputDecoration(
+                            hintText: 'Type a message...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                           ),
-                          filled: true,
-                          fillColor: backgroundColor,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
+                          maxLines: null,
+                          onChanged: (text) {
+                            if (text.isNotEmpty) {
+                              _startTyping();
+                            } else {
+                              _stopTyping();
+                            }
+                          },
+                          onSubmitted: (_) => sendMessage(),
                         ),
-                        maxLines: null,
-                        onChanged: (text) {
-                          if (text.isNotEmpty) {
-                            _startTyping();
-                          } else {
-                            _stopTyping();
-                          }
-                        },
-                        onSubmitted: (_) => sendMessage(),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        shape: BoxShape.circle,
+                      const SizedBox(width: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Scolor.secondry,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: _isUploading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : Center(
+                                  child: const Icon(Icons.send,
+                                      color: Scolor.primary)),
+                          onPressed: _isUploading ? null : sendMessage,
+                        ),
                       ),
-                      child: IconButton(
-                        icon: _isUploading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                                ),
-                              )
-                            : const Icon(Icons.send, color: Colors.white),
-                        onPressed: _isUploading ? null : sendMessage,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ));
   }
 }

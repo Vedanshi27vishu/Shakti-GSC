@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/Widgets/AppWidgets/ScreenHeadings.dart';
-import 'package:shakti/Widgets/AppWidgets/YellowLine.dart';
 import 'package:shakti/helpers/helper_functions.dart';
 
 class InvestmentScreen extends StatelessWidget {
@@ -9,9 +7,7 @@ class InvestmentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = THelperFunctions.screenWidth(context);
-    double screenHeight = THelperFunctions.screenHeight(context);
-
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Scolor.primary,
       appBar: AppBar(
@@ -21,30 +17,78 @@ class InvestmentScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Scolor.secondry),
           onPressed: () => Navigator.pop(context),
         ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: screenWidth * 0.04,
-          //  vertical: screenHeight * 0.02,
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            double fontSize = 20;
+            if (width < 600) {
+              fontSize = 18;
+            } else if (width < 1000) {
+              fontSize = 22;
+            } else {
+              fontSize = 26;
+            }
+            return Text(
+              'Investment Plans',
+              style: TextStyle(
+                color:Scolor.white,
+                fontWeight: FontWeight.bold,
+                fontSize: fontSize,
+              ),
+            );
+          },
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const ScreenHeadings(text: "Invest-"),
-            SizedBox(height: screenHeight * 0.005),
-            Yellowline(screenWidth: screenWidth),
-            SizedBox(height: screenHeight * 0.02),
-            Expanded(
+      ),
+      body: Center(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            // Define max width to constrain layout for desktop/tablet
+            final maxWidth = (width < 600)
+                ? width
+                : (width < 900 ? 600.0 : 700.0);
+            final horizontalPadding = maxWidth * 0.04;
+
+            // Font size breakpoints
+            double titleFontSize = 16;
+            double subtitleFontSize = 13;
+            double featureFontSize = 12;
+            double smallSpacing = 8;
+            double mediumSpacing = 12;
+
+            if (width < 600) {
+              titleFontSize = 16;
+              subtitleFontSize = 13;
+              featureFontSize = 12;
+              smallSpacing = 6;
+              mediumSpacing = 10;
+            } else if (width < 1000) {
+              titleFontSize = 18;
+              subtitleFontSize = 14;
+              featureFontSize = 13;
+              smallSpacing = 8;
+              mediumSpacing = 12;
+            } else {
+              titleFontSize = 20;
+              subtitleFontSize = 15;
+              featureFontSize = 14;
+              smallSpacing = 10;
+              mediumSpacing = 14;
+            }
+
+            return Container(
+              width: maxWidth,
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: mediumSpacing),
               child: ListView.builder(
                 itemCount: investmentPlans.length,
                 itemBuilder: (context, index) {
                   final plan = investmentPlans[index];
                   return Container(
-                    margin: EdgeInsets.only(bottom: screenHeight * 0.015),
-                    padding: EdgeInsets.all(screenWidth * 0.04),
+                    margin: EdgeInsets.only(bottom: mediumSpacing),
+                    padding: EdgeInsets.all(horizontalPadding),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: plan['borderColor']!,
+                        color: plan['borderColor'] ?? Scolor.secondry,
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(12),
@@ -56,89 +100,93 @@ class InvestmentScreen extends StatelessWidget {
                           children: [
                             Image.asset(
                               "assets/rupees.png",
-                              width: screenWidth * 0.07,
-                              height: screenWidth * 0.07,
+                              width: maxWidth * 0.07,
+                              height: maxWidth * 0.07,
                               fit: BoxFit.cover,
                             ),
-                            SizedBox(width: screenWidth * 0.03),
+                            SizedBox(width: mediumSpacing),
                             Expanded(
                               child: Text(
-                                plan['title']!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
+                                plan['title'] ?? '',
+                                style: TextStyle(
+                                  color: Scolor.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: titleFontSize,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: screenHeight * 0.005),
+                        SizedBox(height: smallSpacing),
                         Text(
-                          plan['subtitle']!,
-                          style: const TextStyle(
+                          plan['subtitle'] ?? '',
+                          style: TextStyle(
                             color: Colors.amber,
-                            fontSize: 13,
                             fontWeight: FontWeight.w600,
+                            fontSize: subtitleFontSize,
                           ),
                         ),
-                        SizedBox(height: screenHeight * 0.005),
+                        SizedBox(height: smallSpacing),
                         Text(
-                          "Minimum: ${plan['minimum']}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                          "Minimum: ${plan['minimum'] ?? ''}",
+                          style: TextStyle(
+                            color: Scolor.white,
+                            fontSize: subtitleFontSize,
                           ),
                         ),
                         Text(
-                          "Duration: ${plan['duration']}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                          "Duration: ${plan['duration'] ?? ''}",
+                          style: TextStyle(
+                            color: Scolor.white,
+                            fontSize: subtitleFontSize,
                           ),
                         ),
-                        SizedBox(height: screenHeight * 0.005),
+                        SizedBox(height: smallSpacing),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: plan['features']!.map<Widget>((feature) {
-                            return Row(
-                              children: [
-                                const Icon(Icons.circle,
-                                    size: 6, color: Colors.amber),
-                                SizedBox(width: screenWidth * 0.02),
-                                Expanded(
-                                  child: Text(
-                                    feature,
-                                    style: const TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 12,
+                          children: List<Widget>.from(
+                            (plan['features'] as List<dynamic>? ?? []).map(
+                              (feature) => Padding(
+                                padding: EdgeInsets.only(bottom: smallSpacing / 2),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 6.0),
+                                      child: Icon(Icons.circle, size: 6, color: Colors.amber),
                                     ),
-                                  ),
+                                    SizedBox(width: smallSpacing),
+                                    Expanded(
+                                      child: Text(
+                                        feature,
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: featureFontSize,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            );
-                          }).toList(),
+                              ),
+                            ),
+                          ),
                         ),
-                        SizedBox(height: screenHeight * 0.01),
+                        SizedBox(height: smallSpacing),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Returns: ${plan['returns']}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                              "Returns: ${plan['returns'] ?? ''}",
+                              style: TextStyle(
+                                color: Scolor.white,
+                                fontSize: subtitleFontSize,
                               ),
                             ),
                             Text(
-                              "Group: ${plan['group']}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                              "Group: ${plan['group'] ?? ''}",
+                              style: TextStyle(
+                                color: Scolor.white,
+                                fontSize: subtitleFontSize,
                               ),
                             ),
                           ],
@@ -148,15 +196,15 @@ class InvestmentScreen extends StatelessWidget {
                   );
                 },
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-// ✅ Sample Data
+// Sample data remains the same
 final List<Map<String, dynamic>> investmentPlans = [
   {
     'title': 'Daily Savings Scheme',
@@ -187,7 +235,7 @@ final List<Map<String, dynamic>> investmentPlans = [
     'borderColor': Colors.amber,
   },
   {
-    'title': 'Self-Help Group Fund',
+    'title': 'Self-Help Group',
     'subtitle': 'Group-based weekly investment',
     'minimum': '₹100',
     'duration': '6 months',

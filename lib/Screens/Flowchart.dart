@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shakti/Screens/links.dart';
 import 'package:shakti/Utils/constants/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -232,6 +233,17 @@ class _FlowChartScreenState extends State<FlowChartScreen> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.link, color: Scolor.secondry),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FinancialLinkInsights(),
+                ),
+              );
+            }, // ← You missed this closing brace
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: fetchSuggestions,

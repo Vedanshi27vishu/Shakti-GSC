@@ -63,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://65.2.82.85:5000/auth/signup1'),
+        Uri.parse('https://shaktinxt.me/auth/signup1'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );

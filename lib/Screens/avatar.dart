@@ -58,7 +58,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
 
       if (token == null) throw Exception('No authentication token found');
 
-      final url = Uri.parse('http://65.2.82.85:5000/api/progress/insights');
+      final url = Uri.parse('https://shaktinxt.me/api/progress/insights');
 
       final response = await http.get(
         url,
@@ -126,7 +126,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
 
       if (token == null) throw Exception('No authentication token found');
 
-      final url = Uri.parse('http://65.2.82.85:5000/api/budget/insights');
+      final url = Uri.parse('https://shaktinxt.me/api/budget/insights');
 
       final response = await http.post(
         url,

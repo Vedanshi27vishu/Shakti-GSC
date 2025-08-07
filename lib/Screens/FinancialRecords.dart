@@ -29,7 +29,7 @@ class _FinancialRecordsScreenState extends State<FinancialRecordsScreen> {
     String? token = prefs.getString('token');
 
     final response = await http.get(
-      Uri.parse('http://65.2.82.85:5000/pdfsearch'),
+      Uri.parse('https://shaktinxt.me/pdfsearch'),
       headers: {'Authorization': 'Bearer ${token ?? ''}'},
     );
 
@@ -142,7 +142,7 @@ class _FinancialRecordsScreenState extends State<FinancialRecordsScreen> {
                               String? token = prefs.getString('token');
 
                               final url = Uri.parse(
-                                  'http://65.2.82.85:5000/api/save-result');
+                                  'https://shaktinxt.me/api/save-result');
                               final headers = {
                                 'Content-Type': 'application/json',
                                 'Authorization': 'Bearer ${token ?? ''}',

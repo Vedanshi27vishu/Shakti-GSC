@@ -21,7 +21,7 @@ class _OTPScreenState extends State<OTPScreen> {
   bool _isResending = false;
   String _enteredOtp = '';
 
-  final String baseUrl = 'http://65.2.82.85:5000/api/auth';
+  final String baseUrl = 'https://shaktinxt.me/api/auth';
 
   Future<void> _verifyOtp() async {
     if (_enteredOtp.length != 6) return;

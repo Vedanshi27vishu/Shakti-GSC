@@ -65,7 +65,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     if (_formKey.currentState!.validate() &&
         _startDate != null &&
         _endDate != null) {
-      final url = Uri.parse('http://65.2.82.85:5000/tasks/create');
+      final url = Uri.parse('https://shaktinxt.me/tasks/create');
 
       final prefs = await SharedPreferences.getInstance();
       final String? token = prefs.getString('token');

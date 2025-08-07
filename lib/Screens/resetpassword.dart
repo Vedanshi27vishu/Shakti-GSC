@@ -26,7 +26,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       return;
     }
 
-    final url = Uri.parse('http://65.2.82.85:5000/auth/reset-password');
+    final url = Uri.parse('https://shaktinxt.me/auth/reset-password');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

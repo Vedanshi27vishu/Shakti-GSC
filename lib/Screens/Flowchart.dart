@@ -47,10 +47,10 @@ class _FlowChartScreenState extends State<FlowChartScreen> {
     }
 
     try {
-      print('Making API call to: http://65.2.82.85:5000/api/flow-chart');
+      print('Making API call to: https://shaktinxt.me/api/flow-chart');
 
       final response = await http.post(
-        Uri.parse('http://65.2.82.85:5000/api/flow-chart'),
+        Uri.parse('https://shaktinxt.me/api/flow-chart'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

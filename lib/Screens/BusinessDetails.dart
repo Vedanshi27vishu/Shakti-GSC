@@ -81,7 +81,7 @@ class _BusinessDetailsState extends State<BusinessDetails> {
             "Session ID not found. Please restart the signup process.");
       }
 
-      final url = Uri.parse("http://65.2.82.85:5000/auth/signup3");
+      final url = Uri.parse("https://shaktinxt.me/auth/signup3");
 
       final response = await http.post(
         url,

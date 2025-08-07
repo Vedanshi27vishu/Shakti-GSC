@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool obscurePassword = true;
   bool isLoading = false;
 
-  final String loginUrl = "http://65.2.82.85:5000/api/auth/login";
+  final String loginUrl = "https://shaktinxt.me/api/auth/login";
 
   Future<void> loginUser() async {
     final email = emailController.text.trim();

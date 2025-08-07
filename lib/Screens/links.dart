@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shakti/Utils/constants/colors.dart';
-import 'package:shakti/Widgets/AppWidgets/ScreenHeadings.dart' show ScreenHeadings;
+import 'package:shakti/Widgets/AppWidgets/ScreenHeadings.dart'
+    show ScreenHeadings;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -28,7 +29,7 @@ class _FinancialInsightsScreenState extends State<FinancialLinkInsights> {
     String? token = prefs.getString('token');
 
     final response = await http.get(
-      Uri.parse('http://65.2.82.85:5000/search'),
+      Uri.parse('https://shaktinxt.me/search'),
       headers: {'Authorization': 'Bearer ${token ?? ''}'},
     );
 
@@ -128,7 +129,8 @@ class _FinancialInsightsScreenState extends State<FinancialLinkInsights> {
           return Center(
             child: Container(
               width: maxWidth,
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16),
+              padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding, vertical: 16),
               child: FutureBuilder<List<LinkInsight>>(
                 future: _insightsFuture,
                 builder: (context, snapshot) {
@@ -136,10 +138,12 @@ class _FinancialInsightsScreenState extends State<FinancialLinkInsights> {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(
-                        child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red))
-                    );
+                        child: Text('Error: ${snapshot.error}',
+                            style: const TextStyle(color: Colors.red)));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No insights available.', style: TextStyle(color: Colors.white)));
+                    return const Center(
+                        child: Text('No insights available.',
+                            style: TextStyle(color: Colors.white)));
                   }
 
                   final insights = snapshot.data!;
@@ -147,7 +151,8 @@ class _FinancialInsightsScreenState extends State<FinancialLinkInsights> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const ScreenHeadings(text: "Experts insights for financial business-"),
+                      const ScreenHeadings(
+                          text: "Experts insights for financial business-"),
                       Divider(color: Colors.amber),
                       Expanded(
                         child: ListView.builder(
@@ -166,7 +171,8 @@ class _FinancialInsightsScreenState extends State<FinancialLinkInsights> {
                                 child: Padding(
                                   padding: EdgeInsets.all(cardPadding),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         item.title,

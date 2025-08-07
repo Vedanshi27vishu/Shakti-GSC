@@ -36,7 +36,7 @@ class _ShaktiProfileScreenState extends State<ShaktiProfileScreen> {
         throw Exception('No auth token found');
       }
       final response = await http.get(
-        Uri.parse('http://65.2.82.85:5000/shakti/shaktidetails'),
+        Uri.parse('https://shaktinxt.me/shakti/shaktidetails'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ class _ShaktiProfileScreenState extends State<ShaktiProfileScreen> {
       }
 
       final response = await http.put(
-        Uri.parse('http://65.2.82.85:5000/shakti/shaktidetails'),
+        Uri.parse('https://shaktinxt.me/shakti/shaktidetails'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',

@@ -118,7 +118,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
 
       final response = await http.get(
         Uri.parse(
-          'http://65.2.82.85:5000/api/business/insights',
+          'https://shaktinxt.me/api/business/insights',
         ),
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://65.2.82.85:5000/api/last-two-expenditures'),
+        Uri.parse('https://shaktinxt.me/api/last-two-expenditures'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -218,7 +218,7 @@ class _ComparativeTrackerScreenState extends State<ComparativeTrackerScreen> {
       String sector = businessType.toLowerCase();
 
       final response = await http.post(
-        Uri.parse('http://65.2.82.85:5000/api/predict-budget/$sector'),
+        Uri.parse('https://shaktinxt.me/api/predict-budget/$sector'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

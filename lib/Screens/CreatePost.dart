@@ -101,7 +101,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
 
     final response = await http.post(
-      Uri.parse("http://65.2.82.85:5000/api/post/create"),
+      Uri.parse("https://shaktinxt.me/api/post/create"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -130,7 +130,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() => selectedImage = File(pickedFile.path));
     }
@@ -168,13 +169,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       // ),
       body: Center(
         child: Container(
-          width: contentMaxWidth,     // Applying the responsive width here
+          width: contentMaxWidth, // Applying the responsive width here
           padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              //  CustomTopBar3(),
+                //  CustomTopBar3(),
                 SizedBox(height: screenHeight * 0.015),
                 Center(child: ScreenHeadings(text: "Create New Post")),
                 SizedBox(height: screenHeight * 0.005),
@@ -184,7 +185,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: screenHeight * 0.02),
-                const Text("Post Content", style: TextStyle(color: Colors.white, fontSize: 14)),
+                const Text("Post Content",
+                    style: TextStyle(color: Colors.white, fontSize: 14)),
                 TextField(
                   controller: contentController,
                   maxLength: 300,
@@ -195,20 +197,24 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     fillColor: Colors.white10,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Scolor.secondry, width: 2),
+                      borderSide:
+                          const BorderSide(color: Scolor.secondry, width: 2),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Scolor.secondry, width: 2),
+                      borderSide:
+                          const BorderSide(color: Scolor.secondry, width: 2),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.amber, width: 3),
+                      borderSide:
+                          const BorderSide(color: Colors.amber, width: 3),
                     ),
                     counterStyle: const TextStyle(color: Colors.white70),
                   ),
                 ),
-                const Text("Interest Tags (comma-separated)", style: TextStyle(color: Colors.white, fontSize: 14)),
+                const Text("Interest Tags (comma-separated)",
+                    style: TextStyle(color: Colors.white, fontSize: 14)),
                 TextField(
                   controller: tagsController,
                   style: const TextStyle(color: Colors.white),
@@ -220,11 +226,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Scolor.secondry, width: 2),
+                      borderSide:
+                          const BorderSide(color: Scolor.secondry, width: 2),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.amber, width: 3),
+                      borderSide:
+                          const BorderSide(color: Colors.amber, width: 3),
                     ),
                   ),
                 ),
@@ -240,10 +248,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: selectedImage == null
-                          ? const Icon(Icons.add_a_photo, color: Colors.white, size: 40)
+                          ? const Icon(Icons.add_a_photo,
+                              color: Colors.white, size: 40)
                           : ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.file(selectedImage!, fit: BoxFit.cover),
+                              child:
+                                  Image.file(selectedImage!, fit: BoxFit.cover),
                             ),
                     ),
                   ),
@@ -260,7 +270,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     onPressed: isUploading ? null : createPost,
                     child: isUploading
                         ? const CircularProgressIndicator(color: Colors.black)
-                        : const Text("Submit Post", style: TextStyle(color: Colors.black)),
+                        : const Text("Submit Post",
+                            style: TextStyle(color: Colors.black)),
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.02),
@@ -268,7 +279,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 SizedBox(height: screenHeight * 0.02),
                 const Text(
                   "Previous Posts",
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
                 ),
               ],
             ),

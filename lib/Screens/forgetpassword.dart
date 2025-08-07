@@ -20,7 +20,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final email = _emailController.text.trim();
     if (email.isEmpty) return;
 
-    final url = Uri.parse('http://65.2.82.85:5000/auth/forgot-password');
+    final url = Uri.parse('https://shaktinxt.me/auth/forgot-password');
 
     final response = await http.post(
       url,

@@ -51,7 +51,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   bool _isUploading = false;
 
   // Base URL for your backend
-  final String baseUrl = 'http://65.2.82.85:5000';
+  final String baseUrl = 'https://shaktinxt.me';
 
   // Color palette
   final Color primaryColor = const Color(0xFF1E3A8A); // Dark blue
@@ -699,7 +699,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       myUserId = json.decode(decoded)['userId'];
 
       socket = IO.io(
-        'http://65.2.82.85:5000',
+        'https://shaktinxt.me',
         IO.OptionBuilder()
             .setTransports(['websocket'])
             .disableAutoConnect()

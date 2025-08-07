@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PostService {
-  static const String baseUrl = 'http://65.2.82.85:5000/api';
+  static const String baseUrl = 'https://shaktinxt.me/api';
 
   // Get auth token from shared preferences
   static Future<String?> _getAuthToken() async {

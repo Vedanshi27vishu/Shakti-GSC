@@ -40,7 +40,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       final authToken = await _getAuthToken();
       if (authToken == null) throw Exception('No auth token found');
       final response = await http.get(
-        Uri.parse('http://65.2.82.85:5000/user/all-users'),
+        Uri.parse('https://shaktinxt.me/user/all-users'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       final authToken = await _getAuthToken();
       if (authToken == null) throw Exception('No auth token found');
       final response = await http.get(
-        Uri.parse('http://65.2.82.85:5000/api/follow/followers-following'),
+        Uri.parse('https://shaktinxt.me/api/follow/followers-following'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       final authToken = await _getAuthToken();
       if (authToken == null) throw Exception('No auth token found');
       final response = await http.put(
-        Uri.parse('http://65.2.82.85:5000/api/follow/F/$userId'),
+        Uri.parse('https://shaktinxt.me/api/follow/F/$userId'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       final authToken = await _getAuthToken();
       if (authToken == null) throw Exception('No auth token found');
       final response = await http.put(
-        Uri.parse('http://65.2.82.85:5000/api/follow/U/$userId'),
+        Uri.parse('https://shaktinxt.me/api/follow/U/$userId'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',

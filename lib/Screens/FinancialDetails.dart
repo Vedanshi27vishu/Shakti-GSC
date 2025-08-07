@@ -57,7 +57,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     }
 
     // Corrected URL here
-    final url = Uri.parse("http://65.2.82.85:5000/auth/signup2");
+    final url = Uri.parse("https://shaktinxt.me/auth/signup2");
 
     final loanList = loanControllers.map((loan) {
       return {

@@ -13,7 +13,8 @@ class FinancialInsightsScreen extends StatefulWidget {
   const FinancialInsightsScreen({super.key});
 
   @override
-  State<FinancialInsightsScreen> createState() => _FinancialInsightsScreenState();
+  State<FinancialInsightsScreen> createState() =>
+      _FinancialInsightsScreenState();
 }
 
 class _FinancialInsightsScreenState extends State<FinancialInsightsScreen> {
@@ -29,7 +30,7 @@ class _FinancialInsightsScreenState extends State<FinancialInsightsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     final response = await http.get(
-      Uri.parse('http://65.2.82.85:5000/videos'),
+      Uri.parse('https://shaktinxt.me/videos'),
       headers: {'Authorization': 'Bearer ${token ?? ''}'},
     );
 
@@ -102,7 +103,8 @@ class _FinancialInsightsScreenState extends State<FinancialInsightsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ScreenHeadings(text: "Experts insights for financial business-"),
+                const ScreenHeadings(
+                    text: "Experts insights for financial business-"),
                 SizedBox(height: screenHeight * 0.01),
                 Yellowline(screenWidth: screenWidth),
                 SizedBox(height: screenHeight * 0.01),
@@ -115,7 +117,8 @@ class _FinancialInsightsScreenState extends State<FinancialInsightsScreen> {
                       } else if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(child: Text('No insights available.'));
+                        return const Center(
+                            child: Text('No insights available.'));
                       }
 
                       final insights = snapshot.data!;
@@ -130,15 +133,18 @@ class _FinancialInsightsScreenState extends State<FinancialInsightsScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => VideoWebViewScreen(url: item.link),
+                                  builder: (_) =>
+                                      VideoWebViewScreen(url: item.link),
                                 ),
                               );
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.amber, width: 1.5),
+                                  border: Border.all(
+                                      color: Colors.amber, width: 1.5),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Row(
@@ -152,13 +158,17 @@ class _FinancialInsightsScreenState extends State<FinancialInsightsScreen> {
                                         height: thumbnailHeight,
                                         fit: BoxFit.cover,
                                         errorBuilder: (_, __, ___) =>
-                                            Image.asset('assets/default.png', width: thumbnailWidth, height: thumbnailHeight, fit: BoxFit.cover),
+                                            Image.asset('assets/default.png',
+                                                width: thumbnailWidth,
+                                                height: thumbnailHeight,
+                                                fit: BoxFit.cover),
                                       ),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             item.title,

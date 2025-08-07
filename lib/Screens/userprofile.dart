@@ -58,7 +58,7 @@ class _ProfileScreenState extends State<UserProfileScreen>
       }
 
       final response = await http.get(
-        Uri.parse('http://65.2.82.85:5000/profile/details'),
+        Uri.parse('https://shaktinxt.me/profile/details'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',

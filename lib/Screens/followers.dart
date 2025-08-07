@@ -35,7 +35,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
       }
 
       final response = await http.get(
-        Uri.parse('http://65.2.82.85:5000/api/follow/followers_following'),
+        Uri.parse('https://shaktinxt.me/api/follow/followers_following'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

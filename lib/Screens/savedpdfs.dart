@@ -27,7 +27,7 @@ class _MyLinksScreenState extends State<MyLinksScreen> {
     String? token = prefs.getString('token');
 
     final response = await http.get(
-      Uri.parse('http://65.2.82.85:5000/api/my-results'),
+      Uri.parse('https://shaktinxt.me/api/my-results'),
       headers: {'Authorization': 'Bearer ${token ?? ''}'},
     );
 

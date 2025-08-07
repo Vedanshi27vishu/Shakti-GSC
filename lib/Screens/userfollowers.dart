@@ -80,7 +80,7 @@ class _FollowersPageState extends State<FollowersPage> {
 
       // Try to fetch from API
       final response = await http.get(
-        Uri.parse('http://65.2.82.85:5000/user/followers'),
+        Uri.parse('https://shaktinxt.me/user/followers'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',

@@ -92,7 +92,7 @@ class _FollowingPageState extends State<FollowingPage> {
 
       // Try to fetch from API
       final response = await http.get(
-        Uri.parse('http://65.2.82.85:5000/user/following'),
+        Uri.parse('https://shaktinxt.me/user/following'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ class _FollowingPageState extends State<FollowingPage> {
 
       // Make API call to unfollow/follow
       final response = await http.post(
-        Uri.parse('http://65.2.82.85:5000/user/toggle-follow'),
+        Uri.parse('https://shaktinxt.me/user/toggle-follow'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',

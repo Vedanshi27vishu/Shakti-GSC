@@ -69,7 +69,7 @@ class _InvestState extends State<Invest> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
-      final url = Uri.parse('http://65.2.82.85:5000/filter-loans');
+      final url = Uri.parse('https://shaktinxt.me/filter-loans');
       final response = await http.post(url, headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ class _InvestState extends State<Invest> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
-      final url = Uri.parse('http://65.2.82.85:5000/private-schemes');
+      final url = Uri.parse('https://shaktinxt.me/private-schemes');
       final response = await http.post(url, headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ class _InvestState extends State<Invest> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null) throw Exception('No authentication token found');
-      final url = Uri.parse('http://65.2.82.85:5000/api/financial/loans');
+      final url = Uri.parse('https://shaktinxt.me/api/financial/loans');
       final response = await http.get(url, headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
